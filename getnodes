@@ -1,0 +1,18 @@
+#$/bin/bash
+
+if [ -f filter ]; then
+  filterFile=filter;
+elif [ -f ~/.filter ]; then
+  filterFile=~/.filter;
+else
+  filterFile=none;
+fi
+
+if [ $filterFile != none ]; then
+  echo 'Using the following ethereal display filter:' 1>&2
+  cat $filterFile 1>&2
+  tethereal -r $1 -R "`cat $filterFile`" -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' | awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort | uniq
+else
+  echo 'warning:  filter file not found -- no filters applied' 1>&2
+  tethereal -r $1 -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' | awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort | uniq
+fi
