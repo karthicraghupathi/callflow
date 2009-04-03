@@ -1,0 +1,261 @@
+#!/bin/bash
+
+###  CallFlow diagram generator
+###
+###  Usage:  callflow.sh capture-file | -t text-input file
+###
+###  Output: $DESTDIR/callflow.svg, $DESTDIR/callflow.png, $DESTDIR/index.html, $DESTDIR/frames/frame*.html
+###
+###  Files:  order, filter, session, $SETUPDIR/order, $SETUPDIR/filter, $SETUPDIR/session
+###
+
+##################################
+# Variables
+##################################
+SETUPDIR="/home/orange/callflow";
+DESTDIR="./out"; #default
+TMPDIR="/tmp";
+removeSL=0; # do not remove callflow.short and callflow.long
+
+##################################
+# Check configuration files :
+#   session, filter, order, title
+##################################
+if [ -f session ]; then
+    sessionFile=session;
+elif [ -f $SETUPDIR/session ]; then
+    sessionFile=$SETUPDIR/session;
+else
+    sessionFile=none;
+fi
+
+if [ -f filter ]; then
+    filterFile=filter;
+elif [ -f $SETUPDIR/filter ]; then
+    filterFile=$SETUPDIR/filter;
+else
+    filterFile=none;
+fi
+
+if [ -f order ]; then
+    orderFile=order;
+elif [ -f $SETUPDIR/order ]; then
+    orderFile=$SETUPDIR/order;
+else
+    orderFile=none;
+fi
+
+if [ -f title ]; then
+    titleFile=title;
+elif [ -f $SETUPDIR/title ]; then
+    titleFile=$SETUPDIR/title;
+else
+    titleFile=none;
+fi
+
+##################################
+# Check command line options
+##################################
+if [ -n "$1" ]; then
+  case "$1" in
+    -t)
+	#inputfile
+	inputfile=$2;
+
+	# Compute DESTDIR
+	DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
+	mkdir -p $DESTDIR/frames
+	cp $inputfile $DESTDIR/callflow-source.cap
+
+
+	;;
+    -d)
+	#inputfile
+	#we want to remove duplicate frames
+	inputfile=$2;
+
+	# Compute DESTDIR
+	DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
+	mkdir -p $DESTDIR/frames
+	cp $inputfile $DESTDIR/callflow-source.cap
+
+
+
+	# Remove duplicate frames
+	awk -f $SETUPDIR/awk-scripts/removedups.awk -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
+	rm $DESTDIR/callflow.short
+	mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
+	exit 0;
+	;;
+    -s)
+	if [ sessionFile = none ]; then
+	  echo "You must create either $SETUPDIR/session or ./session to use -s option";
+	  exit 1;
+	fi
+	#inputfile
+	#we want to add "Session ID"
+	inputfile=$2;
+
+	# Compute DESTDIR
+	DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
+	mkdir -p $DESTDIR/frames
+	cp $inputfile $DESTDIR/callflow-source.cap
+
+
+
+	awk -f $SETUPDIR/awk-scripts/marksession.awk -v session_token="`cat $sessionFile`" -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
+	rm $DESTDIR/callflow.short
+	mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
+	exit 0;
+	;;
+    -o)
+	#inputfile is a cap-file
+	#we want to make an order file
+	inputfile=$2;
+
+	if [ $filterFile != none ]; then
+		echo 'Using the following wireshark display filter:' 1>&2
+		cat $filterFile 1>&2
+		tshark -r $inputfile -R "`cat $filterFile`" -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' | awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort | uniq
+		else
+		echo 'Warning:  filter file not found -- no filters applied' 1>&2
+		tshark -r $inputfile -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' | awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort | uniq
+	fi
+	exit 0;
+	;;
+    -r)
+	#inputfile is a cap-file
+	#we want to remove callflow.short and callflow.long after proceeding
+	inputfile=$2;
+	removeSL=-r;
+
+	# DESTDIR
+	DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
+	mkdir -p $DESTDIR/frames
+	cp $inputfile $DESTDIR/callflow-source.cap
+
+	# filterFile
+	if [ $filterFile != none ]; then
+	    echo Using the following wireshark display filter:
+	    cat $filterFile
+	    tshark -r $inputfile -R "`cat $filterFile`" -o 'column.format:"No.","%m","Src","%s","Port","%S","Ignored","%m","Dest","%d","Port","%D","Protocol","%p","Info","%i"' > $DESTDIR/callflow.short
+	    tshark -r $inputfile -R "`cat $filterFile`" -V > $DESTDIR/callflow.long
+	else
+	    echo 'Warning: filter file not found -- no filters applied'
+	    tshark -r $inputfile -o 'column.format: "No.", "%m", "Src", "%s", "Port", "%S", "Ignored", "%m", "Dest", "%d", "Port", "%D", "Protocol", "%p", "Info", "%i"' > $DESTDIR/callflow.short
+	    tshark -r $inputfile -V > $DESTDIR/callflow.long
+	fi
+	;;
+     *)
+	#inputfile is a cap-file
+	#no options
+	inputfile=$1;
+
+	# DESTDIR
+	DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
+	mkdir -p $DESTDIR/frames
+	cp $inputfile $DESTDIR/callflow-source.cap
+
+	# filterFile
+	if [ $filterFile != none ]; then
+	    echo Using the following wireshark display filter:
+	    cat $filterFile
+	    tshark -r $inputfile -R "`cat $filterFile`" -o 'column.format:"No.","%m","Src","%s","Port","%S","Ignored","%m","Dest","%d","Port","%D","Protocol","%p","Info","%i"' > $DESTDIR/callflow.short
+	    tshark -r $inputfile -R "`cat $filterFile`" -V > $DESTDIR/callflow.long
+	else
+	    echo 'Warning: filter file not found -- no filters applied'
+	    tshark -r $inputfile -o 'column.format: "No.", "%m", "Src", "%s", "Port", "%S", "Ignored", "%m", "Dest", "%d", "Port", "%D", "Protocol", "%p", "Info", "%i"' > $DESTDIR/callflow.short
+	    tshark -r $inputfile -V > $DESTDIR/callflow.long
+	fi
+	;;
+  esac
+fi
+
+##################################
+# common
+##################################
+# Create Frames
+awk -f $SETUPDIR/awk-scripts/long2html.awk -v destDir=$DESTDIR < $DESTDIR/callflow.long
+
+# Compute nodes
+awk -f $SETUPDIR/awk-scripts/getnodes.awk < $DESTDIR/callflow.short > $TMPDIR/callflow.auto-nodelist.$PPID
+sort $TMPDIR/callflow.auto-nodelist.$PPID > $TMPDIR/callflow.auto-sortednodes.$PPID
+uniq $TMPDIR/callflow.auto-sortednodes.$PPID > $TMPDIR/callflow.auto-uniq.$PPID
+
+# orderFile
+if [ $orderFile != none ]; then
+    # add forced nodes
+    cp $TMPDIR/callflow.auto-uniq.$PPID $TMPDIR/callflow.auto-uniq-forced.$PPID
+    grep "!f!" $orderFile | cut -d " " -f 1 >> $TMPDIR/callflow.auto-uniq-forced.$PPID
+    cut -d " " -f 1 < $orderFile > $TMPDIR/callflow.order-nodes.$PPID
+    
+    # prune nodes not appearing in capture file and not forced.
+    grep -w -v -f $TMPDIR/callflow.auto-uniq-forced.$PPID $TMPDIR/callflow.order-nodes.$PPID > $TMPDIR/callflow.prune-candidate.$PPID
+    awk -f $SETUPDIR/awk-scripts/makevars.awk < $TMPDIR/callflow.prune-candidate.$PPID > $TMPDIR/callflow.prune-vars.$PPID
+    cat $TMPDIR/callflow.prune-vars.$PPID $SETUPDIR/awk-scripts/prunenodes.awk > $TMPDIR/callflow.prune-awk.$PPID
+    awk -f $TMPDIR/callflow.prune-awk.$PPID < $DESTDIR/callflow.short > $TMPDIR/callflow.auto-not-pruned.$PPID
+    grep -w -v -f $TMPDIR/callflow.auto-not-pruned.$PPID $TMPDIR/callflow.prune-candidate.$PPID > $TMPDIR/callflow.auto-prune.$PPID
+    grep -w -v -f $TMPDIR/callflow.auto-prune.$PPID $TMPDIR/callflow.order-nodes.$PPID > $TMPDIR/callflow.order-nodes-pruned.$PPID
+    
+    # add nodes appearing in capture file but not in order file
+    cp $TMPDIR/callflow.order-nodes-pruned.$PPID $TMPDIR/callflow.order-nodes-final.$PPID
+    grep -w -f $TMPDIR/callflow.auto-uniq-forced.$PPID $TMPDIR/callflow.order-nodes.$PPID >> $TMPDIR/callflow.order-nodes-final.$PPID
+    grep -w -f $TMPDIR/callflow.order-nodes-final.$PPID $orderFile > $TMPDIR/callflow.order.$PPID
+    grep -w -v -E -f $TMPDIR/callflow.order-nodes.$PPID $TMPDIR/callflow.auto-uniq-forced.$PPID >> $TMPDIR/callflow.order.$PPID
+    sed "s/!f!//g" < $TMPDIR/callflow.order.$PPID > $TMPDIR/callflow.order-final.$PPID
+    
+    echo Using the following order:
+    
+    cat $TMPDIR/callflow.order-final.$PPID
+    awk -f $SETUPDIR/awk-scripts/makevars.awk < $TMPDIR/callflow.order-final.$PPID > $TMPDIR/callflow.vars.$PPID
+else
+    echo 'Warning: order file not found -- using alphabetical'
+    awk -f $SETUPDIR/awk-scripts/makevars.awk < $TMPDIR/callflow.auto-uniq.$PPID > $TMPDIR/callflow.vars.$PPID
+fi
+
+# titleFile
+if [ $titleFile != none ]; then
+	title=`cat $titleFile`;
+else
+	title=`basename $inputfile`;
+fi
+
+# Add title to vars
+echo "title=\"$title\"" >> $TMPDIR/callflow.vars.$PPID
+cat $TMPDIR/callflow.vars.$PPID $SETUPDIR/awk-scripts/callflow.awk > $TMPDIR/callflow.awk.$PPID
+
+# Build callflow.svg
+awk -f $TMPDIR/callflow.awk.$PPID \
+	-v numLines=`awk -f $SETUPDIR/awk-scripts/wc.awk < $DESTDIR/callflow.short`\
+	          < $DESTDIR/callflow.short \
+	          > $DESTDIR/callflow.svg
+
+# Remove temporary files
+\rm $TMPDIR/callflow.*.$PPID
+
+# Remove $DESTDIR/callflow.short and callflow.long if -r option
+if [ $removeSL == "-r" ]; then
+    rm $DESTDIR/callflow.short
+    rm $DESTDIR/callflow.long
+fi
+
+# Check to see if java and the batik rasterizer are installed
+which java 2>&1 > /dev/null
+if [ $? == 1 ]; then
+    echo 'Warning: java not found -- not running rasterizer'
+else
+    # Build callflow.png
+    java -jar $SETUPDIR/batik/batik-rasterizer.jar $DESTDIR/callflow.svg
+
+    echo "<html>" > $DESTDIR/index.html
+    cat imagemap >> $DESTDIR/index.html
+    echo "<p align='center'>" >> $DESTDIR/index.html
+    echo "<img border='0' src='callflow.png' usemap='#callflowmap'></img>" >> $DESTDIR/index.html
+    echo "</p>" >> $DESTDIR/index.html
+    echo "<a href='callflow-source.cap'>callflow-source.cap</a>" >> $DESTDIR/index.html
+    echo "</html>" >> $DESTDIR/index.html
+fi
+
+\rm imagemap
+exit 0;
+

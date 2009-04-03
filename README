@@ -7,24 +7,11 @@ diagram.  The scripts have been primarily tested with SIP call flows,
 but should work for other network traffic as well.
 
 
+Building the callflow plateform independant package
+===================================================
 
-
-Building the callflow package
-=============================
-
-Prerequisites:  batik-1.5beta3
-                java (jre 1.3 or greater)
-                tethereal
-
-1.  Obtain batik-1.5beta3 from
-      http://xml.apache.org/batik/dist/archives/batik-1.5beta3.zip
-
-2.  Set the Makefile variable BATIK_LOCATION to the location
-    of the Batik directory.
-
-3.  Type make
-
-
+Prerequisites:  java (jre 1.5 or greater)
+                tshark (wireshark)
 
 
 Using callflow
@@ -32,31 +19,42 @@ Using callflow
 
 With callflow in your path, just type
 
-  callflow capture-file
-	 | -o capture-file
-         | -t text-input-file
-	 | -d text-input-file
-	 | -s text-input-file
+  callflow capture-file.cap
+(see below for more options)
 
-This will produce at least a file called callflow.svg and a
-directory called frames.  If you have java installed you will
-also get a callflow.jpg file and an index.html file.
+This vill produce a directory named like your capture file in your 
+working directory (eg: if file is capture-file.cap, the directory 
+will be capture-file).
+In this, you will find at least a file called callflow.svg.  
+If you have java installed you will also get a callflow.png file, 
+an index.html file and a frames directory.
 
-You can view callflow.svg with the Adobe SVG plugin, or you can
-view index.html with any web browser.  Both the SVG file and the
-html file contain links into the frames directory so that you can
-look at the contents of the full packet frame.  All the frames have
-been processed to remove the IP headers, which usually aren't
-interesting.
+You can view callflow.svg with the Adobe SVG plugin or Firefox, 
+or you can view index.html with any web browser.  Both the SVG file 
+and the html file contain links into the frames directory so that 
+you can look at the contents of the full packet frame.  All the 
+frames have been processed to remove the IP headers, which usually 
+aren't interesting.
+
+Options availables
+------------------
+Usage: callflow [OPTION] FILE
+  -o, create an order file with the nodes in FILE
+      (Don't forget to redirect output in another file. 
+      Exemple of use: callflow -o capture.cap > order)
+  -t, will use FILE/callflow.short file
+  -d, remove duplicate frames in FILE/callflow.short/long
+  -s, add "Session ID" to Sequence Lines in FILE/callflow.short/long
+  -r, remove files (callflow.short and callflow.long) after proceeding
 
 
 Filtering the diagram
 =====================
 
 You can create a file in the current directory called filter, or a
-file in your home directory called .filter which contains an ethereal
+file in the setup directory called filter which contains an wireshark
 DISPLAY filter (as opposed to a capture filter).  You can learn
-more about these from the ethereal man page.  A useful filter for
+more about these from the wireshark man page.  A useful filter for
 SIP traffic is 'sip'.
 
 
@@ -65,7 +63,7 @@ Ordering the diagram
 
 If you know what nodes in your network are logically connected, you
 can have the diagram ordered in a meaningful way.  Just create a file
-called order in your current directory, or .order in your home
+called order in your current directory, or order in the setup
 directory with the order of your network nodes, one per line.  You
 must use the exact name or IP address that appears in your capture
 file in the form: <host/ip>:<port>, or use a regular expression that
@@ -74,7 +72,7 @@ to collapse several nodes in to one logical node.
 
 You can generate an order file with:
 
-$ callflow -o capture-file > order
+  callflow -o capture-file.cap > order
 
 The format of the order file is as follows:
 <node-regex-pattern> [optional-label]
@@ -106,7 +104,7 @@ Make sure that the forced node does not resolve to a regex pattern that
 another node will match! (ie. don't use ".")
 
 Example order file
-==================
+------------------
 
 10.250.250.101:(1917|5060) Pingtel
 10.250.250.201:5060 VOCAL-UAMS
@@ -114,6 +112,7 @@ Example order file
 10.250.250.201:5065 VOCAL-GWMS
 firewall !f!Firewall
 10.250.250.104:5060 PSTN-GW
+
 
 Titling the diagram
 ===================
@@ -125,13 +124,13 @@ then a title text will be generated based upon basename of the capture
 file name.
 
 
-Tweaking ~./ethereal/preferences for frames/Frame*.html
+Tweaking ~/.wireshark/preferences for frames/Frame*.html
 =======================================================
 
 You can change the level of detail provided in the "Internet Protocol",
 "User Datagram Protocol", and "Transmission Control Protocol" sections of
 the detailed frames/Frame*.html pages by tweaking the following entries
-in your ~/.ethereal/preferences:
+in your ~/.wireshark/preferences:
 
 ip.ip_summary_in_tree
 tcp.tcp_summary_in_tree
@@ -140,6 +139,7 @@ udp.udp_summary_in_tree
 If any of these items are set to TRUE, then only the summary line will
 appear in frames/Frame*.html. Otherwise, the gory details will be
 displayed.
+
 
 Creating diagrams manually
 ==========================
@@ -190,7 +190,8 @@ etc.
 
 To process your text files, type the following:
   
-   callflow -t foo
+   callflow -t capture-file.cap
+
 
 Adding Comments
 ===============
@@ -202,13 +203,14 @@ the text.
 
 For example:
 
-# Click here for original ethereal capture file ! mycapture.cap
+# Click here for original wireshark capture file ! mycapture.cap
 # This is a comment
 1 Alice 1000 -> Bob 2000 Alice sends Bob an Invite
 2 Bob 2000 -> Alice 1000 Bob sends Alice a 200
 etc.
 
-It is important that there be no blank lines in the short text-file.
+It is important that there be *no blank lines* in the short text-file.
+
 
 Removing Duplicate Frames
 =========================
@@ -220,6 +222,7 @@ Duplicates are determined by examining each line in foo, and comparing
 frames/Frame<#>.html with all previously seen frames. The non-duplicates version
 of foo will be called "callflow.short".
 
+
 Adding "Session ID" to Sequence Lines
 =====================================
 You can have callflow add a "Session ID" to every Frame that contains a pattern.
@@ -227,15 +230,15 @@ For instances, all SIP packets contains a header "Call-Id:" (case insensitive)
 followed by an identifier that indicates which "SIP dialog" this packet belongs to
 
 To have callflow create to the left of every sequence line that matches "Call-Id:"
-a "Session ID", create a file at either ~/.session or ./session with the contents:
+a "Session ID", create a file at either SETUPDIR/session or ./session with the contents:
 
 Call-Id:
 
 and run callflow with:
-callflow -s &lt;text-file&gt;
+callflow -s capture-file.cap;
 
 Sample session
-==============
+--------------
 
 Create a filter file:
 $ cat > filter << "EOF"
@@ -253,32 +256,28 @@ $ callflow -o mycapture.cap > order
 
 Generate initial diagram:
 $ callflow mycapture.cap
-$ cp callflow.short callflow
 
-We will now use "callflow" and "callflow.long" for further processing:
+We will now use "mycapture/callflow.short" and "mycapture/callflow.long" for further processing:
 Remove retransmitted SIP packets:
-$ callflow -d callflow
-$ cp callflow.short callflow
+$ callflow -d mycapture.cap
 
 Add "Session ID" to Sequence Lines:
 $ cat > session << "EOF"
 > Call-Id:
 > EOF
-$ callflow -d callflow
-$ cp callflow.short callflow
+$ callflow -s mycapture.cap
 
 Add any desired comments to callflow, then regenerate diagram (repeat as needed):
-$ callflow -t callflow
+$ callflow -t mycapture.cap
+
 
 How it works
 ============
 
 Well, this is kind of ugly:
 
-1.  untar callflow shell script contents into .callflow directory
-2.  run .callflow/callflow.sh
     a.  check for order and filter files
-    b.  run tethereal twice to get short and long output files
+    b.  run tshark twice to get short and long output files
     c.  use long2html.awk to convert long output file into frame*.html files
     d.  get all the unique nodes from the short output file
     e.  order them and make sure all nodes are present
@@ -291,27 +290,23 @@ Well, this is kind of ugly:
         IV.    write out the SVG and map file footers
 
     h.  check if java is installed, and if so generate index.html
-        and callflow.jpg using batik
+        and callflow.png using batik
     i.  clean up all the /tmp files
-3.  clean up .callflow
-
 
 
 TO DO
 =====
 
-It would be much nicer to take the tethereal filtered output and
+It would be much nicer to take the tshark filtered output and
 build an intermediate XML representation of it.  Then use XSLT
 to transform it into the SVG file.  This way you could write up
 illustrative sequence diagrams more easily and make use of more
 tools that can manipulate XML.
 
-Build sequence diagrams directly into ethereal.
-
 Write port numbers at the ends of each arrow in an unobtrusive fashion.
 
 Put packet contents right into diagram, available as dhtml popups, with
-similar "drill-down" functionality as ethereal.
+similar "drill-down" functionality as wireshark.
 
 Automatically find a "best order" for the nodes, possibly based on
 total arrow length minimization.

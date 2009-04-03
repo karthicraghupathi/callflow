@@ -1,3 +1,0 @@
-END {
-  printf "%d", NR;
-}
