@@ -10,8 +10,9 @@ but should work for other network traffic as well.
 Building the callflow plateform independant package
 ===================================================
 
-Prerequisites:  java (jre 1.5 or greater)
-                tshark (wireshark)
+Prerequisites:	gawk (ver?)
+					java (jre 1.5 or greater)
+					tshark (wireshark ver?)
 
 
 Using callflow

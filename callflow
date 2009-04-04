@@ -12,7 +12,7 @@
 ##################################
 # Variables
 ##################################
-SETUPDIR="/home/orange/callflow";
+SETUPDIR="/home/arnaud/mesdocs/prog/callflow";
 DESTDIR="./out"; #default
 TMPDIR="/tmp";
 removeSL=0; # do not remove callflow.short and callflow.long

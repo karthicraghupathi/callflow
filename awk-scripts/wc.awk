@@ -1,0 +1,3 @@
+END {
+  printf "%d", NR;
+}
