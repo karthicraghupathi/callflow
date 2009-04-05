@@ -4,25 +4,25 @@
 
 install:
 	#Copy files into /usr/share/callflow
-	@mkdir -p /usr/share/callflow
-	@cp -a awk-scripts/ /usr/share/callflow/
-	@cp -a batik/ /usr/share/callflow/
-	@cp -a callflow /usr/share/callflow/
-	@cp -a AUTHORS /usr/share/callflow/
-	@cp -a README /usr/share/callflow/
-	@cp -a LICENSE /usr/share/callflow/
+	@mkdir -p $(basedir)/usr/share/callflow
+	@cp -a awk-scripts/ $(basedir)/usr/share/callflow/
+	@cp -a batik/ $(basedir)/usr/share/callflow/
+	@cp -a callflow $(basedir)/usr/share/callflow/
+	@cp -a AUTHORS $(basedir)/usr/share/callflow/
+	@cp -a README $(basedir)/usr/share/callflow/
+	@cp -a LICENSE $(basedir)/usr/share/callflow/
 	
 	#Create symlinks for callflow into /usr/bin
-	@ln -s /usr/share/callflow/callflow /usr/bin/callflow
+	@ln -s $(basedir)/usr/share/callflow/callflow $(basedir)/usr/bin/callflow
 	
 	# --> DONE !
 	
 uninstall:
 	#Remove directory /usr/share/callflow
-	@rm -rf /usr/share/callflow
+	@rm -rf $(basedir)/usr/share/callflow
 	
 	#Remove symlinks
-	@rm -f /usr/bin/callflow
+	@rm -f $(basedir)/usr/bin/callflow
 	
 	# --> DONE !
 
