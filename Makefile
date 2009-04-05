@@ -13,7 +13,7 @@ install:
 	@cp -a LICENSE $(basedir)/usr/share/callflow/
 	
 	#Create symlinks for callflow into /usr/bin
-	@ln -s $(basedir)/usr/share/callflow/callflow $(basedir)/usr/bin/callflow 2>&1
+	@-ln -s $(basedir)/usr/share/callflow/callflow $(basedir)/usr/bin/callflow 2>&1
 	
 	# --> DONE !
 	
