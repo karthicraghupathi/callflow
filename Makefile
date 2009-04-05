@@ -13,16 +13,16 @@ install:
 	@cp -a LICENSE $(basedir)/usr/share/callflow/
 	
 	#Create symlinks for callflow into /usr/bin
-	@ln -s $(basedir)/usr/share/callflow/callflow $(basedir)/usr/bin/callflow
+	@ln -s $(basedir)/usr/share/callflow/callflow $(basedir)/usr/bin/callflow 2>&1
 	
 	# --> DONE !
 	
 uninstall:
 	#Remove directory /usr/share/callflow
-	@rm -rf $(basedir)/usr/share/callflow
+	@rm -rf $(basedir)/usr/share/callflow 2>&1
 	
 	#Remove symlinks
-	@rm -f $(basedir)/usr/bin/callflow
+	@rm -f $(basedir)/usr/bin/callflow 2>&1
 	
 	# --> DONE !
 
