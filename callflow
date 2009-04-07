@@ -58,6 +58,22 @@ fi
 ##################################
 if [ -n "$1" ]; then
   case "$1" in
+    -h)
+	#Help needed
+	echo "Options availables"
+	echo "------------------"
+	echo "Usage: callflow [OPTION] FILE"
+	echo "  -h, print this help message"
+	echo "  -o, create an order file with the nodes in FILE"
+	echo "      (Don't forget to redirect output in another file. "
+	echo "      Exemple of use: callflow -o capture.cap > order)"
+	echo "  -t, will use FILE/callflow.short file"
+	echo "  -d, remove duplicate frames in FILE/callflow.short/long"
+	echo "  -s, add 'Session ID' to Sequence Lines in FILE/callflow.short/long"
+	echo "  -r, remove files (callflow.short and callflow.long) after proceeding"
+
+	exit 0;
+	;;
     -t)
 	#inputfile
 	inputfile=$2;
