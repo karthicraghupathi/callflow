@@ -176,8 +176,11 @@ func line(x1,x2,y,output) {
 
 	 gsub("SIP(/SDP|/XML|) *(Status|Request): *","", output);
 	 gsub(", with session description *$"," w/SDP",output);
-
-	 line(x1,x2,y,output);
+	if ((x1==x2) && (noAuto==1)){
+		}
+	else{
+		line(x1,x2,y,output);
+		}
   }
 }
 

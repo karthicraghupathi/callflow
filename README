@@ -64,7 +64,7 @@ Ordering the diagram
 
 If you know what nodes in your network are logically connected, you
 can have the diagram ordered in a meaningful way.  Just create a file
-called order in your current directory, or order in the setup
+called order in your current directory or in the setup
 directory with the order of your network nodes, one per line.  You
 must use the exact name or IP address that appears in your capture
 file in the form: <host/ip>:<port>, or use a regular expression that
@@ -119,10 +119,10 @@ Titling the diagram
 ===================
 
 You can create a file in the current directory called title, or a
-file in your home directory called .title which contains text to be
-displayed as a title to the diagram. If neither of these files exist,
-then a title text will be generated based upon basename of the capture
-file name.
+file in the setup directory (eg : /usr/share/callflow/) called title 
+which contains text to be displayed as a title to the diagram. If 
+neither of these files exist, then a title text will be generated based 
+upon basename of the capture file name.
 
 
 Tweaking ~/.wireshark/preferences for frames/Frame*.html

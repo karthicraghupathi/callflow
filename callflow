@@ -56,136 +56,137 @@ fi
 ##################################
 # Check command line options
 ##################################
-if [ -n "$1" ]; then
-  case "$1" in
+for arg in $*
+do
+	case $arg in
     -h)
-	#Help needed
-	echo "Options availables"
-	echo "------------------"
-	echo "Usage: callflow [OPTION] FILE.cap"
-	echo "  -h, print this help message"
-	echo "  -o, create an order file with the nodes in FILE.cap"
-	echo "      (Don't forget to redirect output in another file. "
-	echo "      Exemple of use: callflow -o capture.cap > order)"
-	echo "  -t, will use FILE/callflow.short file"
-	echo "  -d, remove duplicate frames in FILE/callflow.long"
-	echo "  -s, add 'Session ID' to Sequence Lines in FILE/callflow.long"
-	echo "  -r, remove files FILE/callflow.short and FILE/callflow.long after proceeding"
+		#Help needed
+		echo "Options availables"
+		echo "------------------"
+		echo "Usage: callflow [OPTION] FILE.cap"
+		echo "  -h, print this help message"
+		echo "  -o, create an order file with the nodes in FILE.cap"
+		echo "      (Don't forget to redirect output in another file. "
+		echo "      Exemple of use: callflow -o capture.cap > order)"
+		echo "  -t, will use FILE/callflow.short file"
+		echo "  -d, remove duplicate frames in FILE/callflow.long"
+		echo "  -s, add 'Session ID' to Sequence Lines in FILE/callflow.long"
+		echo "  -r, remove files FILE/callflow.short and FILE/callflow.long after proceeding"
 
-	exit 0;
-	;;
+		exit 0;
+		;;
     -t)
-	#inputfile
-	inputfile=$2;
+		#inputfile
+		inputfile=$2;
 
-	# Compute DESTDIR
-	DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
-	mkdir -p $DESTDIR/frames
-	cp $inputfile $DESTDIR/callflow-source.cap
+		# Compute DESTDIR
+		DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
+		mkdir -p $DESTDIR/frames
+		cp $inputfile $DESTDIR/callflow-source.cap
 
 
-	;;
+		;;
     -d)
-	#inputfile
-	#we want to remove duplicate frames
-	inputfile=$2;
+		#inputfile
+		#we want to remove duplicate frames
+		inputfile=$2;
 
-	# Compute DESTDIR
-	DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
-	mkdir -p $DESTDIR/frames
-	cp $inputfile $DESTDIR/callflow-source.cap
+		# Compute DESTDIR
+		DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
+		mkdir -p $DESTDIR/frames
+		cp $inputfile $DESTDIR/callflow-source.cap
 
 
 
-	# Remove duplicate frames
-	awk -f $SETUPDIR/awk-scripts/removedups.awk -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
-	rm $DESTDIR/callflow.short
-	mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
-	exit 0;
-	;;
+		# Remove duplicate frames
+		awk -f $SETUPDIR/awk-scripts/removedups.awk -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
+		rm $DESTDIR/callflow.short
+		mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
+		exit 0;
+		;;
     -s)
-	if [ sessionFile = none ]; then
-	  echo "You must create either $SETUPDIR/session or ./session to use -s option";
-	  exit 1;
-	fi
-	#inputfile
-	#we want to add "Session ID"
-	inputfile=$2;
+		if [ sessionFile = none ]; then
+		  echo "You must create either $SETUPDIR/session or ./session to use -s option";
+		  exit 1;
+		fi
+		#inputfile
+		#we want to add "Session ID"
+		inputfile=$2;
 
-	# Compute DESTDIR
-	DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
-	mkdir -p $DESTDIR/frames
-	cp $inputfile $DESTDIR/callflow-source.cap
+		# Compute DESTDIR
+		DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
+		mkdir -p $DESTDIR/frames
+		cp $inputfile $DESTDIR/callflow-source.cap
 
 
 
-	awk -f $SETUPDIR/awk-scripts/marksession.awk -v session_token="`cat $sessionFile`" -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
-	rm $DESTDIR/callflow.short
-	mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
-	exit 0;
-	;;
+		awk -f $SETUPDIR/awk-scripts/marksession.awk -v session_token="`cat $sessionFile`" -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
+		rm $DESTDIR/callflow.short
+		mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
+		exit 0;
+		;;
     -o)
-	#inputfile is a cap-file
-	#we want to make an order file
-	inputfile=$2;
+		#inputfile is a cap-file
+		#we want to make an order file
+		inputfile=$2;
 
-	if [ $filterFile != none ]; then
-		echo 'Using the following wireshark display filter:' 1>&2
-		cat $filterFile 1>&2
-		tshark -r $inputfile -R "`cat $filterFile`" -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' | awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort | uniq
-		else
-		echo 'Warning:  filter file not found -- no filters applied' 1>&2
-		tshark -r $inputfile -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' | awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort | uniq
-	fi
-	exit 0;
-	;;
+		if [ $filterFile != none ]; then
+			echo 'Using the following wireshark display filter:' 1>&2
+			cat $filterFile 1>&2
+			tshark -r $inputfile -R "`cat $filterFile`" -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' | awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort | uniq
+			else
+			echo 'Warning:  filter file not found -- no filters applied' 1>&2
+			tshark -r $inputfile -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' | awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort | uniq
+		fi
+		exit 0;
+		;;
     -r)
-	#inputfile is a cap-file
-	#we want to remove callflow.short and callflow.long after proceeding
-	inputfile=$2;
-	removeSL=-r;
+		#inputfile is a cap-file
+		#we want to remove callflow.short and callflow.long after proceeding
+		inputfile=$2;
+		removeSL=-r;
 
-	# DESTDIR
-	DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
-	mkdir -p $DESTDIR/frames
-	cp $inputfile $DESTDIR/callflow-source.cap
+		# DESTDIR
+		DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
+		mkdir -p $DESTDIR/frames
+		cp $inputfile $DESTDIR/callflow-source.cap
 
-	# filterFile
-	if [ $filterFile != none ]; then
-	    echo Using the following wireshark display filter:
-	    cat $filterFile
-	    tshark -r $inputfile -R "`cat $filterFile`" -o 'column.format:"No.","%m","Src","%s","Port","%S","Ignored","%m","Dest","%d","Port","%D","Protocol","%p","Info","%i"' > $DESTDIR/callflow.short
-	    tshark -r $inputfile -R "`cat $filterFile`" -V > $DESTDIR/callflow.long
-	else
-	    echo 'Warning: filter file not found -- no filters applied'
-	    tshark -r $inputfile -o 'column.format: "No.", "%m", "Src", "%s", "Port", "%S", "Ignored", "%m", "Dest", "%d", "Port", "%D", "Protocol", "%p", "Info", "%i"' > $DESTDIR/callflow.short
-	    tshark -r $inputfile -V > $DESTDIR/callflow.long
-	fi
+		# filterFile
+		if [ $filterFile != none ]; then
+			echo Using the following wireshark display filter:
+			cat $filterFile
+			tshark -r $inputfile -R "`cat $filterFile`" -o 'column.format:"No.","%m","Src","%s","Port","%S","Ignored","%m","Dest","%d","Port","%D","Protocol","%p","Info","%i"' > $DESTDIR/callflow.short
+			tshark -r $inputfile -R "`cat $filterFile`" -V > $DESTDIR/callflow.long
+		else
+			echo 'Warning: filter file not found -- no filters applied'
+			tshark -r $inputfile -o 'column.format: "No.", "%m", "Src", "%s", "Port", "%S", "Ignored", "%m", "Dest", "%d", "Port", "%D", "Protocol", "%p", "Info", "%i"' > $DESTDIR/callflow.short
+			tshark -r $inputfile -V > $DESTDIR/callflow.long
+		fi
 	;;
      *)
-	#inputfile is a cap-file
-	#no options
-	inputfile=$1;
+		#inputfile is a cap-file
+		#no options
+		inputfile=$1;
 
-	# DESTDIR
-	DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
-	mkdir -p $DESTDIR/frames
-	cp $inputfile $DESTDIR/callflow-source.cap
+		# DESTDIR
+		DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
+		mkdir -p $DESTDIR/frames
+		cp $inputfile $DESTDIR/callflow-source.cap
 
-	# filterFile
-	if [ $filterFile != none ]; then
-	    echo Using the following wireshark display filter:
-	    cat $filterFile
-	    tshark -r $inputfile -R "`cat $filterFile`" -o 'column.format:"No.","%m","Src","%s","Port","%S","Ignored","%m","Dest","%d","Port","%D","Protocol","%p","Info","%i"' > $DESTDIR/callflow.short
-	    tshark -r $inputfile -R "`cat $filterFile`" -V > $DESTDIR/callflow.long
-	else
-	    echo 'Warning: filter file not found -- no filters applied'
-	    tshark -r $inputfile -o 'column.format: "No.", "%m", "Src", "%s", "Port", "%S", "Ignored", "%m", "Dest", "%d", "Port", "%D", "Protocol", "%p", "Info", "%i"' > $DESTDIR/callflow.short
-	    tshark -r $inputfile -V > $DESTDIR/callflow.long
-	fi
+		# filterFile
+		if [ $filterFile != none ]; then
+			echo Using the following wireshark display filter:
+			cat $filterFile
+			tshark -r $inputfile -R "`cat $filterFile`" -o 'column.format:"No.","%m","Src","%s","Port","%S","Ignored","%m","Dest","%d","Port","%D","Protocol","%p","Info","%i"' > $DESTDIR/callflow.short
+			tshark -r $inputfile -R "`cat $filterFile`" -V > $DESTDIR/callflow.long
+		else
+			echo 'Warning: filter file not found -- no filters applied'
+			tshark -r $inputfile -o 'column.format: "No.", "%m", "Src", "%s", "Port", "%S", "Ignored", "%m", "Dest", "%d", "Port", "%D", "Protocol", "%p", "Info", "%i"' > $DESTDIR/callflow.short
+			tshark -r $inputfile -V > $DESTDIR/callflow.long
+		fi
 	;;
   esac
-fi
+done
 
 ##################################
 # common
@@ -238,6 +239,10 @@ fi
 
 # Add title to vars
 echo "title=\"$title\"" >> $TMPDIR/callflow.vars.$PPID
+cat $TMPDIR/callflow.vars.$PPID $SETUPDIR/awk-scripts/callflow.awk > $TMPDIR/callflow.awk.$PPID
+
+# Add noAuto to vars in order to delete self messaging
+echo "noAuto=\"$noAuto\"" >> $TMPDIR/callflow.vars.$PPID
 cat $TMPDIR/callflow.vars.$PPID $SETUPDIR/awk-scripts/callflow.awk > $TMPDIR/callflow.awk.$PPID
 
 # Build callflow.svg
