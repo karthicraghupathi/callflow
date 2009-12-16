@@ -1,4 +1,4 @@
-CallFlow Sequence Diagram Generator
+CallFlow Sequence Diagram Generator release 20091216
 ===================================
 
 This is a collection of awk and shell scripts that will take a capture
@@ -11,8 +11,8 @@ Building the callflow plateform independant package
 ===================================================
 
 Prerequisites:	gawk (ver?)
-					java (jre 1.5 or greater)
-					tshark (wireshark ver?)
+		java (jre 1.5 or greater)
+		tshark (wireshark ver?)
 
 
 Using callflow
@@ -40,13 +40,16 @@ aren't interesting.
 Options availables
 ------------------
 Usage: callflow [OPTION] FILE
-  -o, create an order file with the nodes in FILE
+  -h, print this help message
+  -o, create an order file with the nodes in FILE.cap
       (Don't forget to redirect output in another file. 
       Exemple of use: callflow -o capture.cap > order)
-  -t, will use FILE/callflow.short file
-  -d, remove duplicate frames in FILE/callflow.short/long
-  -s, add "Session ID" to Sequence Lines in FILE/callflow.short/long
-  -r, remove files (callflow.short and callflow.long) after proceeding
+  -t, use cap.short and cap.long files.
+      note 1 - if -t and -d are used, only -t is executed.
+      note 2 - this option sould not be selected on the first run.
+  -d, remove duplicate frames while computing.
+      This option should not be selected on the first run.
+  -s, add a session ID to Sequence Lines in FILE/callflow.long
 
 
 Filtering the diagram
@@ -220,8 +223,9 @@ You can remove duplicate frames from the short text-file with:
 callflow -d foo
 
 Duplicates are determined by examining each line in foo, and comparing
-frames/Frame<#>.html with all previously seen frames. The non-duplicates version
-of foo will be called "callflow.short".
+frames/Frame<#>.html with all previously seen frames. Because we are comparing
+with html files, the duplicate option suppose that this html files exist.
+To have this html file, the script must be run once without -d option.
 
 
 Adding "Session ID" to Sequence Lines
