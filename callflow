@@ -162,10 +162,18 @@ fi
 if [ ! -f $DESTDIR/callflow.long ]; then
 	echo "File callflow.long does not exist !"
 	exit 1;
+else
+	# Some SIP messages don't include a space between the Call-ID tag and
+	# Call-ID value
+	sed -i 's,\(Call-ID:\)\([^ ]\),\1 \2,' $DESTDIR/callflow.long
 fi
 if [ ! -f $DESTDIR/callflow.short ]; then
         echo "File callflow.short does not exist !"
 	exit 1;
+else
+	# Remove Malformed packages from callflow.short, especially because it
+	# contains unpaired "["
+	sed -i '/Malform/d' $DESTDIR/callflow.short
 fi
 
 ##################################
@@ -285,13 +293,26 @@ else
     # Build callflow.png
     java -jar $SETUPDIR/batik/batik-rasterizer.jar $DESTDIR/callflow.svg
 
-    echo "<html>" > $DESTDIR/index.html
-    cat imagemap >> $DESTDIR/index.html
-    echo "<p align='center'>" >> $DESTDIR/index.html
-    echo "<img border='0' src='callflow.png' usemap='#callflowmap'></img>" >> $DESTDIR/index.html
-    echo "</p>" >> $DESTDIR/index.html
-    echo "<a href='callflow-source.cap'>callflow-source.cap</a>" >> $DESTDIR/index.html
-    echo "</html>" >> $DESTDIR/index.html
+    ( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
+      echo "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
+      echo "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">"
+      echo " <head>"
+      echo "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>"
+      echo "  <title>Callflow: $inputfile</title>"
+      echo " </head>"
+      echo " <body>"
+      echo "  <div>"
+      cat imagemap
+      echo "   <p align=\"center\">"
+      echo "    <img style=\"border: 0px;\" src=\"callflow.png\" usemap=\"#callflowmap\" alt=\"Call flow sequence diagram for $inputfile\"/>"
+      echo "   </p>"
+      echo "   <p>"
+      echo "    <a href=\"callflow-source.cap\">callflow-source.cap</a>"
+      echo "   </p>"
+      echo "  </div>"
+      echo " </body>"
+      echo "</html>"
+    ) > $DESTDIR/index.html
 fi
 
 \rm imagemap

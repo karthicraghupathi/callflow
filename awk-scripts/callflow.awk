@@ -6,8 +6,8 @@
   bottomMargin = 50;
   numTraces = numHosts;
 
-  print "<?xml version='1.0' encoding='UTF-8' standalone='no'?>";
-  print "<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.0//EN' 'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>";
+  print "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
+  print "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\" \"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd\">";
 
   for(i=0;i<numHosts;i++)
   {
@@ -18,14 +18,14 @@
   w = (numHosts-1) * xHostSpace + leftMargin + rightMargin;
   h = numLines * yLineSpace + topMargin + bottomMargin;
 
- printf "<svg xmlns=\"http://www.w3.org/2000/svg\" width='%d' height='%d' viewBox='0 0 %d %d'>\n",w,h,w,h;
+ printf "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" viewBox=\"0 0 %d %d\">\n",w,h,w,h;
 
   insertStyleDefs();
 
   ystart = 60;
   yend = h;
 
-  printf "<text x='%d' y='%d' class='label title-text'>%s</text>\n",
+  printf "<text x=\"%d\" y=\"%d\" class=\"label title-text\">%s</text>\n",
     (w/2),
     ystart-35,
     title;
@@ -34,15 +34,15 @@
          if (label[i] == "")
            label[i] = hosts[i];
 
-      printf "<text x='%d' y='%d' class='label host-text'>%s</text>\n",
+      printf "<text x=\"%d\" y=\"%d\" class=\"label host-text\">%s</text>\n",
       leftMargin+(i*xHostSpace),
       ystart-(15*(i%2)+2),
       label[i];
 
-      printf "<line x1='%d' y1='%d' x2='%d' y2='%d' class='element-line' />\n", leftMargin+(i*xHostSpace), ystart, leftMargin+(i*xHostSpace), yend;
+      printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"element-line\" />\n", leftMargin+(i*xHostSpace), ystart, leftMargin+(i*xHostSpace), yend;
     }
 
-  printf "<map name='callflowmap'>\n" > "imagemap";
+  printf "   <map name=\"callflowmap\" id=\"callflowmap\">\n" > "imagemap";
 }
 func insertStyleDefs () {
   printf "<defs>\n<style type=\"text/css\"><![CDATA[\n";
@@ -67,13 +67,13 @@ func insertStyleDefs () {
 
 func arrow(x,y,d) {
   
-  printf "<polygon points='%d,%d %d,%d %d,%d %d,%d' class='arrowhead'/>\n", x,y, x+5*d,y-3,x+3*d,y,x+5*d,y+3;
+  printf "<polygon points=\"%d,%d %d,%d %d,%d %d,%d\" class=\"arrowhead\"/>\n", x,y, x+5*d,y-3,x+3*d,y,x+5*d,y+3;
 }
 
 func line(x1,x2,y,output) {
   if (x1 == x2)
   {
-    printf "<polyline points='%d,%d %d,%d %d,%d %d,%d %d,%d %d,%d %d,%d %d,%d' fill='none' class='traceline'/>\n",
+    printf "<polyline points=\"%d,%d %d,%d %d,%d %d,%d %d,%d %d,%d %d,%d %d,%d\" fill=\"none\" class=\"traceline\"/>\n",
       x1,y-18+7,
       x1+5,y-18+7,
       x1+12,y-15+7,
@@ -86,29 +86,29 @@ func line(x1,x2,y,output) {
 
     xtext = x1 + 18;
     
-    printf "<area href='frames/Frame%d.html' coords='%d,%d,%d,%d'></area>\n", $1, x1, y-yLineSpace+2, x1+15, y+7+1 >> "imagemap"
+    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"/>\n", $1, x1, y-yLineSpace+2, x1+15, y+7+1, $1 >> "imagemap"
   }
   else if (x1<x2)
   {
-    printf "<line x1='%d' y1='%d' x2='%d' y2='%d' class='traceline' />\n", x1, y, x2, y;
+    printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" />\n", x1, y, x2, y;
     arrow(x2,y,-1);
   
     xtext = x1 + 10;
     
-    printf "<area href='frames/Frame%d.html' coords='%d,%d,%d,%d'></area>\n", $1, x1, y-yLineSpace+2, x2, y+1 >> "imagemap"
+    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"/>\n", $1, x1, y-yLineSpace+2, x2, y+1, $1 >> "imagemap"
   }
   else
   {
-    printf "<line x1='%d' y1='%d' x2='%d' y2='%d' class='traceline' />\n", x1, y, x2, y;
+    printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" />\n", x1, y, x2, y;
     arrow(x2,y,1);
     
     xtext = x2 + 10;
     
-    printf "<area href='frames/Frame%d.html' coords='%d,%d,%d,%d'></area>\n", $1, x2, y-yLineSpace+2, x1, y+1 >> "imagemap"
+    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"/>\n", $1, x2, y-yLineSpace+2, x1, y+1, $1 >> "imagemap"
   }
   
-  printf "<a href='frames/Frame%d.html' target='_blank'>\n", $1;
-  printf "<text x='%d' y='%d' class='pkt-text'>%s</text>\n", xtext, y-4, output;
+  printf "<a href=\"frames/Frame%d.html\" target=\"_blank\">\n", $1;
+  printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\">%s</text>\n", xtext, y-4, output;
   printf "</a>\n";
 }
 
@@ -138,18 +138,18 @@ func line(x1,x2,y,output) {
 
 	 if (link != "")
 	 {
-		printf("<text x='%d' y='%d' class='link'>%s</text>\n", 50, y, output);
-		printf("<area href='%s' coords='%d,%d,%d,%d'></area>\n", link, 50, y-yLineSpace+2, w, y+1) >> "imagemap";
+		printf("<text x=\"%d\" y=\"%d\" class=\"link\">%s</text>\n", 50, y, output);
+		printf("    <area href=\"%s\" coords=\"%d,%d,%d,%d\"/>\n", link, 50, y-yLineSpace+2, w, y+1) >> "imagemap";
 	 }
 	 else
 	 {
-		printf("<text x='%d' y='%d' class='comment-text'>%s</text>\n", 50, y, output);
+		printf("<text x=\"%d\" y=\"%d\" class=\"comment-text\">%s</text>\n", 50, y, output);
 	 }
   }
   else
   {
 	 if ($4 ~ "{([0-9]+)}") {
-		printf("<text x='%d' y='%d' class='session-text'>%s</text>\n", 25, y, $4);
+		printf("<text x=\"%d\" y=\"%d\" class=\"session-text\">%s</text>\n", 25, y, $4);
 	 }
 	 l1 = sprintf("%s:%s", $2,$3);
 	 l2 = sprintf("%s:%s", $5,$6);
@@ -169,7 +169,7 @@ func line(x1,x2,y,output) {
 	 x2 = x2 * xHostSpace + leftMargin;
 
 	 ORS = "";
-	 printf "<text x='%d' y='%d' class='pkt-text'>%d</text>\n", leftMargin/2, y, $1;
+	 printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\">%d</text>\n", leftMargin/2, y, $1;
 
 	 output = "";
 	 for(i=7;i<=NF;i++) output = output " " $i;
@@ -186,6 +186,6 @@ func line(x1,x2,y,output) {
 
 
 END {
-  printf "</map>\n" >> "imagemap";
+  printf "   </map>\n" >> "imagemap";
   printf "</svg>\n";
     }
