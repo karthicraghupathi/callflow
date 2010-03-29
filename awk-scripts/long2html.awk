@@ -1,13 +1,27 @@
-/^Frame [0-9]+/ {
-  filename = destDir "/frames/Frame" $2 ".html";
-  printf "<html>\n" >filename;
-  printf "<pre>\n" >filename;
-  discard = 0;
+BEGIN{
+  first=1;
 }
+#/^Frame [0-9]+/ {
+#  filename = destDir "/frames/Frame" $2 ".html";
+#  printf "<html>\n" >filename;
+#  printf "<pre>\n" >filename;
+#  discard = 0;
+#}
 /^Frame [0-9]+ (.*)/ {
+  # New frame, closing <pre> and html> from previous frame before compute new filename
+  if (first==0){
+    print "</pre></html>" >filename;
+  }
+  else{
+    first=0;
+  }
   filename = destDir "/frames/Frame" $2 ".html";
   printf "<html>\n" >filename;
   printf "<pre>\n" >filename;
+  print $0 >filename;
+  # Print time
+  getline
+  gsub("^ *", "")
   print $0 >filename;
   discard = 1;
 }
@@ -35,11 +49,10 @@
 /^Internet Control Message Protocol/ {
   discard = 0;
 }
-
 /^Session Initiation Protocol/ {
   discard = 0;
 }
-{ 
+{
   if (discard==0)
     {
       
@@ -48,4 +61,7 @@
       gsub("<","\\&lt;");
       print $0 > filename;
     }
+}
+END {
+  print "</pre></html>" >filename
 }
