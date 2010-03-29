@@ -52,6 +52,9 @@ BEGIN{
 /^Session Initiation Protocol/ {
   discard = 0;
 }
+/^Diameter Protocol/ {
+  discard = 0;
+}
 {
   if (discard==0)
     {

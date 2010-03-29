@@ -9,8 +9,7 @@
   print "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
   print "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\" \"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd\">";
 
-  for(i=0;i<numHosts;i++)
-  {
+  for(i=0;i<numHosts;i++) {
     lookup[hosts[i]] = i;
     printf "<!-- lookup['%s'] = %d -->\n", hosts[i], i;
   }
@@ -18,7 +17,7 @@
   w = (numHosts-1) * xHostSpace + leftMargin + rightMargin;
   h = numLines * yLineSpace + topMargin + bottomMargin;
 
- printf "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" viewBox=\"0 0 %d %d\">\n",w,h,w,h;
+  printf "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" viewBox=\"0 0 %d %d\">\n",w,h,w,h;
 
   insertStyleDefs();
 
@@ -29,21 +28,23 @@
     (w/2),
     ystart-35,
     title;
-  for(i=0;i<numTraces;i++)
-    {
-         if (label[i] == "")
-           label[i] = hosts[i];
 
-      printf "<text x=\"%d\" y=\"%d\" class=\"label host-text\">%s</text>\n",
+  for(i=0;i<numTraces;i++) {
+
+    if (label[i] == "")
+      label[i] = hosts[i];
+
+    printf "<text x=\"%d\" y=\"%d\" class=\"label host-text\">%s</text>\n",
       leftMargin+(i*xHostSpace),
       ystart-(15*(i%2)+2),
       label[i];
 
-      printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"element-line\" />\n", leftMargin+(i*xHostSpace), ystart, leftMargin+(i*xHostSpace), yend;
-    }
+    printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"element-line\" />\n", leftMargin+(i*xHostSpace), ystart, leftMargin+(i*xHostSpace), yend;
+  }
 
   printf "   <map name=\"callflowmap\" id=\"callflowmap\">\n" > "imagemap";
 }
+
 func insertStyleDefs () {
   printf "<defs>\n<style type=\"text/css\"><![CDATA[\n";
   printf " .traceline { stroke-width: 1pt; stroke:black; }\n";
@@ -71,8 +72,8 @@ func arrow(x,y,d) {
 }
 
 func line(x1,x2,y,output) {
-  if (x1 == x2)
-  {
+
+  if (x1 == x2) {
     printf "<polyline points=\"%d,%d %d,%d %d,%d %d,%d %d,%d %d,%d %d,%d %d,%d\" fill=\"none\" class=\"traceline\"/>\n",
       x1,y-18+7,
       x1+5,y-18+7,
@@ -87,18 +88,16 @@ func line(x1,x2,y,output) {
     xtext = x1 + 18;
     
     printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"/>\n", $1, x1, y-yLineSpace+2, x1+15, y+7+1, $1 >> "imagemap"
-  }
-  else if (x1<x2)
-  {
+
+  } else if (x1<x2) {
     printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" />\n", x1, y, x2, y;
     arrow(x2,y,-1);
   
     xtext = x1 + 10;
     
     printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"/>\n", $1, x1, y-yLineSpace+2, x2, y+1, $1 >> "imagemap"
-  }
-  else
-  {
+
+  } else {
     printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" />\n", x1, y, x2, y;
     arrow(x2,y,1);
     
@@ -188,4 +187,4 @@ func line(x1,x2,y,output) {
 END {
   printf "   </map>\n" >> "imagemap";
   printf "</svg>\n";
-    }
+}

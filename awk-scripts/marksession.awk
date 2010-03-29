@@ -11,7 +11,7 @@ BEGIN {
 	  split(session_line, array);
 	  session = array[2];
 
-	  for (i=0;i<session_count;i++) {
+	  for (i=0; i < session_count; i++) {
 		 if (sessions[i] == session) {
 			found = 1;
 			$4 = "{" i+1 "}";
@@ -23,11 +23,11 @@ BEGIN {
 		 $4 = "{" session_count+1 "}";
 		 sessions[session_count++] = session;
 		 print $0;
-		 s = sprintf("echo 'New Frame %s: session = %s' 1>&2", $1, session);
+		 s = sprintf("echo 'New session in frame %s: %s' >&2", $1, session);
 		 system(s);
 	  }
-   }
-   else {
+
+   } else {
 	  print $0;
    }
 }
