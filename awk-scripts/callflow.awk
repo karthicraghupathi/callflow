@@ -6,6 +6,19 @@
   bottomMargin = 50;
   numTraces = numHosts;
 
+  color[0]  = "black";
+  color[1]  = "orange";
+  color[2]  = "sienna";
+  color[3]  = "red";
+  color[4]  = "green";
+  color[5]  = "purple";
+  color[6]  = "chocolate";
+  color[7]  = "olivedrab";
+  color[8]  = "darkred";
+  color[9]  = "darkslategrey";
+  color[10] = "MidnightBlue";
+  color[11] = "maroon";
+
   print "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
   print "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\" \"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd\">";
 
@@ -66,12 +79,17 @@ func insertStyleDefs () {
   printf " ]]></style>\n</defs>\n";
 }
 
-func arrow(x,y,d) {
+func arrow(x,y,d,c) {
   
-  printf "<polygon points=\"%d,%d %d,%d %d,%d %d,%d\" class=\"arrowhead\"/>\n", x,y, x+5*d,y-3,x+3*d,y,x+5*d,y+3;
+  printf "<polygon points=\"%d,%d %d,%d %d,%d %d,%d\" class=\"arrowhead\" style=\"fill: %s; stroke: %s\"/>\n",
+  x,y,
+  x+5*d, y-3,
+  x+3*d, y,
+  x+5*d, y+3,
+  color[c], color[c];
 }
 
-func line(x1,x2,y,output) {
+func line(x1,x2,y,output, c) {
 
   if (x1 == x2) {
     printf "<polyline points=\"%d,%d %d,%d %d,%d %d,%d %d,%d %d,%d %d,%d %d,%d\" fill=\"none\" class=\"traceline\"/>\n",
@@ -90,16 +108,16 @@ func line(x1,x2,y,output) {
     printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"/>\n", $1, x1, y-yLineSpace+2, x1+15, y+7+1, $1 >> "imagemap"
 
   } else if (x1<x2) {
-    printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" />\n", x1, y, x2, y;
-    arrow(x2,y,-1);
+    printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" style=\"stroke: %s\"/>\n", x1, y, x2, y, color[c];
+    arrow(x2,y,-1,c);
   
     xtext = x1 + 10;
     
     printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"/>\n", $1, x1, y-yLineSpace+2, x2, y+1, $1 >> "imagemap"
 
   } else {
-    printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" />\n", x1, y, x2, y;
-    arrow(x2,y,1);
+    printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" style=\"stroke: %s\"/>\n", x1, y, x2, y, color[c];
+    arrow(x2,y,1,c);
     
     xtext = x2 + 10;
     
@@ -148,7 +166,14 @@ func line(x1,x2,y,output) {
   else
   {
 	 if ($4 ~ "{([0-9]+)}") {
-		printf("<text x=\"%d\" y=\"%d\" class=\"session-text\">%s</text>\n", 25, y, $4);
+		c = $4
+		gsub("{", "", c)
+		gsub("}", "", c)
+		
+		# If over 11 colors, choose black color as default...
+		# TODO: change color behavior
+		if (strtonum(c)>11) {c="0"}
+		# printf("<text x=\"%d\" y=\"%d\" class=\"session-text\" style=\"fill: %s;\">%s</text>\n", 25, y, color[c], $4);
 	 }
 	 l1 = sprintf("%s:%s", $2,$3);
 	 l2 = sprintf("%s:%s", $5,$6);
@@ -168,7 +193,7 @@ func line(x1,x2,y,output) {
 	 x2 = x2 * xHostSpace + leftMargin;
 
 	 ORS = "";
-	 printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\">%d</text>\n", leftMargin/2, y, $1;
+	 printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\" style=\"fill: %s;\">%d</text>\n", leftMargin/2, y, color[c], $1;
 
 	 output = "";
 	 for(i=7;i<=NF;i++) output = output " " $i;
@@ -178,7 +203,7 @@ func line(x1,x2,y,output) {
 	if ((x1==x2) && (noAuto==1)){
 		}
 	else{
-		line(x1,x2,y,output);
+		line(x1,x2,y,output,c);
 		}
   }
 }

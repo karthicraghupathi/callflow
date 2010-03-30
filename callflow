@@ -197,16 +197,16 @@ fi
 ##################################
 
 if [ $removeDF = 1 ]; then
-	DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
-	if [ -d $DESTDIR/frames ]; then
-		echo "Removing Duplicates Frames"
+  DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
+  if [ -d $DESTDIR/frames ]; then
+    echo "Removing Duplicates Frames"
   else
     echo "Please run the script without -d once in order to build $DESTDIR directory"
     exit 1;
   fi
-	awk -f $SETUPDIR/awk-scripts/removedups.awk -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
-	rm $DESTDIR/callflow.short
-	mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
+  awk -f $SETUPDIR/awk-scripts/removedups.awk -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
+  rm $DESTDIR/callflow.short
+  mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
 fi
 
 ##################################
