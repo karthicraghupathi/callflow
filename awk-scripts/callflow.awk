@@ -81,7 +81,7 @@ func insertStyleDefs () {
 
 func arrow(x,y,d,c) {
   
-  printf "<polygon points=\"%d,%d %d,%d %d,%d %d,%d\" class=\"arrowhead\" style=\"fill: %s; stroke: %s\"/>\n",
+  printf "<polygon points=\"%d,%d %d,%d %d,%d %d,%d\" class=\"arrowhead\" style=\"fill: %s; stroke: %s;\"/>\n",
   x,y,
   x+5*d, y-3,
   x+3*d, y,
@@ -108,7 +108,7 @@ func line(x1,x2,y,output, c) {
     printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"/>\n", $1, x1, y-yLineSpace+2, x1+15, y+7+1, $1 >> "imagemap"
 
   } else if (x1<x2) {
-    printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" style=\"stroke: %s\"/>\n", x1, y, x2, y, color[c];
+    printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" style=\"stroke: %s;\"/>\n", x1, y, x2, y, color[c];
     arrow(x2,y,-1,c);
   
     xtext = x1 + 10;
@@ -116,7 +116,7 @@ func line(x1,x2,y,output, c) {
     printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"/>\n", $1, x1, y-yLineSpace+2, x2, y+1, $1 >> "imagemap"
 
   } else {
-    printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" style=\"stroke: %s\"/>\n", x1, y, x2, y, color[c];
+    printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" style=\"stroke: %s;\"/>\n", x1, y, x2, y, color[c];
     arrow(x2,y,1,c);
     
     xtext = x2 + 10;
@@ -173,7 +173,6 @@ func line(x1,x2,y,output, c) {
 		# If over 11 colors, choose black color as default...
 		# TODO: change color behavior
 		if (strtonum(c)>11) {c="0"}
-		# printf("<text x=\"%d\" y=\"%d\" class=\"session-text\" style=\"fill: %s;\">%s</text>\n", 25, y, color[c], $4);
 	 }
 	 l1 = sprintf("%s:%s", $2,$3);
 	 l2 = sprintf("%s:%s", $5,$6);
@@ -193,7 +192,7 @@ func line(x1,x2,y,output, c) {
 	 x2 = x2 * xHostSpace + leftMargin;
 
 	 ORS = "";
-	 printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\" style=\"fill: %s;\">%d</text>\n", leftMargin/2, y, color[c], $1;
+	 printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\">%d</text>\n", leftMargin/2, y, $1;
 
 	 output = "";
 	 for(i=7;i<=NF;i++) output = output " " $i;
