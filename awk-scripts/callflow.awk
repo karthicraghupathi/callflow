@@ -173,6 +173,8 @@ func line(x1,x2,y,output, c) {
 		# If over 11 colors, choose black color as default...
 		# TODO: change color behavior
 		if (strtonum(c)>11) {c="0"}
+	 } else {
+		c = 0
 	 }
 	 l1 = sprintf("%s:%s", $2,$3);
 	 l2 = sprintf("%s:%s", $5,$6);
