@@ -74,7 +74,7 @@ func insertStyleDefs () {
   printf " .element-line { stroke-width: 0.25pt; stroke: black; }\n";
   printf " .link { color: blue; font-family: Trebuchet MS,Helvetica, sans-serif;\n";
   printf "		font-size: 9pt; text-decoration: underline; fill: blue;}\n";
-  printf " .session-text { color: red; font-family: Trebuchet MS,Helvetica, sans-serif;\n";
+  #printf " .session-text { color: red; font-family: Trebuchet MS,Helvetica, sans-serif;\n";
   printf "		font-size: 9pt; font-weight: bold; fill: red;}\n";
   printf " ]]></style>\n</defs>\n";
 }
@@ -135,82 +135,80 @@ func line(x1,x2,y,output, c) {
 
   if($1 == "#")
   {
-	 output = "";
-	 for (i=2; i<=NF; i++)
-	 {
-		if ($i == "!")
-		   break;
-		output = output " " $i;
-	 }
+    output = "";
+    for (i=2; i<=NF; i++)
+    {
+      if ($i == "!")
+        break;
+      output = output " " $i;
+    }
 
-	 link = "";
-	 if($i == "!")
-	 {
-		i++;
-		for(;i<=NF;i++)
-		{
-		   link = link " " $i;
-		}
-	 }
+    link = "";
+    if($i == "!")
+    {
+      i++;
+      for(;i<=NF;i++)
+      {
+        link = link " " $i;
+      }
+    }
 
-	 if (link != "")
-	 {
-		printf("<text x=\"%d\" y=\"%d\" class=\"link\">%s</text>\n", 50, y, output);
-		printf("    <area href=\"%s\" coords=\"%d,%d,%d,%d\"/>\n", link, 50, y-yLineSpace+2, w, y+1) >> "imagemap";
-	 }
-	 else
-	 {
-		printf("<text x=\"%d\" y=\"%d\" class=\"comment-text\">%s</text>\n", 50, y, output);
-	 }
+    if (link != "")
+    {
+      printf("<text x=\"%d\" y=\"%d\" class=\"link\">%s</text>\n", 50, y, output);
+      printf("    <area href=\"%s\" coords=\"%d,%d,%d,%d\"/>\n", link, 50, y-yLineSpace+2, w, y+1) >> "imagemap";
+    }
+    else
+    {
+      printf("<text x=\"%d\" y=\"%d\" class=\"comment-text\">%s</text>\n", 50, y, output);
+    }
   }
   else
   {
-	 if ($4 ~ "{([0-9]+)}") {
-		c = $4
-		gsub("{", "", c)
-		gsub("}", "", c)
-		
-		# If over 11 colors, choose black color as default...
-		# TODO: change color behavior
-		if (strtonum(c)>11) {c="0"}
-	 } else {
-		c = 0
-	 }
-	 l1 = sprintf("%s:%s", $2,$3);
-	 l2 = sprintf("%s:%s", $5,$6);
-	 for (i=0; i<numHosts; i++)
-	 {
-	   if(l1 ~ hosts[i])
-	   {
-		 x1 = strtonum(lookup[hosts[i]]);
-	   }
-	   if(l2 ~ hosts[i])
-	   {
-		 x2 = strtonum(lookup[hosts[i]]);
-	   }
-	 }
+    if ($4 ~ "{([0-9]+)}") {
+      c = $4
+      gsub("{", "", c)
+      gsub("}", "", c)
+    
+      # If over 11 colors, choose black color as default...
+      # TODO: change color behavior
+      if (strtonum(c)>11) {c = "0"}
+    } else {c = "0"}
+    l1 = sprintf("%s:%s", $2,$3);
+    l2 = sprintf("%s:%s", $5,$6);
+    for (i=0; i<numHosts; i++)
+    {
+      if(l1 ~ hosts[i])
+      {
+        x1 = strtonum(lookup[hosts[i]]);
+      }
+      if(l2 ~ hosts[i])
+      {
+        x2 = strtonum(lookup[hosts[i]]);
+      }
+    }
 
-	 x1 = x1 * xHostSpace + leftMargin;
-	 x2 = x2 * xHostSpace + leftMargin;
+    x1 = x1 * xHostSpace + leftMargin;
+    x2 = x2 * xHostSpace + leftMargin;
 
-	 ORS = "";
-	 printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\">%d</text>\n", leftMargin/2, y, $1;
+    ORS = "";
+    printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\" style=\"fill: %s;\">%d</text>\n", leftMargin/2, y, $1;
 
-	 output = "";
-	 for(i=7;i<=NF;i++) output = output " " $i;
+    output = "";
+    for(i=7;i<=NF;i++) output = output " " $i;
 
-	 gsub("SIP(/SDP|/XML|) *(Status|Request): *","", output);
-	 gsub(", with session description *$"," w/SDP",output);
-	if ((x1==x2) && (noAuto==1)){
-		}
-	else{
-		line(x1,x2,y,output,c);
-		}
+    gsub("SIP(/SDP|/XML|) *(Status|Request): *","", output);
+    gsub(", with session description *$"," w/SDP",output);
+    if ((x1==x2) && (noAuto==1)){
+    }
+    else{
+      line(x1,x2,y,output,c);
+    }
   }
 }
-
 
 END {
   printf "   </map>\n" >> "imagemap";
   printf "</svg>\n";
 }
+
