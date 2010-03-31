@@ -105,7 +105,7 @@ func line(x1,x2,y,output, c) {
 
     xtext = x1 + 18;
     
-    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"/>\n", $1, x1, y-yLineSpace+2, x1+15, y+7+1, $1 >> "imagemap"
+    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $1, x1, y-yLineSpace+2, x1+15, y+7+1, $1, $1 >> "imagemap"
 
   } else if (x1<x2) {
     printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" style=\"stroke: %s;\"/>\n", x1, y, x2, y, color[c];
@@ -113,7 +113,7 @@ func line(x1,x2,y,output, c) {
   
     xtext = x1 + 10;
     
-    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"/>\n", $1, x1, y-yLineSpace+2, x2, y+1, $1 >> "imagemap"
+    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $1, x1, y-yLineSpace+2, x2, y+1, $1, $1 >> "imagemap"
 
   } else {
     printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" style=\"stroke: %s;\"/>\n", x1, y, x2, y, color[c];
@@ -121,7 +121,7 @@ func line(x1,x2,y,output, c) {
     
     xtext = x2 + 10;
     
-    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"/>\n", $1, x2, y-yLineSpace+2, x1, y+1, $1 >> "imagemap"
+    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $1, x2, y-yLineSpace+2, x1, y+1, $1, $1 >> "imagemap"
   }
   
   printf "<a href=\"frames/Frame%d.html\" target=\"_blank\">\n", $1;
