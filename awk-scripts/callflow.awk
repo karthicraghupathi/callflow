@@ -74,8 +74,8 @@ func insertStyleDefs () {
   printf " .element-line { stroke-width: 0.25pt; stroke: black; }\n";
   printf " .link { color: blue; font-family: Trebuchet MS,Helvetica, sans-serif;\n";
   printf "		font-size: 9pt; text-decoration: underline; fill: blue;}\n";
-  #printf " .session-text { color: red; font-family: Trebuchet MS,Helvetica, sans-serif;\n";
-  printf "		font-size: 9pt; font-weight: bold; fill: red;}\n";
+  # printf " .session-text { color: red; font-family: Trebuchet MS,Helvetica, sans-serif;\n";
+  # printf "		font-size: 9pt; font-weight: bold; fill: red;}\n";
   printf " ]]></style>\n</defs>\n";
 }
 
