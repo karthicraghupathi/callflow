@@ -320,7 +320,26 @@ else
       echo "  </div>"
       echo " </body>"
       echo "</html>"
+
     ) > $DESTDIR/index.html
+
+    sed 's/coords=/target=\"msg\" coords=/' $DESTDIR/index.html > $DESTDIR/graph.html
+
+    ( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\""
+      echo "   \"http://www.w3.org/TR/html4/frameset.dtd\">"
+      echo "<html>"
+      echo " <head>"
+      echo "  <meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\" >"
+      echo "  <title>Callflow: $title</title>"
+      echo " </head>"
+      echo " <frameset cols=\"75%,25%\">"
+      echo "  <frame name=\"graph\" src=\"graph.html\">"
+      echo "  <frame name=\"msg\" src=\"frames/Frame1.html\">"
+      echo " </frameset>"
+      echo "</html>"
+
+    ) > $DESTDIR/index_with_frames.html
+
 fi
 
 \rm imagemap

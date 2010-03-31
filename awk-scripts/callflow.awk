@@ -192,7 +192,7 @@ func line(x1,x2,y,output, c) {
     x2 = x2 * xHostSpace + leftMargin;
 
     ORS = "";
-    printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\" style=\"fill: %s;\">%d</text>\n", leftMargin/2, y, $1;
+    printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\" style=\"fill: %s;\">%d</text>\n", leftMargin/2, y, color[c], $1;
 
     output = "";
     for(i=7;i<=NF;i++) output = output " " $i;
