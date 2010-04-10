@@ -6,19 +6,6 @@
   bottomMargin = 50;
   numTraces = numHosts;
 
-  color[0]  = "black";
-  color[1]  = "orange";
-  color[2]  = "sienna";
-  color[3]  = "red";
-  color[4]  = "green";
-  color[5]  = "purple";
-  color[6]  = "chocolate";
-  color[7]  = "olivedrab";
-  color[8]  = "darkred";
-  color[9]  = "darkslategrey";
-  color[10] = "MidnightBlue";
-  color[11] = "maroon";
-
   print "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
   print "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\" \"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd\">";
 

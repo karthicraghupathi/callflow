@@ -269,6 +269,19 @@ else
 	title=`basename $inputfile`;
 fi
 
+if [ -f colors ]; then
+    colorFile=colors
+elif [ -f $SETUPDIR/colors ]; then
+    colorFile=$SETUPDIR/colors
+else
+  colorFile=colors
+
+  for Color in black orange sienna red green purple chocolate olivedrab darkred \
+    darkslategrey MidnightBlue maroon; do
+    echo $Color
+  done > $colorFile
+fi
+
 ( cat $TMPDIR/callflow.vars.$PPID
 
   echo
@@ -276,8 +289,10 @@ fi
 
   # Add noAuto to vars in order to delete self messaging
   echo "  noAuto=\"$noAuto\""
-
   echo "  numLines = $(cat $DESTDIR/callflow.short | wc -l)"
+  echo
+  awk '{printf("  color[%s] = \"%s\"\n", NR-1, $1)}' $colorFile
+  echo
   cat $SETUPDIR/awk-scripts/callflow.awk
 
 ) > $TMPDIR/callflow.awk.$PPID
