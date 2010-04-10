@@ -279,7 +279,7 @@ cat $TMPDIR/callflow.vars.$PPID $SETUPDIR/awk-scripts/callflow.awk > $TMPDIR/cal
 
 # Build callflow.svg
 awk -f $TMPDIR/callflow.awk.$PPID \
-	-v numLines=`awk -f $SETUPDIR/awk-scripts/wc.awk < $DESTDIR/callflow.short`\
+	-v numLines=$(cat $DESTDIR/callflow.short | wc -l) \
 	          < $DESTDIR/callflow.short \
 	          > $DESTDIR/callflow.svg
 
