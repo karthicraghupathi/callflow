@@ -204,7 +204,8 @@ if [ $removeDF = 1 ]; then
     echo "Please run the script without -d once in order to build $DESTDIR directory"
     exit 1;
   fi
-  awk -f $SETUPDIR/awk-scripts/removedups.awk -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
+  #awk -f $SETUPDIR/awk-scripts/removedups.awk -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
+  bash $SETUPDIR/awk-scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR
   rm $DESTDIR/callflow.short
   mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
 fi
@@ -356,7 +357,7 @@ else
     ) > $DESTDIR/index_dynamic.html
     
     #Copy JavaScript files into DESTDIR
-    cp -a $SETUPDIR/js $DESTDIR/
+    cp -af $SETUPDIR/js $DESTDIR/
 
     sed 's/coords=/target=\"msg\" coords=/' $DESTDIR/index.html > $DESTDIR/graph.html
 
