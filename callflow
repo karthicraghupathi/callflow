@@ -269,19 +269,21 @@ else
 	title=`basename $inputfile`;
 fi
 
-# Add title to vars
-echo "title=\"$title\"" >> $TMPDIR/callflow.vars.$PPID
-cat $TMPDIR/callflow.vars.$PPID $SETUPDIR/awk-scripts/callflow.awk > $TMPDIR/callflow.awk.$PPID
+( cat $TMPDIR/callflow.vars.$PPID
 
-# Add noAuto to vars in order to delete self messaging
-echo "noAuto=\"$noAuto\"" >> $TMPDIR/callflow.vars.$PPID
-cat $TMPDIR/callflow.vars.$PPID $SETUPDIR/awk-scripts/callflow.awk > $TMPDIR/callflow.awk.$PPID
+  echo
+  echo "  title=\"$title\""
+
+  # Add noAuto to vars in order to delete self messaging
+  echo "  noAuto=\"$noAuto\""
+
+  echo "  numLines = $(cat $DESTDIR/callflow.short | wc -l)"
+  cat $SETUPDIR/awk-scripts/callflow.awk
+
+) > $TMPDIR/callflow.awk.$PPID
 
 # Build callflow.svg
-awk -f $TMPDIR/callflow.awk.$PPID \
-	-v numLines=$(cat $DESTDIR/callflow.short | wc -l) \
-	          < $DESTDIR/callflow.short \
-	          > $DESTDIR/callflow.svg
+awk -f $TMPDIR/callflow.awk.$PPID $DESTDIR/callflow.short > $DESTDIR/callflow.svg
 
 # Remove temporary files
 \rm $TMPDIR/callflow.*.$PPID
