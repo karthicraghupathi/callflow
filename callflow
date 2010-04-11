@@ -63,7 +63,7 @@ elif [ -f $SETUPDIR/colors ]; then
 else
     colorFile=colors
     for Color in black orange sienna red green purple chocolate olivedrab darkred \
-        darkslategrey MidnightBlue maroon; do
+        darkslategrey midnightblue maroon; do
         echo $Color
     done > $colorFile
 fi
@@ -90,7 +90,7 @@ do
 		echo "      This option should not be selected on the first run."
 		echo "  -s, add a session ID to Sequence Lines in FILE/callflow.long"
 		echo "      This option needs a session file in current folder or"
-		echo "      in SETUP folder. (exemple of session contents: 'Call-Id:'"
+		echo "      in the SETUP folder (example of session file contents: 'Call-Id:')."
 
 		exit 0;
 		;;
@@ -288,6 +288,7 @@ fi
   echo
   # Add graph title
   echo "  title=\"$title\";"
+
   # Add graph variables
   echo "  yLineSpace = 24;"
   echo "  xHostSpace = 200;"
@@ -296,10 +297,12 @@ fi
   echo "  topMargin = 50;"
   echo "  bottomMargin = 50;"
   echo "  numTraces = numHosts;"
+
   # Add noAuto to vars in order to delete self messaging
   echo "  noAuto=\"$noAuto\";"
   echo "  numLines = $(cat $DESTDIR/callflow.short | wc -l);"
   echo
+
   # Add colors from colorFile
   awk '{printf("  color[%s] = \"%s\"\n", NR-1, $1)}' $colorFile
   echo
