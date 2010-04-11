@@ -205,7 +205,7 @@ if [ $removeDF = 1 ]; then
     exit 1;
   fi
   #awk -f $SETUPDIR/awk-scripts/removedups.awk -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
-  bash $SETUPDIR/awk-scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR
+  $SETUPDIR/awk-scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR
   rm $DESTDIR/callflow.short
   mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
 fi
