@@ -22,7 +22,7 @@ order=0; # do not build order file
 
 ##################################
 # Check configuration files :
-#   session, filter, order, title
+#   session, filter, order, title, colors
 ##################################
 if [ -f session ]; then
     sessionFile=session;
@@ -56,6 +56,18 @@ else
     titleFile=none;
 fi
 
+if [ -f colors ]; then
+    colorFile=colors
+elif [ -f $SETUPDIR/colors ]; then
+    colorFile=$SETUPDIR/colors
+else
+    colorFile=colors
+    for Color in black orange sienna red green purple chocolate olivedrab darkred \
+        darkslategrey MidnightBlue maroon; do
+        echo $Color
+    done > $colorFile
+fi
+
 ##################################
 # Check command line options
 ##################################
@@ -77,6 +89,8 @@ do
 		echo "  -d, remove duplicate frames while computing."
 		echo "      This option should not be selected on the first run."
 		echo "  -s, add a session ID to Sequence Lines in FILE/callflow.long"
+		echo "      This option needs a session file in current folder or"
+		echo "      in SETUP folder. (exemple of session contents: 'Call-Id:'"
 
 		exit 0;
 		;;
@@ -205,7 +219,7 @@ if [ $removeDF = 1 ]; then
     exit 1;
   fi
   #awk -f $SETUPDIR/awk-scripts/removedups.awk -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
-  $SETUPDIR/awk-scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR
+  bash $SETUPDIR/awk-scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR
   rm $DESTDIR/callflow.short
   mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
 fi
@@ -269,28 +283,24 @@ else
 	title=`basename $inputfile`;
 fi
 
-if [ -f colors ]; then
-    colorFile=colors
-elif [ -f $SETUPDIR/colors ]; then
-    colorFile=$SETUPDIR/colors
-else
-  colorFile=colors
-
-  for Color in black orange sienna red green purple chocolate olivedrab darkred \
-    darkslategrey MidnightBlue maroon; do
-    echo $Color
-  done > $colorFile
-fi
-
 ( cat $TMPDIR/callflow.vars.$PPID
 
   echo
-  echo "  title=\"$title\""
-
+  # Add graph title
+  echo "  title=\"$title\";"
+  # Add graph variables
+  echo "  yLineSpace = 24;"
+  echo "  xHostSpace = 200;"
+  echo "  leftMargin = 100;"
+  echo "  rightMargin = 100;"
+  echo "  topMargin = 50;"
+  echo "  bottomMargin = 50;"
+  echo "  numTraces = numHosts;"
   # Add noAuto to vars in order to delete self messaging
-  echo "  noAuto=\"$noAuto\""
-  echo "  numLines = $(cat $DESTDIR/callflow.short | wc -l)"
+  echo "  noAuto=\"$noAuto\";"
+  echo "  numLines = $(cat $DESTDIR/callflow.short | wc -l);"
   echo
+  # Add colors from colorFile
   awk '{printf("  color[%s] = \"%s\"\n", NR-1, $1)}' $colorFile
   echo
   cat $SETUPDIR/awk-scripts/callflow.awk
@@ -301,7 +311,7 @@ fi
 awk -f $TMPDIR/callflow.awk.$PPID $DESTDIR/callflow.short > $DESTDIR/callflow.svg
 
 # Remove temporary files
-\rm $TMPDIR/callflow.*.$PPID
+#\rm $TMPDIR/callflow.*.$PPID
 
 # Check to see if java and the batik rasterizer are installed
 which java 2>&1 > /dev/null

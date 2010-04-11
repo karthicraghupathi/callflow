@@ -1,10 +1,4 @@
-  yLineSpace = 24;
-  xHostSpace = 200;
-  leftMargin = 100;
-  rightMargin = 100;
-  topMargin = 50;
-  bottomMargin = 50;
-  numTraces = numHosts;
+
 
   print "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
   print "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\" \"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd\">";
