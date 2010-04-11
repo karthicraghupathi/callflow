@@ -311,7 +311,7 @@ fi
 awk -f $TMPDIR/callflow.awk.$PPID $DESTDIR/callflow.short > $DESTDIR/callflow.svg
 
 # Remove temporary files
-#\rm $TMPDIR/callflow.*.$PPID
+\rm $TMPDIR/callflow.*.$PPID
 
 # Check to see if java and the batik rasterizer are installed
 which java 2>&1 > /dev/null
