@@ -1,5 +1,5 @@
 #!/bin/bash
-
+###
 ###  CallFlow diagram generator
 ###
 ###  Usage:  callflow.sh capture-file | -t text-input file
@@ -13,12 +13,12 @@
 # Variables
 ##################################
 SETUPDIR="/usr/share/callflow";
-DESTDIR="./out"; #default
 TMPDIR="/tmp";
 keepSL=0 # do not keep cap.short and cap.long files
 removeDF=0; # do not remove Duplicate Frames
 sessionID=0; # do not use session ID
 order=0; # do not build order file
+noAuto=0; # do not take into account flows from and to the same element (rounded flows)
 
 ##################################
 # Check configuration files :
@@ -91,6 +91,7 @@ do
 		echo "  -s, add a session ID to Sequence Lines in FILE/callflow.long"
 		echo "      This option needs a session file in current folder or"
 		echo "      in the SETUP folder (example of session file contents: 'Call-Id:')."
+		echo "  -n, prevent flows from and to the same equipment to be represented."
 
 		exit 0;
 		;;
@@ -127,6 +128,11 @@ do
 		removeSL=-r;
 
 		;;
+		-n)
+		#We want to disable auto flows (From and To the same equipment)
+		noAuto=1;
+		echo "Flows from and to the same equipment will not be shown"
+		;;
      *)
 		#inputfile is a cap-file
 		#no options
@@ -151,7 +157,8 @@ fi
 DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
 mkdir -p $DESTDIR
 # Copy cap file into destdir
-cp $inputfile $DESTDIR/callflow-source.cap
+TRACEFILE=$(basename $inputfile)
+cp $inputfile $DESTDIR/$TRACEFILE
 
 # if we do want to build new short and long file
 if [ $keepSL = 0 ]; then
@@ -211,7 +218,6 @@ fi
 ##################################
 
 if [ $removeDF = 1 ]; then
-  DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
   if [ -d $DESTDIR/frames ]; then
     echo "Removing Duplicates Frames"
   else
@@ -241,9 +247,8 @@ mkdir -p $DESTDIR/frames
 awk -f $SETUPDIR/awk-scripts/long2html.awk -v destDir=$DESTDIR < $DESTDIR/callflow.long
 
 # Compute nodes
-awk -f $SETUPDIR/awk-scripts/getnodes.awk < $DESTDIR/callflow.short > $TMPDIR/callflow.auto-nodelist.$PPID
-sort $TMPDIR/callflow.auto-nodelist.$PPID > $TMPDIR/callflow.auto-sortednodes.$PPID
-uniq $TMPDIR/callflow.auto-sortednodes.$PPID > $TMPDIR/callflow.auto-uniq.$PPID
+awk '{ if($1 != "#") { printf("%s:%s\n%s:%s\n", $2, $3, $5, $6) }}' $DESTDIR/callflow.short | 
+    sort -u > $TMPDIR/callflow.auto-uniq.$PPID
 
 # orderFile
 if [ $orderFile != none ]; then
@@ -267,13 +272,13 @@ if [ $orderFile != none ]; then
     grep -w -v -E -f $TMPDIR/callflow.order-nodes.$PPID $TMPDIR/callflow.auto-uniq-forced.$PPID >> $TMPDIR/callflow.order.$PPID
     sed "s/!f!//g" < $TMPDIR/callflow.order.$PPID > $TMPDIR/callflow.order-final.$PPID
     
-    echo Using the following order:
+    finalOrderFile=$TMPDIR/callflow.order-final.$PPID
     
-    cat $TMPDIR/callflow.order-final.$PPID
-    awk -f $SETUPDIR/awk-scripts/makevars.awk < $TMPDIR/callflow.order-final.$PPID > $TMPDIR/callflow.vars.$PPID
+    echo Using the following order:
+    cat $finalOrderFile
 else
     echo 'Warning: order file not found -- using alphabetical'
-    awk -f $SETUPDIR/awk-scripts/makevars.awk < $TMPDIR/callflow.auto-uniq.$PPID > $TMPDIR/callflow.vars.$PPID
+    finalOrderFile=$TMPDIR/callflow.auto-uniq.$PPID
 fi
 
 # titleFile
@@ -283,7 +288,7 @@ else
 	title=`basename $inputfile`;
 fi
 
-( cat $TMPDIR/callflow.vars.$PPID
+( awk -f $SETUPDIR/awk-scripts/makevars.awk $finalOrderFile
 
   echo
   # Add graph title
@@ -322,7 +327,8 @@ if [ $? == 1 ]; then
     echo 'Warning: java not found -- not running rasterizer'
 else
     # Build callflow.png
-    java -jar $SETUPDIR/batik/batik-rasterizer.jar $DESTDIR/callflow.svg
+    #java -jar $SETUPDIR/batik/batik-rasterizer.jar $DESTDIR/callflow.svg
+    bash $SETUPDIR/awk-scripts/svg2png.sh $DESTDIR/callflow.svg
 
     ( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
       echo "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
@@ -346,7 +352,7 @@ else
       echo "    <img src=\"callflow.png\" usemap=\"#callflowmap\" alt=\"Call flow sequence diagram for $inputfile\"/>"
       echo "   </p>"
       echo "   <p>"
-      echo "    <a href=\"callflow-source.cap\">callflow-source.cap</a>"
+      echo "    <a href=\"$TRACEFILE\">Trace source</a>"
       echo "   </p>"
       echo "  </div>"
       echo " </body>"
@@ -378,7 +384,7 @@ else
       echo "    <img src=\"callflow.png\" usemap=\"#callflowmap\" alt=\"Call flow sequence diagram for $inputfile\"/>"
       echo "   </p>"
       echo "   <p>"
-      echo "    <a href=\"callflow-source.cap\">callflow-source.cap</a>"
+      echo "    <a href=\"$TRACEFILE\">Trace source</a>"
       echo "   </p>"
       echo "  </div>"
       echo " </body>"

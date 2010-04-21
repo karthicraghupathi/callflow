@@ -15,7 +15,7 @@ function mkmd5sum {
 
 if [ $# -ne 3 ]
 then
-  echo Mauvais arguments $#
+  echo Bad arguments $#
   exit 1
 fi
 
@@ -39,7 +39,7 @@ for M in $(awk '{print $2}' $TMPDIR/md5sums.$$ | sort -u); do
   grep $M $TMPDIR/md5sums.$$ | head -1
 done | awk '{print $1}' | sort -n  > $TMPDIR/pckts.$$
 
-#echo Trick on callflow.short
+#echo "Trick on callflow.short (remove left spaces (left trim))"
 sed 's/^ *//' $DESTDIR/callflow.short > $TMPDIR/callflow.short.$$
 
 # Join the files

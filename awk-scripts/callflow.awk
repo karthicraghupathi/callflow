@@ -171,18 +171,20 @@ func line(x1,x2,y,output, c) {
 
     x1 = x1 * xHostSpace + leftMargin;
     x2 = x2 * xHostSpace + leftMargin;
-
-    ORS = "";
-    printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\">%d</text>\n", leftMargin/2, y, $1;
-
-    output = "";
-    for(i=7;i<=NF;i++) output = output " " $i;
-
-    gsub("SIP(/SDP|/XML|) *(Status|Request): *","", output);
-    gsub(", with session description *$"," w/SDP",output);
     if ((x1==x2) && (noAuto==1)){
-    }
+      # Do nothing
+      }
     else{
+      # Print the line
+      ORS = "";
+      printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\">%d</text>\n", leftMargin/2, y, $1;
+
+      output = "";
+      for(i=7;i<=NF;i++) output = output " " $i;
+
+      gsub("SIP(/SDP|/XML|) *(Status|Request): *","", output);
+      gsub(", with session description *$"," w/SDP",output);
+    
       line(x1,x2,y,output,c);
     }
   }

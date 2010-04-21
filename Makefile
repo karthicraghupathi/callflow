@@ -6,7 +6,6 @@ install:
 	#Copy files into /usr/share/callflow
 	@mkdir -p $(basedir)/usr/share/callflow
 	@cp -a awk-scripts/ $(basedir)/usr/share/callflow/
-	@cp -a batik/ $(basedir)/usr/share/callflow/
 	@cp -a js/ $(basedir)/usr/share/callflow/
 	@cp -a callflow $(basedir)/usr/share/callflow/
 	@cp -a AUTHORS $(basedir)/usr/share/callflow/
