@@ -8,8 +8,9 @@ Building the callflow plateform independant package
 ===================================================
 
 Prerequisites:	
-		gawk
+		(g)awk
 		tshark
+		inkscape
 
 
 Using callflow
@@ -20,7 +21,7 @@ With callflow in your path, just type
   callflow capture-file.cap
 (see below for more options)
 
-This vill produce a directory named like your capture file in your working directory (eg: if file is capture-file.cap, the directory will be capture-file).
+This will produce a directory named like your capture file in your working directory (eg: if file is capture-file.cap, the directory will be capture-file).
 In this, you will find at least:
 	- callflow.svg file, 
 	- callflow.png file, 
@@ -34,7 +35,7 @@ You may also find (depending on options chosen):
 	- callflow.long,
 	- callflow.short.
 
-You can view callflow.svg with the Adobe SVG plugin or Firefox, or you can view index*.html with any web browser.  Both the SVG file and the html file contain links into the frames directory so that you can look at the contents of the full packet frame.  All the frames have been processed to remove the IP headers, which usually aren't interesting.
+You can view callflow.svg with the Adobe SVG plugin or Firefox, or you can view index*.html with any web browser.  Both the SVG file and the html file contain links into the frames directory so that you can look at the contents of the full packet frame.  All the frames have been processed to remove the IP headers, which usually aren't that interesting.
 
 Options availables
 ==================
@@ -57,7 +58,7 @@ Usage: callflow [OPTION] FILE
 Filtering the diagram
 =====================
 
-You can create a file in the current directory called filter, or a file in the setup directory called filter which contains an tshark DISPLAY filter (as opposed to a CAPTURE filter).  You can learn more about these from the tshark man page.  A useful filter for SIP traffic is 'sip'.
+You can create a file in the current directory called filter, or a file in the setup directory called filter which contains a tshark DISPLAY filter (as opposed to a CAPTURE filter).  You can learn more about these from the tshark man page.  A useful filter for SIP traffic is 'sip'.
 
 
 Ordering the diagram
@@ -192,7 +193,7 @@ Removing Duplicate Frames
 You can remove duplicate frames from the short text-file with:
 callflow -d foo
 
-Duplicates are determined by examining each line in foo, and comparing frames/Frame<#>.html with all previously seen frames. Because we are comparing with html files, the duplicate option suppose that this html files exist.
+Duplicates are determined by examining each line in foo, and comparing frames/Frame<#>.html with all previously seen frames. Because we are comparing with html files, the duplicate option assumes that those html files exist.
 
  / \
 / ! \ To have this html file, the script must be run once without -d option.
@@ -265,7 +266,7 @@ Well, this is kind of ugly:
         IV.    write out the SVG and map file footers
 
     h.  generate callflow.png using inkscape
-    i.  generate html files (index* and frames)
+    i.  generate html index files
     i.  clean up all the /tmp files
 
 
@@ -284,3 +285,4 @@ Automatically find a "best order" for the nodes, possibly based on
 total arrow length minimization.
 
 Specify output filenames and locations on the command line.
+
