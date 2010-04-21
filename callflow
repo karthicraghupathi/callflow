@@ -18,7 +18,7 @@ keepSL=0 # do not keep cap.short and cap.long files
 removeDF=0; # do not remove Duplicate Frames
 sessionID=0; # do not use session ID
 order=0; # do not build order file
-noAuto=0; # do not take into account flows from and to the same element (rounded flows)
+noLocalLoop=0; # do not take into account flows from and to the same element (rounded flows)
 
 ##################################
 # Check configuration files :
@@ -91,7 +91,7 @@ do
 		echo "  -s, add a session ID to Sequence Lines in FILE/callflow.long"
 		echo "      This option needs a session file in current folder or"
 		echo "      in the SETUP folder (example of session file contents: 'Call-Id:')."
-		echo "  -n, prevent flows from and to the same equipment to be represented."
+		echo "  -nl, prevent flows from and to the same equipment to be represented."
 
 		exit 0;
 		;;
@@ -124,13 +124,13 @@ do
     -r)
 		#inputfile is a cap-file
 		#we want to remove callflow.short and callflow.long after proceeding
-		inputfile=$2;
+		#inputfile=$2;
 		removeSL=-r;
 
 		;;
-		-n)
+		-nl)
 		#We want to disable auto flows (From and To the same equipment)
-		noAuto=1;
+		noLocalLoop=1;
 		echo "Flows from and to the same equipment will not be shown"
 		;;
      *)
@@ -303,8 +303,8 @@ fi
   echo "  bottomMargin = 50;"
   echo "  numTraces = numHosts;"
 
-  # Add noAuto to vars in order to delete self messaging
-  echo "  noAuto=\"$noAuto\";"
+  # Add noLocalLoop to vars in order to delete self messaging
+  echo "  noLocalLoop=\"$noLocalLoop\";"
   echo "  numLines = $(cat $DESTDIR/callflow.short | wc -l);"
   echo
 

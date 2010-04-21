@@ -171,7 +171,7 @@ func line(x1,x2,y,output, c) {
 
     x1 = x1 * xHostSpace + leftMargin;
     x2 = x2 * xHostSpace + leftMargin;
-    if ((x1==x2) && (noAuto==1)){
+    if ((x1==x2) && (noLocalLoop==1)){
       # Do nothing
       }
     else{
