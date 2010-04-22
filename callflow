@@ -12,7 +12,7 @@
 ##################################
 # Variables
 ##################################
-SETUPDIR="/usr/share/callflow";
+SETUPDIR="__SETUPDIR__";
 TMPDIR="/tmp";
 keepSL=0 # do not keep cap.short and cap.long files
 removeDF=0; # do not remove Duplicate Frames
@@ -225,7 +225,7 @@ if [ $removeDF = 1 ]; then
     exit 1;
   fi
   #awk -f $SETUPDIR/awk-scripts/removedups.awk -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
-  bash $SETUPDIR/awk-scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR
+  $SETUPDIR/awk-scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR
   rm $DESTDIR/callflow.short
   mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
 fi
@@ -327,8 +327,7 @@ if [ $? == 1 ]; then
     echo 'Warning: java not found -- not running rasterizer'
 else
     # Build callflow.png
-    #java -jar $SETUPDIR/batik/batik-rasterizer.jar $DESTDIR/callflow.svg
-    bash $SETUPDIR/awk-scripts/svg2png.sh $DESTDIR/callflow.svg
+    inkscape --export-dpi=90 -C --export-background=white --export-png=$DESTDIR/callflow.png $DESTDIR/callflow.svg
 
     ( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
       echo "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"

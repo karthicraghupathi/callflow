@@ -1,28 +1,46 @@
 ###  Makefile
 
+#Binaries
+ECHO ?= echo
+INSTALL ?= install
+UNINSTALL ?= rm -rf
+MKDIR ?= mkdir -p
+SED ?= sed -i -e
+
+#Variables
+prefix ?= /usr/local
+exec_prefix ?= $(prefix)
+bindir ?= $(exec_prefix)/bin
+DESTDIR ?= $(prefix)
+PROGDIR ?= /callflow
+
 .PHONY: install uninstall
 
 install:
-	#Copy files into /usr/share/callflow
-	@mkdir -p $(basedir)/usr/share/callflow
-	@cp -a awk-scripts/ $(basedir)/usr/share/callflow/
-	@cp -a js/ $(basedir)/usr/share/callflow/
-	@cp -a callflow $(basedir)/usr/share/callflow/
-	@cp -a AUTHORS $(basedir)/usr/share/callflow/
-	@cp -a README $(basedir)/usr/share/callflow/
-	@cp -a LICENSE $(basedir)/usr/share/callflow/
+	#Copy files into $(DESTDIR)$(PROGDIR)
+	@$(MKDIR) $(DESTDIR)$(PROGDIR)
+	@$(MKDIR) $(DESTDIR)$(PROGDIR)/awk-scripts
+	@$(MKDIR) $(DESTDIR)$(PROGDIR)/js
+	@$(INSTALL) awk-scripts/* $(DESTDIR)$(PROGDIR)/awk-scripts
+	@$(INSTALL) js/* -m 644 $(DESTDIR)$(PROGDIR)/js
+	@$(INSTALL) -m 644 AUTHORS $(DESTDIR)$(PROGDIR)/AUTHORS
+	@$(INSTALL) -m 644 README $(DESTDIR)$(PROGDIR)/
+	@$(INSTALL) -m 644 LICENSE $(DESTDIR)$(PROGDIR)/
 	
-	#Create symlinks for callflow into /usr/bin
-	@-ln -s $(basedir)/usr/share/callflow/callflow $(basedir)/usr/bin/callflow 2>&1
+	#Install callflow bin into $(DESTDIR)/bin/ directory
+	@$(INSTALL) -m 755 callflow $(bindir)/
+	
+	#Change __SETUPDIR__ variable with $(DESTDIR)$(PROGDIR)
+	@$(SED) "s;__SETUPDIR__;$(DESTDIR)$(PROGDIR);" $(bindir)/callflow
 	
 	# --> DONE !
 	
 uninstall:
-	#Remove directory /usr/share/callflow
-	@rm -rf $(basedir)/usr/share/callflow 2>&1
+	#Remove directory $(DESTDIR)$(PROGDIR)
+	@$(UNINSTALL) $(DESTDIR)$(PROGDIR) 2>&1
 	
-	#Remove symlinks
-	@rm -f $(basedir)/usr/bin/callflow 2>&1
+	#Remove callflow from $(bindir)
+	@$(UNINSTALL) $(bindir)/callflow 2>&1
 	
 	# --> DONE !
 
