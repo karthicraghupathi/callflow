@@ -1,69 +1,64 @@
-CallFlow Sequence Diagram Generator (updated on 2010/04/21)
-===================================
+.TH callflow 1 "2010/04/22" callflow "callflow - Sequence Diagram Generator"
 
+
+.SH NAME
+callflow - Sequence Diagram Generator
+
+.SH SYNOPSIS
+callflow [-t] [-d] [-h] [-o] [-s] [-nl] capture-file.cap
+
+.SH DESCRIPTION
 This is a collection of awk and shell scripts that will take a capture file that can be read by tshark and produce a callflow sequence diagram.  The scripts have been primarily tested with SIP call flows, but should work for other network traffic as well.
 
 
-Building the callflow plateform independant package
-===================================================
-
-Prerequisites:	
-		(g)awk
-		tshark
-		inkscape
-
-
-Using callflow
-==============
-
+.SS Using callflow
 With callflow in your path, just type:
-
   callflow capture-file.cap
 (see below for more options)
 
 This will produce a directory named like your capture file in your working directory (eg: if file is capture-file.cap, the directory will be capture-file).
 In this, you will find at least:
-	- callflow.svg file, 
-	- callflow.png file, 
-	- index.html file, 
-	- index_dynamic.html file,
-	- index_with_frames.html file,
-	- graph.html file,
-	- frames directory with FrameX.html files inside.
+  -callflow.svg file
+  -callflow.png file
+  -index.html file
+  -index_dynamic.html file,
+  -index_with_frames.html file,
+  -graph.html file,
+  -frames directory with FrameX.html files inside.
 
 You may also find (depending on options chosen):
-	- callflow.long,
-	- callflow.short.
+  -callflow.long,
+  -callflow.short.
 
 You can view callflow.svg with the Adobe SVG plugin or Firefox, or you can view index*.html with any web browser.  Both the SVG file and the html file contain links into the frames directory so that you can look at the contents of the full packet frame.  All the frames have been processed to remove the IP headers, which usually aren't that interesting.
 
-Options availables
-==================
-Usage: callflow [OPTION] FILE
-  -h, print this help message
-  -o, create an order file with the nodes in FILE.cap
-      (Don't forget to redirect output in another file. 
-      Exemple of use: callflow -o capture.cap > order)
-  -t, use callflow and callflow.long files from FILE directory.
-      note 1 - if -t and -d are used, only -t is executed.
-      note 2 - this option sould not be selected on the first run.
-  -d, remove duplicate frames while computing.
-      This option should not be selected on the first run.
-  -s, add a session ID to Sequence Lines in FILE/callflow.long
-      This option needs a session file in current folder or
-      in the SETUP folder (example of session file contents: 'Call-Id:').
-  -nl, prevent flows from and to the same equipment to be represented.
+.SH OPTIONS
+
+.B -h
+print this help message
+
+.B -o
+create an order file with the nodes in FILE.cap (Don't forget to redirect output in another file. Exemple of use: callflow -o capture.cap > order)
+
+.B -t
+use callflow and callflow.long files from FILE directory. Note 1 - if -t and -d are used, only -t is executed. Note 2 - this option sould not be selected on the first run.
+  
+.B -d
+remove duplicate frames while computing. This option should not be selected on the first run.
+
+.B -s
+add a session ID to Sequence Lines in FILE/callflow.long. This option needs a session file in current folder or in the SETUP folder (example of session file contents: 'Call-Id:').
+
+.B -nl
+prevent flows from and to the same equipment to be represented.
 
 
-Filtering the diagram
-=====================
 
+.SS Filtering the diagram
 You can create a file in the current directory called filter, or a file in the setup directory called filter which contains a tshark DISPLAY filter (as opposed to a CAPTURE filter).  You can learn more about these from the tshark man page.  A useful filter for SIP traffic is 'sip'.
 
 
-Ordering the diagram
-====================
-
+.SS Ordering the diagram
 If you know what nodes in your network are logically connected, you can have the diagram ordered in a meaningful way.  Just create a file called order in your current directory or in the setup directory with the order of your network nodes, one per line.  You must use the exact name or IP address that appears in your capture file in the form: <host/ip>:<port>, or use a regular expression that resolves to that name. Using a regular expression can be useful to collapse several nodes in to one logical node.
 
 You can generate an order file with:
@@ -75,52 +70,41 @@ The format of the order file is as follows:
 Network nodes that are in your filtered capture file but not in your order file will appear on the right of the diagram, and nodes that are in your order file but not in the filtered capture will not be present in the diagram.
 
 
-Labeling the diagram
-====================
-
+.SS Labeling the diagram
 First, you need to create on order file, as above.  Anything that appears after the node name or IP will be used as the label in the diagram.  Otherwise, the node name or IP will be used as the label.
 
 
-Forcing a node into the diagram
-===============================
-
+.SS Forcing a node into the diagram
 If you would like a node that has no traffic to appear in the diagram, put the string "!f!" as part of its label in the order file. 
 The string "!f!" will be edited out of the label.  This can be useful to show the position of a firewall in a trace, or to illustrate a proxy that does not receive traffic.
 Make sure that the forced node does not resolve to a regex pattern that another node will match! (ie. don't use ".")
 
-Example order file
-------------------
-
-10.250.250.101:(1917|5060) Pingtel
-10.250.250.201:5060 VOCAL-UAMS
-10.250.250.201:5070 VOCAL-RS
-10.250.250.201:5065 VOCAL-GWMS
-firewall !f!Firewall
-10.250.250.104:5060 PSTN-GW
+.I Example order file
+ 10.250.250.101:(1917|5060) Pingtel
+ 10.250.250.201:5060 VOCAL-UAMS
+ 10.250.250.201:5070 VOCAL-RS
+ 10.250.250.201:5065 VOCAL-GWMS
+ firewall !f!Firewall
+ 10.250.250.104:5060 PSTN-GW
 
 
-Titling the diagram
-===================
-
+.SS Titling the diagram
 You can create a file in the current directory called title, or a file in the setup directory (eg : /usr/share/callflow/) called title which contains text to be displayed as a title to the diagram. 
 If neither of these files exist, then a title text will be generated based upon basename of the capture file name.
 
 
-Removing Duplicate Frames
-=========================
-
+.SS Removing Duplicate Frames
 You can remove duplicate frames from the short text-file with:
 callflow -d foo
 
 Duplicates are determined by examining each line in foo, and comparing frames/Frame<#>.html with all previously seen frames. Because we are comparing with html files, the duplicate option assumes that those html files exist.
 
- / \
-/ ! \ To have this html file, the script must be run once without -d option.
------
+  / \\
+ / ! \\ To have this html file, the script must be run once without -d option.
+ -----
 
 
-Adding "Session ID" to Sequence Lines
-=====================================
+.SS Adding "Session ID" to Sequence Lines
 You can have callflow to colorate every Frame based on a specific pattern. For instance, it can be usefull when all SIP packets contains a header "Call-Id:" (case insensitive). This header is followed by an identifier that indicates which "SIP dialog" this packet belongs to. Callflow can use the same color for all flows that have the same Call-Id.
 
 To have callflow to colorate, you have to create a file at either SETUPDIR/session or ./session with the contents:
@@ -130,9 +114,7 @@ and run callflow with:
 callflow -s capture-file.cap;
 
 
-Tweaking ~/.wireshark/preferences for frames/Frame*.html
-=======================================================
-
+.SH TWIKING TSHARK PREFERENCE
 You can change the level of detail provided in the "Internet Protocol", "User Datagram Protocol", and "Transmission Control Protocol" sections of the detailed frames/Frame*.html pages by tweaking the following entries in your ~/.wireshark/preferences:
 
 ip.ip_summary_in_tree
@@ -142,105 +124,100 @@ udp.udp_summary_in_tree
 If any of these items are set to TRUE, then only the summary line will appear in frames/Frame*.html. Otherwise, the gory details will be displayed.
 
 
-Creating diagrams manually
-==========================
-
+.SH CREATING DIAGRAM MANUALY
 You can manually create a diagram by creating two text files, foo.short and foo.long.
 
 When you run callflow, you can take the output files callflow.short and callflow.long as a starting point.
 
 The first file (.short) contains the trace information, one transaction per line, in the following format:
 
-<frame #> <src node> <src port> <ignored or session> <dest node> <dest port> <description>
+ <frame #> <src node> <src port> <ignored or session> <dest node> <dest port> <description>
 
-For example:
+.I For example:
 
-1 Alice 1000 -> Bob 2000 Alice sends Bob an Invite
-2 Bob 2000 -> Alice 1000 Bob sends Alice a 200
-etc.
+ 1 Alice 1000 -> Bob 2000 Alice sends Bob an Invite
+ 2 Bob 2000 -> Alice 1000 Bob sends Alice a 200
+ etc.
 
- / \
-/ ! \ It is important that there is *no blank lines* in the short text-file.
------
+  / \\
+ / ! \\ It is important that there is *no blank lines* in the short text-file.
+ -----
+
+
 
 If this file is called foo.short, you can create another file called foo.long with longer descriptions of each transaction, in the following format:
 
-Frame #
-Descriptive information
-goes here
+ Frame #
+ Descriptive information
+ goes here
 
-Frame #
-Description of another frame
+ Frame #
+ Description of another frame
 
 
-For example:
+.I For example:
 
-Frame 1
-Via: SIP/2.0/UDP 192.168.1.112:5060
-From: "C7960 (x1201)" <sip:1201@192.168.1.42>;tag=aab70900293102348a-7008
-To: <sip:1020@192.168.1.42>
+ Frame 1
+ Via: SIP/2.0/UDP 192.168.1.112:5060
+ From: "C7960 (x1201)" <sip:1201@192.168.1.42>;tag=aab70900293102348a-7008
+ To: <sip:1020@192.168.1.42>
 
-Frame 2
-To: <sip:1020@192.168.1.42:5060>;tag=53d20696
-From: "C7960 (x1201)"<sip:1201@192.168.1.42:5060>;tag=aab70900293102348a-7008
-Call-ID: aab70900-2fe3102-3ae-2b27@192.168.1.112
+ Frame 2
+ To: <sip:1020@192.168.1.42:5060>;tag=53d20696
+ From: "C7960 (x1201)"<sip:1201@192.168.1.42:5060>;tag=aab70900293102348a-7008
+ Call-ID: aab70900-2fe3102-3ae-2b27@192.168.1.112
 
-etc.
+ etc.
 
 
 To process your text files, type the following:
-  
-   callflow -t capture-file.cap
+  callflow -t capture-file.cap
 
 
-Adding Comments
-===============
+.SH ADDING COMMENTS
 You can add a comments to your diagram by adding a line that start with "# " to short text-file. If in the middle of the line there is a " ! " token, then the comment becomes a hyper-link with what precedes the " ! " is the text that is displayed, and what comes after is the link to be followed when a user clicks on the text.
 
-For example:
+.I For example:
 
-# Click here for original wireshark capture file ! mycapture.cap
-# This is a comment
-1 Alice 1000 -> Bob 2000 Alice sends Bob an Invite
-2 Bob 2000 -> Alice 1000 Bob sends Alice a 200
-etc.
+ # Click here for original wireshark capture file ! mycapture.cap
+ # This is a comment
+ 1 Alice 1000 -> Bob 2000 Alice sends Bob an Invite
+ 2 Bob 2000 -> Alice 1000 Bob sends Alice a 200
+ etc.
 
- / \
-/ ! \ It is important that there is *no blank lines* in the short text-file.
------
+  / \\
+ / ! \\ It is important that there be *no blank lines* in the short text-file.
+ -----
 
 
-Example
-=======
+.SH Example
+.SS Create a filter file:
+ $ echo "sip" > filter
 
-Create a filter file:
-$ echo "sip" > filter
+.SS Create a title file:
+ $ echo "This is a sample capture" > title
 
-Create a title file:
-$ echo "This is a sample capture" > title
+.SS Create an order file:
+ $ callflow -o mycapture.cap > order
+ (edit order file as needed)
 
-Create an order file:
-$ callflow -o mycapture.cap > order
-(edit order file as needed)
+.SS Generate initial diagram:
+ $ callflow mycapture.cap
 
-Generate initial diagram:
-$ callflow mycapture.cap
 
+.SS Remove retransmitted SIP packets:
 We will now use "mycapture/callflow.short" and "mycapture/callflow.long" text files for further processing:
-Remove retransmitted SIP packets:
-$ callflow -d mycapture.cap
+ $ callflow -d mycapture.cap
 
-Add "Session ID" to Sequence Lines:
-$ echo "Call-Id:" > session
-$ callflow -s mycapture.cap
+.SS Add "Session ID" to Sequence Lines:
+ $ echo "Call-Id:" > session
+ $ callflow -s mycapture.cap
 
-Add any desired comments to callflow, then regenerate diagram (repeat as needed):
-$ callflow -t mycapture.cap
+.SS Add any desired comments to callflow, then regenerate diagram (repeat as needed):
+ $ callflow -t mycapture.cap
 
 
-How it works
-============
-
+.SH HOW IT WORKS
 Well, this is kind of ugly:
 
     a.  check for order, session, title, filter files
@@ -261,9 +238,7 @@ Well, this is kind of ugly:
     i.  clean up all the /tmp files
 
 
-TO DO
-=====
-
+.SH TO DO
 It would be much nicer to take the tshark filtered output and build an intermediate XML representation of it.  Then use XSLT to transform it into the SVG file.  This way you could write up illustrative sequence diagrams more easily and make use of more tools that can manipulate XML.
 
 Write port numbers at the ends of each arrow in an unobtrusive fashion.
@@ -273,6 +248,7 @@ Automatically find a "best order" for the nodes, possibly based on total arrow l
 Specify output filenames and locations on the command line.
 
 
-Authors
-=======
-see AUTHORS file provided with this package.
+.SH AUTHORS
+Man page created by Arnaud Morin <arnaud.morin@gmail.com>.
+
+See AUTHORS file provided with this package to see all project contributors.
