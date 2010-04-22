@@ -44,7 +44,7 @@ Usage: callflow [OPTION] FILE
   -o, create an order file with the nodes in FILE.cap
       (Don't forget to redirect output in another file. 
       Exemple of use: callflow -o capture.cap > order)
-  -t, use cap.short and cap.long files.
+  -t, use callflow and callflow.long files from FILE directory.
       note 1 - if -t and -d are used, only -t is executed.
       note 2 - this option sould not be selected on the first run.
   -d, remove duplicate frames while computing.
@@ -106,6 +106,30 @@ You can create a file in the current directory called title, or a file in the se
 If neither of these files exist, then a title text will be generated based upon basename of the capture file name.
 
 
+Removing Duplicate Frames
+=========================
+
+You can remove duplicate frames from the short text-file with:
+callflow -d foo
+
+Duplicates are determined by examining each line in foo, and comparing frames/Frame<#>.html with all previously seen frames. Because we are comparing with html files, the duplicate option assumes that those html files exist.
+
+ / \
+/ ! \ To have this html file, the script must be run once without -d option.
+-----
+
+
+Adding "Session ID" to Sequence Lines
+=====================================
+You can have callflow to colorate every Frame based on a specific pattern. For instance, it can be usefull when all SIP packets contains a header "Call-Id:" (case insensitive). This header is followed by an identifier that indicates which "SIP dialog" this packet belongs to. Callflow can use the same color for all flows that have the same Call-Id.
+
+To have callflow to colorate, you have to create a file at either SETUPDIR/session or ./session with the contents:
+Call-Id:
+
+and run callflow with:
+callflow -s capture-file.cap;
+
+
 Tweaking ~/.wireshark/preferences for frames/Frame*.html
 =======================================================
 
@@ -123,10 +147,9 @@ Creating diagrams manually
 
 You can manually create a diagram by creating two text files, foo.short and foo.long.
 
-When you run callflow, you can take the output files callflow.short and callflow.long as a starting point. Just rename callflow.short so it doesn't have the .short extension.
+When you run callflow, you can take the output files callflow.short and callflow.long as a starting point.
 
-The first file contains the trace information, one
-transaction per line, in the following format:
+The first file (.short) contains the trace information, one transaction per line, in the following format:
 
 <frame #> <src node> <src port> <ignored or session> <dest node> <dest port> <description>
 
@@ -140,7 +163,7 @@ etc.
 / ! \ It is important that there be *no blank lines* in the short text-file.
 -----
 
-If this file is called foo, you can create another file called foo.long with longer descriptions of each transaction, in the following format:
+If this file is called foo.short, you can create another file called foo.long with longer descriptions of each transaction, in the following format:
 
 Frame #
 Descriptive information
@@ -187,44 +210,14 @@ etc.
 -----
 
 
-Removing Duplicate Frames
-=========================
-
-You can remove duplicate frames from the short text-file with:
-callflow -d foo
-
-Duplicates are determined by examining each line in foo, and comparing frames/Frame<#>.html with all previously seen frames. Because we are comparing with html files, the duplicate option assumes that those html files exist.
-
- / \
-/ ! \ To have this html file, the script must be run once without -d option.
------
-
-Adding "Session ID" to Sequence Lines
-=====================================
-You can have callflow add a "Session ID" to every Frame that contains a pattern.
-For instances, all SIP packets contains a header "Call-Id:" (case insensitive)
-followed by an identifier that indicates which "SIP dialog" this packet belongs to
-
-To have callflow create to the left of every sequence line that matches "Call-Id:"
-a "Session ID", create a file at either SETUPDIR/session or ./session with the contents:
-
-Call-Id:
-
-and run callflow with:
-callflow -s capture-file.cap;
-
-Sample session
---------------
+Example
+=======
 
 Create a filter file:
-$ cat > filter << "EOF"
-> sip
-> EOF
+$ echo "sip" > filter
 
 Create a title file:
-$ cat > title << "EOF"
-> This is a sample capture
-> EOF
+$ echo "This is a sample capture" > title
 
 Create an order file:
 $ callflow -o mycapture.cap > order
@@ -233,14 +226,12 @@ $ callflow -o mycapture.cap > order
 Generate initial diagram:
 $ callflow mycapture.cap
 
-We will now use "mycapture/callflow.short" and "mycapture/callflow.long" for further processing:
+We will now use "mycapture/callflow.short" and "mycapture/callflow.long" text files for further processing:
 Remove retransmitted SIP packets:
 $ callflow -d mycapture.cap
 
 Add "Session ID" to Sequence Lines:
-$ cat > session << "EOF"
-> Call-Id:
-> EOF
+$ echo "Call-Id:" > session << "EOF"
 $ callflow -s mycapture.cap
 
 Add any desired comments to callflow, then regenerate diagram (repeat as needed):
@@ -273,16 +264,15 @@ Well, this is kind of ugly:
 TO DO
 =====
 
-It would be much nicer to take the tshark filtered output and
-build an intermediate XML representation of it.  Then use XSLT
-to transform it into the SVG file.  This way you could write up
-illustrative sequence diagrams more easily and make use of more
-tools that can manipulate XML.
+It would be much nicer to take the tshark filtered output and build an intermediate XML representation of it.  Then use XSLT to transform it into the SVG file.  This way you could write up illustrative sequence diagrams more easily and make use of more tools that can manipulate XML.
 
 Write port numbers at the ends of each arrow in an unobtrusive fashion.
 
-Automatically find a "best order" for the nodes, possibly based on
-total arrow length minimization.
+Automatically find a "best order" for the nodes, possibly based on total arrow length minimization.
 
 Specify output filenames and locations on the command line.
 
+
+Authors
+=======
+see AUTHORS file provided with this package.
