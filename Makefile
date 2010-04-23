@@ -27,10 +27,11 @@ clean:
 	#Nothing to do
 	
 install: install_man install_conf
-	#Copy files into $(DESTDIR)$(prefix)$(PROGDIR)
+	#Copy files
 	@$(MKDIR) $(DESTDIR)$(prefix)$(PROGDIR)
 	@$(MKDIR) $(DESTDIR)$(prefix)$(PROGDIR)/awk-scripts
 	@$(MKDIR) $(DESTDIR)$(prefix)$(PROGDIR)/js
+	@$(MKDIR) $(DESTDIR)$(bindir)
 	@$(INSTALL) awk-scripts/* $(DESTDIR)$(prefix)$(PROGDIR)/awk-scripts
 	@$(INSTALL) js/* -m 644 $(DESTDIR)$(prefix)$(PROGDIR)/js
 	@$(INSTALL) -m 644 AUTHORS $(DESTDIR)$(prefix)$(PROGDIR)/AUTHORS
