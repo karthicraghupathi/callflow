@@ -6,14 +6,13 @@
 ###
 ###  Output: $DESTDIR/callflow.svg, $DESTDIR/callflow.png, $DESTDIR/index.html, $DESTDIR/frames/frame*.html
 ###
-###  Files:  order, filter, session, $SETUPDIR/order, $SETUPDIR/filter, $SETUPDIR/session
+###  Files:  order, filter, session, $CONFDIR/order, $CONFDIR/filter, $CONFDIR/session
 ###
 
 ##################################
 # Variables
 ##################################
-SETUPDIR="__SETUPDIR__";
-TMPDIR="/tmp";
+CONFDIR="__CONFDIR__";
 keepSL=0 # do not keep cap.short and cap.long files
 removeDF=0; # do not remove Duplicate Frames
 sessionID=0; # do not use session ID
@@ -22,44 +21,52 @@ noLocalLoop=0; # do not take into account flows from and to the same element (ro
 
 ##################################
 # Check configuration files :
-#   session, filter, order, title, colors
+#   callflow.cfg, session, filter, order, title, colors
 ##################################
+if [ -f $CONFDIR/callflow.cfg ]; then
+    . $CONFDIR/callflow.cfg;
+else
+    # Basic conf
+    SETUPDIR="/usr/local/callflow"; 
+    TMPDIR="/tmp";
+fi
+
 if [ -f session ]; then
     sessionFile=session;
-elif [ -f $SETUPDIR/session ]; then
-    sessionFile=$SETUPDIR/session;
+elif [ -f $CONFDIR/session ]; then
+    sessionFile=$CONFDIR/session;
 else
     sessionFile=none;
 fi
 
 if [ -f filter ]; then
     filterFile=filter;
-elif [ -f $SETUPDIR/filter ]; then
-    filterFile=$SETUPDIR/filter;
+elif [ -f $CONFDIR/filter ]; then
+    filterFile=$CONFDIR/filter;
 else
     filterFile=none;
 fi
 
 if [ -f order ]; then
     orderFile=order;
-elif [ -f $SETUPDIR/order ]; then
-    orderFile=$SETUPDIR/order;
+elif [ -f $CONFDIR/order ]; then
+    orderFile=$CONFDIR/order;
 else
     orderFile=none;
 fi
 
 if [ -f title ]; then
     titleFile=title;
-elif [ -f $SETUPDIR/title ]; then
-    titleFile=$SETUPDIR/title;
+elif [ -f $CONFDIR/title ]; then
+    titleFile=$CONFDIR/title;
 else
     titleFile=none;
 fi
 
 if [ -f colors ]; then
     colorFile=colors
-elif [ -f $SETUPDIR/colors ]; then
-    colorFile=$SETUPDIR/colors
+elif [ -f $CONFDIR/colors ]; then
+    colorFile=$CONFDIR/colors
 else
     colorFile=colors
     for Color in black orange sienna red green purple chocolate olivedrab darkred \
@@ -108,7 +115,7 @@ do
                 ;;
     -s)
 		if [ $sessionFile = none ]; then
-		  echo "You must create either $SETUPDIR/session or ./session to use -s option";
+		  echo "You must create either $CONFDIR/session or ./session to use -s option";
 		  exit 1;
 		fi
 		#we want to add "Session ID"

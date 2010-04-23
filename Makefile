@@ -16,13 +16,14 @@ man1dir ?= $(mandir)/man1
 
 DESTDIR ?= $(prefix)
 PROGDIR ?= /callflow
+CONFDIR ?= /etc/callflow
 
 .PHONY: install uninstall
 
 clean:
 	#Nothing to do
 	
-install: install_man
+install: install_man install_conf
 	#Copy files into $(DESTDIR)$(PROGDIR)
 	@$(MKDIR) $(DESTDIR)$(PROGDIR)
 	@$(MKDIR) $(DESTDIR)$(PROGDIR)/awk-scripts
@@ -36,14 +37,20 @@ install: install_man
 	#Install callflow bin into $(DESTDIR)/bin/ directory
 	@$(INSTALL) -m 755 callflow $(bindir)/
 	
-	#Change __SETUPDIR__ variable with $(DESTDIR)$(PROGDIR)
-	@$(SED) "s;__SETUPDIR__;$(DESTDIR)$(PROGDIR);" $(bindir)/callflow
+	#Change __CONFDIR__ variable with $(CONFDIR)
+	@$(SED) "s;__CONFDIR__;$(CONFDIR);" $(bindir)/callflow
 	
 	# --> DONE !
 
 install_man:
 	#Install man page
+	@$(MKDIR) $(man1dir)
 	@$(INSTALL) -m 644 man/callflow.1.gz $(man1dir)/callflow.1.gz
+	
+install_conf:
+	#Install conf files
+	@$(MKDIR) $(CONFDIR)
+	@$(INSTALL) -m 644 conf/callflow.cfg $(CONFDIR)/callflow.cfg
 
 uninstall:
 	#Remove directory $(DESTDIR)$(PROGDIR)
@@ -54,6 +61,9 @@ uninstall:
 	
 	#Remove man page
 	@$(UNINSTALL) $(man1dir)/callflow.1.gz
+	
+	#Remove conf files
+	@$(UNINSTALL) $(CONFDIR)
 	
 	# --> DONE !
 
