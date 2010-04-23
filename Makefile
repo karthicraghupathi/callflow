@@ -7,15 +7,19 @@ UNINSTALL ?= rm -rf
 MKDIR ?= mkdir -p
 SED ?= sed -i -e
 
-#Variables
+# GNU respectfull variables
 prefix ?= /usr/local
 exec_prefix ?= $(prefix)
 bindir ?= $(exec_prefix)/bin
 mandir ?= $(prefix)/share/man
 man1dir ?= $(mandir)/man1
 
+# DESTDIR
 DESTDIR ?= $(prefix)
+
+# Callflow personnal variables. SETUPDIR is used for DEBIAN packages
 PROGDIR ?= /callflow
+SETUPDIR ?= $(DESTDIR)$(PROGDIR)
 CONFDIR ?= /etc/callflow
 
 .PHONY: install uninstall
@@ -37,8 +41,11 @@ install: install_man install_conf
 	#Install callflow bin into $(DESTDIR)/bin/ directory
 	@$(INSTALL) -m 755 callflow $(bindir)/
 	
-	#Change __CONFDIR__ variable with $(CONFDIR)
-	@$(SED) "s;__CONFDIR__;$(CONFDIR);" $(bindir)/callflow
+	#Change CONFDIR variable with $(CONFDIR) into $(bindir)/callflow
+	@$(SED) "s#/etc/callflow#$(CONFDIR)#" $(bindir)/callflow
+	
+	#Change SETUPDIR variable with $(SETUPDIR) into $(CONFDIR)/callflow.cfg
+	@$(SED) "s#/usr/local/callflow#$(SETUPDIR)#" $(CONFDIR)/callflow.cfg
 	
 	# --> DONE !
 

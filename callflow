@@ -12,7 +12,7 @@
 ##################################
 # Variables
 ##################################
-CONFDIR="__CONFDIR__";
+CONFDIR="/etc/callflow";
 keepSL=0 # do not keep cap.short and cap.long files
 removeDF=0; # do not remove Duplicate Frames
 sessionID=0; # do not use session ID
