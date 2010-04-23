@@ -43,7 +43,7 @@ install: install_man
 
 install_man:
 	#Install man page
-	@$(INSTALL) -m 644 README.man $(man1dir)/callflow.1.gz
+	@$(INSTALL) -m 644 man/callflow.1.gz $(man1dir)/callflow.1.gz
 
 uninstall:
 	#Remove directory $(DESTDIR)$(PROGDIR)
