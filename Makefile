@@ -19,7 +19,10 @@ PROGDIR ?= /callflow
 
 .PHONY: install uninstall
 
-install:
+clean:
+	#Nothing to do
+	
+install: install_man
 	#Copy files into $(DESTDIR)$(PROGDIR)
 	@$(MKDIR) $(DESTDIR)$(PROGDIR)
 	@$(MKDIR) $(DESTDIR)$(PROGDIR)/awk-scripts
@@ -36,11 +39,12 @@ install:
 	#Change __SETUPDIR__ variable with $(DESTDIR)$(PROGDIR)
 	@$(SED) "s;__SETUPDIR__;$(DESTDIR)$(PROGDIR);" $(bindir)/callflow
 	
+	# --> DONE !
+
+install_man:
 	#Install man page
 	@$(INSTALL) -m 644 README.man $(man1dir)/callflow.1.gz
-	
-	# --> DONE !
-	
+
 uninstall:
 	#Remove directory $(DESTDIR)$(PROGDIR)
 	@$(UNINSTALL) $(DESTDIR)$(PROGDIR) 2>&1
@@ -52,4 +56,5 @@ uninstall:
 	@$(UNINSTALL) $(man1dir)/callflow.1.gz
 	
 	# --> DONE !
+
 
