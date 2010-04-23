@@ -11,6 +11,9 @@ SED ?= sed -i -e
 prefix ?= /usr/local
 exec_prefix ?= $(prefix)
 bindir ?= $(exec_prefix)/bin
+mandir ?= $(prefix)/share/man
+man1dir ?= $(mandir)/man1
+
 DESTDIR ?= $(prefix)
 PROGDIR ?= /callflow
 
@@ -33,6 +36,9 @@ install:
 	#Change __SETUPDIR__ variable with $(DESTDIR)$(PROGDIR)
 	@$(SED) "s;__SETUPDIR__;$(DESTDIR)$(PROGDIR);" $(bindir)/callflow
 	
+	#Install man page
+	@$(INSTALL) -m 644 README.man $(man1dir)/callflow.1.gz
+	
 	# --> DONE !
 	
 uninstall:
@@ -41,6 +47,9 @@ uninstall:
 	
 	#Remove callflow from $(bindir)
 	@$(UNINSTALL) $(bindir)/callflow 2>&1
+	
+	#Remove man page
+	@$(UNINSTALL) $(man1dir)/callflow.1.gz
 	
 	# --> DONE !
 
