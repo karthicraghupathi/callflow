@@ -137,10 +137,19 @@ do
 		removeSL=-r;
 
 		;;
-		-nl)
+    -nl)
 		#We want to disable auto flows (From and To the same equipment)
 		noLocalLoop=1;
 		echo "Flows from and to the same equipment will not be shown"
+		;;
+	-v)
+		#Print version number and exit
+		VersionDate=$(echo $VersionSVN | awk '{print $4}');
+		VersionDate=$(echo $VersionDate | awk 'BEGIN{FS="-"};{print $1$2$3}');
+		VersionRev=$(echo $VersionSVN | awk '{print $3}');
+		Version=$(echo $VersionDate"."$VersionRev);
+		echo "Version number: $Version";
+		exit 0;
 		;;
      *)
 		#inputfile is a cap-file
