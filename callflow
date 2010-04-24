@@ -18,7 +18,7 @@ removeDF=0; # do not remove Duplicate Frames
 sessionID=0; # do not use session ID
 order=0; # do not build order file
 noLocalLoop=0; # do not take into account flows from and to the same element (rounded flows)
-Version=$Date$;
+VersionSVN="\$Id: 2010-04-24 16:45:59 +0200 (sam. 24 avril 2010) $"; #DO NOT EDIT THIS LINE BY HAND, DATE IS AUTOMATICALLY ADDED BY SUBVERSION
 
 ##################################
 # Check configuration files :
@@ -100,6 +100,7 @@ do
 		echo "      This option needs a session file in current folder or"
 		echo "      in the SETUP folder (example of session file contents: 'Call-Id:')."
 		echo "  -nl, prevent flows from and to the same equipment to be represented."
+		echo "  -v, print version number"
 
 		exit 0;
 		;;
