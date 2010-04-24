@@ -90,7 +90,7 @@ do
 		echo "  -h, print this help message"
 		echo "  -o, create an order file with the nodes in FILE.cap"
 		echo "      (Don't forget to redirect output in another file. "
-		echo "      Exemple of use: callflow -o capture.cap > order)"
+		echo "      Example of use: callflow -o capture.cap > order)"
 		echo "  -t, use cap.short and cap.long files."
 		echo "      note 1 - if -t and -d are used, only -t is executed."
 		echo "      note 2 - this option sould not be selected on the first run."

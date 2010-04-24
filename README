@@ -43,7 +43,7 @@ Usage: callflow [OPTION] FILE
   -h, print this help message
   -o, create an order file with the nodes in FILE.cap
       (Don't forget to redirect output in another file. 
-      Exemple of use: callflow -o capture.cap > order)
+      Example of use: callflow -o capture.cap > order)
   -t, use callflow and callflow.long files from FILE directory.
       note 1 - if -t and -d are used, only -t is executed.
       note 2 - this option sould not be selected on the first run.
