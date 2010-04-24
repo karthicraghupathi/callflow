@@ -21,10 +21,10 @@ noLocalLoop=0; # do not take into account flows from and to the same element (ro
 
 ##################################
 # Check configuration files :
-#   callflow.cfg, session, filter, order, title, colors
+#   callflow.conf, session, filter, order, title, colors
 ##################################
-if [ -f $CONFDIR/callflow.cfg ]; then
-    . $CONFDIR/callflow.cfg;
+if [ -f $CONFDIR/callflow.conf ]; then
+    . $CONFDIR/callflow.conf;
 else
     # Basic conf
     SETUPDIR="/usr/local/callflow"; 

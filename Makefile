@@ -54,10 +54,10 @@ install_man:
 install_conf:
 	#Install conf files
 	@$(MKDIR) $(DESTDIR)$(CONFDIR)
-	@$(INSTALL) -m 644 conf/callflow.cfg $(DESTDIR)$(CONFDIR)/callflow.cfg
+	@$(INSTALL) conf/* $(DESTDIR)$(CONFDIR)
 	
-	#Change SETUPDIR variable with $(prefix)$(PROGDIR) into $(CONFDIR)/callflow.cfg
-	@$(SED) "s#/usr/local/callflow#$(prefix)$(PROGDIR)#" $(DESTDIR)$(CONFDIR)/callflow.cfg
+	#Change SETUPDIR variable with $(prefix)$(PROGDIR) into $(CONFDIR)/callflow.conf
+	@$(SED) "s#/usr/local/callflow#$(prefix)$(PROGDIR)#" $(DESTDIR)$(CONFDIR)/callflow.conf
 
 uninstall:
 	#Remove directory $(DESTDIR)$(PROGDIR)
