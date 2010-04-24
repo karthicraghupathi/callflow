@@ -231,8 +231,8 @@ if [ $removeDF = 1 ]; then
     echo "Please run the script without -d once in order to build $DESTDIR directory"
     exit 1;
   fi
-  #awk -f $SETUPDIR/awk-scripts/removedups.awk -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
-  $SETUPDIR/awk-scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR
+  #awk -f $SETUPDIR/scripts/removedups.awk -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
+  $SETUPDIR/scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR
   rm $DESTDIR/callflow.short
   mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
 fi
@@ -241,7 +241,7 @@ fi
 # Add session ID
 ##################################
 if [ $sessionID = 1 ]; then
-	awk -f $SETUPDIR/awk-scripts/marksession.awk -v session_token="`cat $sessionFile`" -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
+	awk -f $SETUPDIR/scripts/marksession.awk -v session_token="`cat $sessionFile`" -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
 	rm $DESTDIR/callflow.short
 	mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
 fi
@@ -251,7 +251,7 @@ fi
 ##################################
 # Create Frames
 mkdir -p $DESTDIR/frames
-awk -f $SETUPDIR/awk-scripts/long2html.awk -v destDir=$DESTDIR < $DESTDIR/callflow.long
+awk -f $SETUPDIR/scripts/long2html.awk -v destDir=$DESTDIR < $DESTDIR/callflow.long
 
 # Compute nodes
 awk '{ if($1 != "#") { printf("%s:%s\n%s:%s\n", $2, $3, $5, $6) }}' $DESTDIR/callflow.short | 
@@ -266,8 +266,8 @@ if [ $orderFile != none ]; then
     
     # prune nodes not appearing in capture file and not forced.
     grep -w -v -f $TMPDIR/callflow.auto-uniq-forced.$PPID $TMPDIR/callflow.order-nodes.$PPID > $TMPDIR/callflow.prune-candidate.$PPID
-    awk -f $SETUPDIR/awk-scripts/makevars.awk < $TMPDIR/callflow.prune-candidate.$PPID > $TMPDIR/callflow.prune-vars.$PPID
-    cat $TMPDIR/callflow.prune-vars.$PPID $SETUPDIR/awk-scripts/prunenodes.awk > $TMPDIR/callflow.prune-awk.$PPID
+    awk -f $SETUPDIR/scripts/makevars.awk < $TMPDIR/callflow.prune-candidate.$PPID > $TMPDIR/callflow.prune-vars.$PPID
+    cat $TMPDIR/callflow.prune-vars.$PPID $SETUPDIR/scripts/prunenodes.awk > $TMPDIR/callflow.prune-awk.$PPID
     awk -f $TMPDIR/callflow.prune-awk.$PPID < $DESTDIR/callflow.short > $TMPDIR/callflow.auto-not-pruned.$PPID
     grep -w -v -f $TMPDIR/callflow.auto-not-pruned.$PPID $TMPDIR/callflow.prune-candidate.$PPID > $TMPDIR/callflow.auto-prune.$PPID
     grep -w -v -f $TMPDIR/callflow.auto-prune.$PPID $TMPDIR/callflow.order-nodes.$PPID > $TMPDIR/callflow.order-nodes-pruned.$PPID
@@ -295,7 +295,7 @@ else
 	title=`basename $inputfile`;
 fi
 
-( awk -f $SETUPDIR/awk-scripts/makevars.awk $finalOrderFile
+( awk -f $SETUPDIR/scripts/makevars.awk $finalOrderFile
 
   echo
   # Add graph title
@@ -318,7 +318,7 @@ fi
   # Add colors from colorFile
   awk '{printf("  color[%s] = \"%s\"\n", NR-1, $1)}' $colorFile
   echo
-  cat $SETUPDIR/awk-scripts/callflow.awk
+  cat $SETUPDIR/scripts/callflow.awk
 
 ) > $TMPDIR/callflow.awk.$PPID
 
