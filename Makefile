@@ -6,6 +6,7 @@ INSTALL ?= install
 UNINSTALL ?= rm -rf
 MKDIR ?= mkdir -p
 SED ?= sed -i -e
+GZIP ?= gzip
 
 # GNU respectfull variables
 prefix ?= /usr/local
@@ -49,7 +50,8 @@ install: install_man install_conf
 install_man:
 	#Install man page
 	@$(MKDIR) $(DESTDIR)$(man1dir)
-	@$(INSTALL) -m 644 man/callflow.1.gz $(DESTDIR)$(man1dir)/callflow.1.gz
+	@$(INSTALL) -m 644 man/callflow.1 $(DESTDIR)$(man1dir)/callflow.1
+	@$(GZIP) $(DESTDIR)$(man1dir)/callflow.1
 	
 install_conf:
 	#Install conf files
