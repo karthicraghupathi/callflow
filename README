@@ -53,6 +53,7 @@ Usage: callflow [OPTION] FILE
       This option needs a session file in current folder or
       in the SETUP folder (example of session file contents: 'Call-Id:').
   -nl, prevent flows from and to the same equipment to be represented.
+  -v, print version number.
 
 
 Filtering the diagram
