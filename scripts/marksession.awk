@@ -30,7 +30,7 @@ BEGIN {
         $4 = "{" session_count+1 "}"
         sessions[session_count++] = session
         print $0
-        s = sprintf("echo 'New session in frame %s: %s' >&2", $1, session)
+        s = sprintf("echo '%2d: new session in frame %s: %s' >&2", session_count, $1, session)
         system(s)
       }
     }
