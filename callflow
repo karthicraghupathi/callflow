@@ -327,7 +327,12 @@ fi
   echo
 
   # Add colors from colorFile
-  awk '{printf("  color[%s] = \"%s\"\n", NR-1, $1)}' $colorFile
+  awk '{
+    printf("  color[%d] = \"%s\"\n", NR-1, $1)
+  } END {
+    print "  colors = length(color) - 1"
+  }' $colorFile
+
   echo
   cat $SETUPDIR/scripts/callflow.awk
 

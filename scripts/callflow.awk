@@ -147,14 +147,22 @@ func line(x1,x2,y,output, c) {
   else
   {
     if ($4 ~ "{([0-9]+)}") {
-      c = $4
-      gsub("{", "", c)
-      gsub("}", "", c)
+      str = $4
+      gsub("{", "", str)
+      gsub("}", "", str)
     
-      # If over 11 colors, choose black color as default...
-      # TODO: change color behavior
-      if (strtonum(c)>11) {c = "0"}
-    } else {c = "0"}
+      colorId = strtonum(str)
+      if ( colorId <= colors ) {
+        c = colorId
+      } else {
+
+        # There are more sessions than configured colors.
+        # choose the first color as default...
+        c = 0
+      }
+
+    } else { c = 0 }
+
     l1 = sprintf("%s:%s", $2,$3);
     l2 = sprintf("%s:%s", $5,$6);
     for (i=0; i<numHosts; i++)
