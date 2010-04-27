@@ -14,7 +14,7 @@
 ##################################
 CONFDIR="/etc/callflow";
 keepSL=0 # do not keep cap.short and cap.long files
-removeDF=0; # do not remove Duplicate Frames
+removeDF=0; # do not remove duplicate frames
 sessionID=0; # do not use session ID
 order=0; # do not build order file
 noLocalLoop=0; # do not take into account flows from and to the same element (rounded flows)
@@ -108,7 +108,7 @@ do
 		#inputfile
 		#we want to remove duplicate frames
 		removeDF=1
-		echo "Duplicate Frames will be removed"
+		echo "Duplicate frames will be removed"
 		;;
     -t)
                 #keep short and long files
@@ -237,7 +237,7 @@ fi
 
 if [ $removeDF = 1 ]; then
   if [ -d $DESTDIR/frames ]; then
-    echo "Removing Duplicates Frames"
+    echo "Removing duplicate frames"
   else
     echo "Please run the script without -d once in order to build $DESTDIR directory"
     exit 1;
