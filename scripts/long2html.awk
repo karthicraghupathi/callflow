@@ -61,6 +61,9 @@ BEGIN{
 /^Hypertext Transfer Protocol/ {
   discard = 0;
 }
+/^Call Specification Language/ {
+  discard = 0;
+}
 {
   if (discard==0)
     {
