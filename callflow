@@ -409,6 +409,8 @@ cp -af $SETUPDIR/js $DESTDIR/
 
 sed 's/coords=/target=\"msg\" coords=/' $DESTDIR/index.html > $DESTDIR/graph.html
 
+firstFrame=$(awk '{ if (NR == 1) print $1 }' $DESTDIR/callflow.short)
+
 ( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\""
   echo "   \"http://www.w3.org/TR/html4/frameset.dtd\">"
   echo "<html>"
@@ -418,7 +420,7 @@ sed 's/coords=/target=\"msg\" coords=/' $DESTDIR/index.html > $DESTDIR/graph.htm
   echo " </head>"
   echo " <frameset cols=\"75%,25%\">"
   echo "  <frame name=\"graph\" src=\"graph.html\">"
-  echo "  <frame name=\"msg\" src=\"frames/Frame1.html\">"
+  echo "  <frame name=\"msg\" src=\"frames/Frame${firstFrame}.html\">"
   echo " </frameset>"
   echo "</html>"
 ) > $DESTDIR/index_with_frames.html
