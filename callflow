@@ -164,8 +164,33 @@ done
 # Check input file
 ##################################
 if [ ! -f $inputfile ]; then 
-	echo "Input file does not exists !"
-	exit 1;
+  echo "Input file does not exists!"
+  exit 1;
+fi
+
+##################################
+# order file
+##################################
+# Build the order file and exit
+if [ $order = 1 ]; then
+  
+  if [[ "$filterFile" == "none" ]]; then
+    FARG=""
+    FVAL=""
+
+    echo 'Note: no filter file found -- no filters applied'
+  else
+    FARG="-R"
+    FVAL="$(cat $filterFile)"
+
+    echo "Using the following wireshark display filter:"
+    echo "$FVAL"
+  fi
+
+  tshark -r $inputfile $FARG "$FVAL" \
+    -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' |
+    awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort --unique
+  exit 0;
 fi
 
 ##################################
@@ -180,55 +205,49 @@ cp $inputfile $DESTDIR/$TRACEFILE
 
 # if we do want to build new short and long file
 if [ $keepSL = 0 ]; then
-	# filterFile
-	if [ $filterFile != none ]; then
-		echo Using the following wireshark display filter:
-		cat $filterFile
-		tshark -r $inputfile -R "`cat $filterFile`" -o 'column.format:"No.","%m","Src","%s","Port","%S","Ignored","%m","Dest","%d","Port","%D","Protocol","%p","Info","%i"' > $DESTDIR/callflow.short
-		tshark -r $inputfile -R "`cat $filterFile`" -V > $DESTDIR/callflow.long
-	else
-		echo 'Warning: filter file not found -- no filters applied'
-		tshark -r $inputfile -o 'column.format: "No.", "%m", "Src", "%s", "Port", "%S", "Ignored", "%m", "Dest", "%d", "Port", "%D", "Protocol", "%p", "Info", "%i"' > $DESTDIR/callflow.short
-		tshark -r $inputfile -V > $DESTDIR/callflow.long
-	fi
+
+  # filterFile
+  if [[ "$filterFile" == "none" ]]; then
+    FARG=""
+    FVAL=""
+
+    echo 'Note: no filter file found -- no filters applied'
+  else
+    FARG="-R"
+    FVAL="$(cat $filterFile)"
+
+    echo "Using the following wireshark display filter:"
+    echo "$FVAL"
+  fi
+
+  tshark -r $inputfile $FARG "$FVAL" -V > $DESTDIR/callflow.long
+
+  tshark -r $inputfile $FARG "$FVAL" \
+    -o 'column.format:"No.","%m","Src","%s","Port","%S","Ignored","%m","Dest","%d","Port","%D","Protocol","%p","Info","%i"' > $DESTDIR/callflow.short
+
 else
-	# We want to keep SL files
-	# disable duplicate frame remove
-	removeDF=0
+  # We want to keep SL files
+  # disable duplicate frame remove
+  removeDF=0
 fi
 
 # We have to check if short and long file exist
 if [ ! -f $DESTDIR/callflow.long ]; then
-	echo "File callflow.long does not exist !"
-	exit 1;
+  echo "File callflow.long does not exist!"
+  exit 1;
 else
-	# Some SIP messages don't include a space between the Call-ID tag and
-	# Call-ID value
-	sed -i 's,\(Call-ID:\)\([^ ]\),\1 \2,' $DESTDIR/callflow.long
-fi
-if [ ! -f $DESTDIR/callflow.short ]; then
-        echo "File callflow.short does not exist !"
-	exit 1;
-else
-	# Remove Malformed packages from callflow.short, especially because it
-	# contains unpaired "["
-	sed -i '/Malform/d' $DESTDIR/callflow.short
+  # Some SIP messages don't include a space between the Call-ID tag and
+  # Call-ID value
+  sed -i 's,\(Call-ID:\)\([^ ]\),\1 \2,' $DESTDIR/callflow.long
 fi
 
-##################################
-# order file
-##################################
-# Build the order file and exit
-if [ $order = 1 ]; then
-	if [ $filterFile != none ]; then
-		echo 'Using the following wireshark display filter:' 1>&2
-		cat $filterFile 1>&2
-		tshark -r $inputfile -R "`cat $filterFile`" -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' | awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort | uniq
-	else
-		echo 'Warning:  filter file not found -- no filters applied' 1>&2
-		tshark -r $inputfile -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' | awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort | uniq
-	fi
-	exit 0;
+if [ ! -f $DESTDIR/callflow.short ]; then
+  echo "File callflow.short does not exist!"
+  exit 1;
+else
+  # Remove Malformed packages from callflow.short, especially because it
+  # contains unpaired "["
+  sed -i '/Malform/d' $DESTDIR/callflow.short
 fi
 
 ##################################
@@ -252,9 +271,9 @@ fi
 # Add session ID
 ##################################
 if [ $sessionID = 1 ]; then
-	awk -f $SETUPDIR/scripts/marksession.awk -v session_token="`cat $sessionFile`" -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
-	rm $DESTDIR/callflow.short
-	mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
+  awk -f $SETUPDIR/scripts/marksession.awk -v session_token="`cat $sessionFile`" -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
+  rm $DESTDIR/callflow.short
+  mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
 fi
 
 ##################################
@@ -266,7 +285,7 @@ awk -f $SETUPDIR/scripts/long2html.awk -v destDir=$DESTDIR < $DESTDIR/callflow.l
 
 # Compute nodes
 awk '{ if($1 != "#") { printf("%s:%s\n%s:%s\n", $2, $3, $5, $6) }}' $DESTDIR/callflow.short | 
-    sort -u > $TMPDIR/callflow.auto-uniq.$PPID
+  sort -u > $TMPDIR/callflow.auto-uniq.$PPID
 
 # orderFile
 if [ $orderFile != none ]; then
