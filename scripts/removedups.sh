@@ -56,12 +56,9 @@ END {
   }
 }' >&2
 
-#echo "Trick on callflow.short (remove left spaces (left trim))"
-sed 's/^ *//' $DESTDIR/callflow.short > $TMPDIR/callflow.short.$$
-
 # Join the files
 for i in $(cat $TMPDIR/pckts.$$); do
-  grep "^$i " $TMPDIR/callflow.short.$$
+  awk -F"|" -v pckt=$i '{if ($3 == pckt) print $0}' $DESTDIR/callflow.short
 done > $DESTDIR/callflow.short.new
 
 #Remove temp files

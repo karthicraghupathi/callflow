@@ -5,8 +5,8 @@
 }
 
 { 
-   l1 = sprintf("%s:%s", $2,$3);
-   l2 = sprintf("%s:%s", $5,$6);
+   l1 = sprintf("%s:%s", $4,$5);
+   l2 = sprintf("%s:%s", $7,$8);
    
    for (i=0; i<numHosts; i++) {
 	  if(l1 ~ hosts[i]) {

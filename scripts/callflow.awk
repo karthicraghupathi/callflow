@@ -86,7 +86,7 @@ func line(x1,x2,y,output, c) {
 
     xtext = x1 + 18;
     
-    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $1, x1, y-yLineSpace+2, x1+15, y+7+1, $1, $1 >> "imagemap"
+    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $3, x1, y-yLineSpace+2, x1+15, y+7+1, $3, $3 >> "imagemap"
 
   } else if (x1<x2) {
     printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" style=\"stroke: %s;\"/>\n", x1, y, x2, y, color[c];
@@ -94,7 +94,7 @@ func line(x1,x2,y,output, c) {
   
     xtext = x1 + 10;
     
-    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $1, x1, y-yLineSpace+2, x2, y+1, $1, $1 >> "imagemap"
+    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $3, x1, y-yLineSpace+2, x2, y+1, $3, $3 >> "imagemap"
 
   } else {
     printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" style=\"stroke: %s;\"/>\n", x1, y, x2, y, color[c];
@@ -102,10 +102,10 @@ func line(x1,x2,y,output, c) {
     
     xtext = x2 + 10;
     
-    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $1, x2, y-yLineSpace+2, x1, y+1, $1, $1 >> "imagemap"
+    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $3, x2, y-yLineSpace+2, x1, y+1, $3, $3 >> "imagemap"
   }
   
-  printf "<a href=\"frames/Frame%d.html\" target=\"_blank\">\n", $1;
+  printf "<a href=\"frames/Frame%d.html\" target=\"_blank\">\n", $3;
   printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\">%s</text>\n", xtext, y-4, output;
   printf "</a>\n";
 }
@@ -114,23 +114,25 @@ func line(x1,x2,y,output, c) {
   y = NR;
   y = y * yLineSpace + ystart;
 
-  if($1 == "#")
+  if($0 ~ "^#")
   {
     output = "";
-    for (i=2; i<=NF; i++)
+    split($0, A, " ")
+
+    for (i=2; i <= length(A); i++)
     {
-      if ($i == "!")
+      if (A[i] == "!")
         break;
-      output = output " " $i;
+      output = output " " A[i];
     }
 
     link = "";
-    if($i == "!")
+    if (A[i] == "!")
     {
       i++;
-      for(;i<=NF;i++)
+      for(;i <= length(A); i++)
       {
-        link = link " " $i;
+        link = link " " A[i];
       }
     }
 
@@ -146,8 +148,8 @@ func line(x1,x2,y,output, c) {
   }
   else
   {
-    if ($4 ~ "{([0-9]+)}") {
-      str = $4
+    if ($6 ~ "{([0-9]+)}") {
+      str = $6
       gsub("{", "", str)
       gsub("}", "", str)
     
@@ -163,8 +165,8 @@ func line(x1,x2,y,output, c) {
 
     } else { c = 0 }
 
-    l1 = sprintf("%s:%s", $2,$3);
-    l2 = sprintf("%s:%s", $5,$6);
+    l1 = sprintf("%s:%s", $4,$5);
+    l2 = sprintf("%s:%s", $7,$8);
     for (i=0; i<numHosts; i++)
     {
       if(l1 ~ hosts[i])
@@ -185,10 +187,9 @@ func line(x1,x2,y,output, c) {
     else{
       # Print the line
       ORS = "";
-      printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\">%d</text>\n", leftMargin/2, y, $1;
+      printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\">%d</text>\n", leftMargin/2, y, $3;
 
-      output = "";
-      for(i=7;i<=NF;i++) output = output " " $i;
+      output = $9" "$10;
 
       gsub("SIP(/SDP|/XML|) *(Status|Request): *","", output);
       gsub(", with session description *$"," w/SDP",output);

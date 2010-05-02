@@ -19,17 +19,20 @@ sessionID=0; # do not use session ID
 order=0; # do not build order file
 noLocalLoop=0; # do not take into account flows from and to the same element (rounded flows)
 VersionSVN="$Id$"; #DO NOT EDIT THIS LINE BY HAND, DATE IS AUTOMATICALLY ADDED BY SUBVERSION
+readonly PRGNAME=$(basename $0)
 
 ##################################
 # Check configuration files :
 #   callflow.conf, session, filter, order, title, colors
 ##################################
-if [ -f $CONFDIR/callflow.conf ]; then
-    . $CONFDIR/callflow.conf;
+if [ -f callflow.conf ]; then
+  . callflow.conf
+elif [ -f $CONFDIR/callflow.conf ]; then
+  . $CONFDIR/callflow.conf;
 else
-    # Basic conf
-    SETUPDIR="/usr/local/callflow"; 
-    TMPDIR="/tmp";
+  # Basic conf
+  SETUPDIR="/usr/local/callflow"; 
+  TMPDIR="/tmp";
 fi
 
 if [ -f session ]; then
@@ -163,7 +166,7 @@ done
 ##################################
 # Check input file
 ##################################
-if [ ! -f $inputfile ]; then 
+if [ ! -f "$inputfile" ]; then 
   echo "Input file does not exists!"
   exit 1;
 fi
@@ -222,8 +225,39 @@ if [ $keepSL = 0 ]; then
 
   tshark -r $inputfile $FARG "$FVAL" -V > $DESTDIR/callflow.long
 
-  tshark -r $inputfile $FARG "$FVAL" \
-    -o 'column.format:"No.","%m","Src","%s","Port","%S","Ignored","%m","Dest","%d","Port","%D","Protocol","%p","Info","%i"' > $DESTDIR/callflow.short
+  tshark -r $inputfile $FARG "$FVAL" -t a \
+    -o 'column.format: "No.", "%m", "Time", "%t", "Src", "%s", "Port", "%S", "Ignored", "%m", "Dest", "%d", "Port", "%D", "Protocol", "%p", "Info", "%i"' |
+    sed 's/^[[:blank:]]*//;s/\([0-9]\{3\}\)000 /\1 /' | awk '{
+      # The match and the substr are working together to get the string starting
+      # at field 9 till the end of the line.  This provides the frame summary line.
+      # But the frame summary may contain characters that influence the match,
+      # such as the "(" and ")" characters.  Therefor look for the end of the
+      # protocol field (8) as the protocol field contains most likely regular
+      # ascii characters.
+
+      # The A[0, "start"] gives the start position of the $8
+      match($0, $8, A)
+      SUMMARY_START = A[0, "start"] + length($8) + 1
+      SUMMARY = substr($0, SUMMARY_START)
+      printf("%s|%s|%s|%s||%s|%s|%s|%s\n", $1, $2, $3, $4, $6, $7, $8, SUMMARY)
+
+  }' > $TMPDIR/${PRGNAME}-tshark-1.$PPID
+
+  tshark -r $inputfile $FARG "$FVAL" -t a \
+    -o 'column.format: "No.", "%m", "Cseq", "%Cus:sip.CSeq"' |
+    sed 's/^[[:blank:]]*//;s/ /|/' > $TMPDIR/${PRGNAME}-tshark-2.$PPID
+
+  ( # echo "time|no|trace|src|srcport|dir|dst|dstport|prot|summary|remark"
+    join -t "|" --nocheck-order $TMPDIR/${PRGNAME}-tshark-1.$PPID $TMPDIR/${PRGNAME}-tshark-2.$PPID | awk -F "|" '{
+      printf("%s||%s|", $2, $1)
+      for ( N = 3; N < NF; N++) {
+        printf("%s|", $N)
+      }
+      printf("%s\n", $N)
+    }'
+  ) > $DESTDIR/callflow.short
+
+  rm $TMPDIR/${PRGNAME}-tshark-1.$PPID $TMPDIR/${PRGNAME}-tshark-2.$PPID
 
 else
   # We want to keep SL files
@@ -284,7 +318,7 @@ mkdir -p $DESTDIR/frames
 awk -f $SETUPDIR/scripts/long2html.awk -v destDir=$DESTDIR < $DESTDIR/callflow.long
 
 # Compute nodes
-awk '{ if($1 != "#") { printf("%s:%s\n%s:%s\n", $2, $3, $5, $6) }}' $DESTDIR/callflow.short | 
+awk -F"|" '{ if ($0 !~ "^#") { printf("%s:%s\n%s:%s\n", $4, $5, $7, $8) }}' $DESTDIR/callflow.short | 
   sort -u > $TMPDIR/callflow.auto-uniq.$PPID
 
 # orderFile
@@ -293,24 +327,24 @@ if [ $orderFile != none ]; then
     cp $TMPDIR/callflow.auto-uniq.$PPID $TMPDIR/callflow.auto-uniq-forced.$PPID
     grep "!f!" $orderFile | cut -d " " -f 1 >> $TMPDIR/callflow.auto-uniq-forced.$PPID
     cut -d " " -f 1 < $orderFile > $TMPDIR/callflow.order-nodes.$PPID
-    
+
     # prune nodes not appearing in capture file and not forced.
     grep -w -v -f $TMPDIR/callflow.auto-uniq-forced.$PPID $TMPDIR/callflow.order-nodes.$PPID > $TMPDIR/callflow.prune-candidate.$PPID
     awk -f $SETUPDIR/scripts/makevars.awk < $TMPDIR/callflow.prune-candidate.$PPID > $TMPDIR/callflow.prune-vars.$PPID
     cat $TMPDIR/callflow.prune-vars.$PPID $SETUPDIR/scripts/prunenodes.awk > $TMPDIR/callflow.prune-awk.$PPID
-    awk -f $TMPDIR/callflow.prune-awk.$PPID < $DESTDIR/callflow.short > $TMPDIR/callflow.auto-not-pruned.$PPID
+    awk -F"|" -f $TMPDIR/callflow.prune-awk.$PPID < $DESTDIR/callflow.short > $TMPDIR/callflow.auto-not-pruned.$PPID
     grep -w -v -f $TMPDIR/callflow.auto-not-pruned.$PPID $TMPDIR/callflow.prune-candidate.$PPID > $TMPDIR/callflow.auto-prune.$PPID
     grep -w -v -f $TMPDIR/callflow.auto-prune.$PPID $TMPDIR/callflow.order-nodes.$PPID > $TMPDIR/callflow.order-nodes-pruned.$PPID
-    
+
     # add nodes appearing in capture file but not in order file
     cp $TMPDIR/callflow.order-nodes-pruned.$PPID $TMPDIR/callflow.order-nodes-final.$PPID
     grep -w -f $TMPDIR/callflow.auto-uniq-forced.$PPID $TMPDIR/callflow.order-nodes.$PPID >> $TMPDIR/callflow.order-nodes-final.$PPID
     grep -w -f $TMPDIR/callflow.order-nodes-final.$PPID $orderFile > $TMPDIR/callflow.order.$PPID
     grep -w -v -E -f $TMPDIR/callflow.order-nodes.$PPID $TMPDIR/callflow.auto-uniq-forced.$PPID >> $TMPDIR/callflow.order.$PPID
     sed "s/!f!//g" < $TMPDIR/callflow.order.$PPID > $TMPDIR/callflow.order-final.$PPID
-    
+
     finalOrderFile=$TMPDIR/callflow.order-final.$PPID
-    
+
     echo Using the following order:
     cat $finalOrderFile
 else
@@ -358,7 +392,7 @@ fi
 ) > $TMPDIR/callflow.awk.$PPID
 
 # Build callflow.svg
-awk -f $TMPDIR/callflow.awk.$PPID $DESTDIR/callflow.short > $DESTDIR/callflow.svg
+awk -F "|" -f $TMPDIR/callflow.awk.$PPID $DESTDIR/callflow.short > $DESTDIR/callflow.svg
 
 # Remove temporary files
 \rm $TMPDIR/callflow.*.$PPID
@@ -433,7 +467,7 @@ cp -af $SETUPDIR/js $DESTDIR/
 
 sed 's/coords=/target=\"msg\" coords=/' $DESTDIR/index.html > $DESTDIR/graph.html
 
-firstFrame=$(awk '{ if (NR == 1) print $1 }' $DESTDIR/callflow.short)
+firstFrame=$(awk -F "|" '{ if (NR == 1) print $3 }' $DESTDIR/callflow.short)
 
 ( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\""
   echo "   \"http://www.w3.org/TR/html4/frameset.dtd\">"
