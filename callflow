@@ -19,10 +19,7 @@ sessionID=0; # do not use session ID
 order=0; # do not build order file
 noLocalLoop=0; # do not take into account flows from and to the same element (rounded flows)
 VersionSVN="$Id$"; #DO NOT EDIT THIS LINE BY HAND, DATE IS AUTOMATICALLY ADDED BY SUBVERSION
-VersionDate=$(echo $VersionSVN | awk '{print $4}')
-VersionDate=$(echo $VersionDate | awk 'BEGIN{FS="-"};{print $1$2$3}')
-VersionRev=$(echo $VersionSVN | awk '{print $3}')
-readonly PRGVRSN=$(echo $VersionDate"."$VersionRev)
+readonly PRGVRSN=$(awk '{split($4, A, "-"); print A[1] A[2] A[3] "." $3}' <<< "$VersionSVN")
 readonly PRGNAME=$(basename $0)
 
 ##################################
