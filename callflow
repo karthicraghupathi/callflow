@@ -19,6 +19,10 @@ sessionID=0; # do not use session ID
 order=0; # do not build order file
 noLocalLoop=0; # do not take into account flows from and to the same element (rounded flows)
 VersionSVN="$Id$"; #DO NOT EDIT THIS LINE BY HAND, DATE IS AUTOMATICALLY ADDED BY SUBVERSION
+VersionDate=$(echo $VersionSVN | awk '{print $4}')
+VersionDate=$(echo $VersionDate | awk 'BEGIN{FS="-"};{print $1$2$3}')
+VersionRev=$(echo $VersionSVN | awk '{print $3}')
+readonly PRGVRSN=$(echo $VersionDate"."$VersionRev)
 readonly PRGNAME=$(basename $0)
 
 ##################################
@@ -79,89 +83,112 @@ else
     done > $colorFile
 fi
 
-##################################
-# Check command line options
-##################################
-for arg in $*
-do
-	case $arg in
-    -h)
-		#Help needed
-		echo "Options availables"
-		echo "------------------"
-		echo "Usage: callflow [OPTION] FILE.cap"
-		echo "  -h, print this help message"
-		echo "  -o, create an order file with the nodes in FILE.cap"
-		echo "      (Don't forget to redirect output in another file. "
-		echo "      Example of use: callflow -o capture.cap > order)"
-		echo "  -t, use cap.short and cap.long files."
-		echo "      note 1 - if -t and -d are used, only -t is executed."
-		echo "      note 2 - this option sould not be selected on the first run."
-		echo "  -d, remove duplicate frames while computing."
-		echo "      This option should not be selected on the first run."
-		echo "  -s, add a session ID to Sequence Lines in FILE/callflow.long"
-		echo "      This option needs a session file in current folder or"
-		echo "      in the SETUP folder (example of session file contents: 'Call-Id:')."
-		echo "  -nl, prevent flows from and to the same equipment to be represented."
-		echo "  -v, print version number"
+function usage()
+#################
+{
+  ( echo "$SHORTHELP"
+    echo "See $PRGNAME --help for extended help."
+  ) >&2
+  exit 0
+}
 
-		exit 0;
-		;;
-    -d)
-		#inputfile
-		#we want to remove duplicate frames
-		removeDF=1
-		echo "Duplicate frames will be removed"
-		;;
-    -t)
-                #keep short and long files
-                keepSL=1
-                echo "Short and Long files will be used"
-                ;;
-    -s)
-		if [ $sessionFile = none ]; then
-		  echo "You must create either $CONFDIR/session or ./session to use -s option";
-		  exit 1;
-		fi
-		#we want to add "Session ID"
-		sessionID=1
-		echo "Session ID will be shown"
-		
-		;;
-    -o)
-		#inputfile is a cap-file
-		#we want to make an order file
-		order=1
-		;;
-    -r)
-		#inputfile is a cap-file
-		#we want to remove callflow.short and callflow.long after proceeding
-		#inputfile=$2;
-		removeSL=-r;
+function help ()
+################
+{
+  cat << EOF >&1
+Usage: $PRGNAME [options] <trace file>
 
-		;;
-    -nl)
-		#We want to disable auto flows (From and To the same equipment)
-		noLocalLoop=1;
-		echo "Flows from and to the same equipment will not be shown"
-		;;
-	-v)
-		#Print version number and exit
-		VersionDate=$(echo $VersionSVN | awk '{print $4}');
-		VersionDate=$(echo $VersionDate | awk 'BEGIN{FS="-"};{print $1$2$3}');
-		VersionRev=$(echo $VersionSVN | awk '{print $3}');
-		Version=$(echo $VersionDate"."$VersionRev);
-		echo "Version number: $Version";
-		exit 0;
-		;;
-     *)
-		#inputfile is a cap-file
-		#no options
-		inputfile=$arg;
+Options:
+   -h           Print short help and exit
+  --help        Print this help and exit
+  --version     Print version
 
-	;;
+  --remove-duplicate-frames,-d
+                Remove duplicate frames while computing.
+                This option should not be selected on the first run.
+
+  --order-file,-o
+                Create an order file with the nodes in the trace file
+                (Don't forget to redirect output in another file.
+                 Example of use: callflow -o capture.cap > order)
+
+  --with-session,-s
+                Add a session ID to Sequence Lines in FILE/callflow.long
+                This option needs a session file in current folder or
+                in the SETUP folder (example of session file contents: 'Call-Id:').
+
+  --cache,-c,-t
+                Use cap.short and cap.long files.
+                Note 1: if -t and -d are used, only -t is executed.
+                Note 2: this option sould not be selected on the first run.
+
+  --no-loops
+                Prevent flows from and to the same equipment to be represented.
+
+EOF
+}
+
+readonly SHORTHELP="Usage: $PRGNAME [-dhorstv] <filename>" 
+
+# Command line argument parsing, the allowed arguments are
+# alphabetically listed, keep it this way please.
+LOPT="cache,help,order-file:,no-loops,remove-duplicate-frames,with-session,version"
+
+# Note that we use `"$@"' to let each command-line parameter expand to a
+# separate word. The quotes around `$@' are essential!
+# We need TEMP as the `eval set --' would nuke the return value of getopt.
+TEMP=$(getopt --options=cdhorstv --long $LOPT -n $PRGNAME -- "$@")
+
+if [[ $? -ne 0 ]]; then
+  echo "Terminating..." >&2
+  exit $ERR_ARGUMENT
+fi
+
+# Note the quotes around `$TEMP': they are essential!
+eval set -- "$TEMP"
+
+while true; do
+  case $1 in
+   --cache|-c|-t)
+                         # Keep short and long files
+                         keepSL=1
+                         echo "Short and Long files will be used"
+                         ;;
+  --help)                help; exit ;;
+   -h)                   usage; exit;;
+  --no-loops)
+                         # We want to disable auto flows (From and To the same equipment)
+                         noLocalLoop=1;
+                         echo "Flows from and to the same equipment will not be shown"
+                         ;;
+  --order-file|-o)
+                         # Inputfile is a cap-file
+                         # make it an order file
+                         order=1
+                         ;;
+  --remove-duplicate-frames|-d)
+                         # Remove duplicate frames
+                         removeDF=1
+                         echo "Duplicate frames will be removed"
+                         ;;
+  --with-session|-s)
+                         if [ $sessionFile = none ]; then
+                           echo "You must create either $CONFDIR/session or ./session to use -s option";
+                           exit 1;
+                         fi
+                         # Add "Session ID"
+                         sessionID=1
+                         echo "Session ID will be shown"
+                         ;;
+  --version|-v)          echo "$PRGNAME version: $PRGVRSN"; exit;;
+  --)                    shift; break;;
+   *)                    # echo "unknow argument \"$1\""; exit $ERR_ARGUMENT;;
+                         ;;
   esac
+  shift
 done
+
+inputfile=$1
 
 ##################################
 # Check input file
