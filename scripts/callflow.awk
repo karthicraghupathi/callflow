@@ -114,40 +114,38 @@ func line(x1,x2,y,output, c) {
   y = NR;
   y = y * yLineSpace + ystart;
 
-  if($0 ~ "^#")
-  {
+  if($0 ~ "^#") {
     output = "";
     split($0, A, " ")
 
-    for (i=2; i <= length(A); i++)
-    {
+    for (i=2; i <= length(A); i++) {
+
       if (A[i] == "!")
         break;
       output = output " " A[i];
     }
 
     link = "";
-    if (A[i] == "!")
-    {
+    if (A[i] == "!") {
+
       i++;
-      for(;i <= length(A); i++)
-      {
+      for(;i <= length(A); i++) {
         link = link " " A[i];
       }
     }
 
-    if (link != "")
-    {
+    if (link != "") {
+
       printf("<text x=\"%d\" y=\"%d\" class=\"link\">%s</text>\n", 50, y, output);
       printf("    <area href=\"%s\" coords=\"%d,%d,%d,%d\"/>\n", link, 50, y-yLineSpace+2, w, y+1) >> "imagemap";
-    }
-    else
-    {
+
+    } else {
+
       printf("<text x=\"%d\" y=\"%d\" class=\"comment-text\">%s</text>\n", 50, y, output);
     }
-  }
-  else
-  {
+
+  } else {
+
     if ($6 ~ "{([0-9]+)}") {
       str = $6
       gsub("{", "", str)
@@ -167,24 +165,22 @@ func line(x1,x2,y,output, c) {
 
     l1 = sprintf("%s:%s", $4,$5);
     l2 = sprintf("%s:%s", $7,$8);
-    for (i=0; i<numHosts; i++)
-    {
-      if(l1 ~ hosts[i])
-      {
+    for (i=0; i<numHosts; i++) {
+
+      if(l1 ~ hosts[i]) {
         x1 = strtonum(lookup[hosts[i]]);
       }
-      if(l2 ~ hosts[i])
-      {
+
+      if(l2 ~ hosts[i]) {
         x2 = strtonum(lookup[hosts[i]]);
       }
     }
 
     x1 = x1 * xHostSpace + leftMargin;
     x2 = x2 * xHostSpace + leftMargin;
-    if ((x1==x2) && (noLocalLoop==1)){
+    if ((x1==x2) && (noLocalLoop==1)) {
       # Do nothing
-      }
-    else{
+    } else {
       # Print the line
       ORS = "";
       printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\">%d</text>\n", leftMargin/2, y, $3;
