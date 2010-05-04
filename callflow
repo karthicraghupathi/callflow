@@ -52,20 +52,16 @@ else
     filterFile=none;
 fi
 
-if [ -f order ]; then
-    orderFile=order;
-elif [ -f $CONFDIR/order ]; then
-    orderFile=$CONFDIR/order;
+if [[ -f order ]]; then
+  orderFile=order
 else
-    orderFile=none;
+  orderFile=none
 fi
 
-if [ -f title ]; then
-    titleFile=title;
-elif [ -f $CONFDIR/title ]; then
-    titleFile=$CONFDIR/title;
+if [[ -f title ]]; then
+    titleFile=title
 else
-    titleFile=none;
+    titleFile=none
 fi
 
 if [[ -f colors ]]; then
