@@ -100,27 +100,31 @@ Options:
   --help        Print this help and exit
   --version     Print version
 
-  --remove-duplicate-frames,-d
-                Remove duplicate frames while computing.
-                This option should not be selected on the first run.
+  --no-loops
+                Prevent flows from and to the same equipment to be represented.
 
-  --order-file,-o
+  --order-file, -o
                 Create an order file with the nodes in the trace file
                 (Don't forget to redirect output in another file.
                  Example of use: callflow -o capture.cap > order)
 
-  --with-session,-s
+  --remove-duplicate-frames, -d
+                Remove duplicate frames while computing.
+                This option should not be selected on the first run.
+
+  --use-cache, -c, -t
+                Use cap.short and cap.long files.
+                Note 1: if -c and -d are used, only -c is executed.
+                Note 2: this option sould not be selected on the first run.
+
+  --width-between-hosts
+                Distance between the hosts the in final picture.  The distance
+                may vary between 100 and 250.  Default = 200.
+
+  --with-session, -s
                 Add a session ID to Sequence Lines in FILE/callflow.long
                 This option needs a session file in current folder or
                 in the SETUP folder (example of session file contents: 'Call-Id:').
-
-  --cache,-c,-t
-                Use cap.short and cap.long files.
-                Note 1: if -t and -d are used, only -t is executed.
-                Note 2: this option sould not be selected on the first run.
-
-  --no-loops
-                Prevent flows from and to the same equipment to be represented.
 
 EOF
 }
@@ -129,7 +133,8 @@ readonly SHORTHELP="Usage: $PRGNAME [-dhorstv] <filename>"
 
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
-LOPT="cache,help,order-file:,no-loops,remove-duplicate-frames,with-session,version"
+LOPT="help,order-file:,no-loops,remove-duplicate-frames,width-between-hosts:"
+LOPT="$LOPT,use-cache,with-session,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
 # separate word. The quotes around `$@' are essential!
@@ -146,11 +151,6 @@ eval set -- "$TEMP"
 
 while true; do
   case $1 in
-   --cache|-c|-t)
-                         # Keep short and long files
-                         keepSL=1
-                         echo "Short and Long files will be used"
-                         ;;
   --help)                help; exit ;;
    -h)                   usage; exit;;
   --no-loops)
@@ -168,6 +168,11 @@ while true; do
                          removeDF=1
                          echo "Duplicate frames will be removed"
                          ;;
+  --use-cache|-c|-t)
+                         # Keep short and long files
+                         keepSL=1
+                         echo "Short and Long files will be used"
+                         ;;
   --with-session|-s)
                          if [ $sessionFile = none ]; then
                            echo "You must create either $CONFDIR/session or ./session to use -s option";
@@ -176,6 +181,9 @@ while true; do
                          # Add "Session ID"
                          sessionID=1
                          echo "Session ID will be shown"
+                         ;;
+  --width-between-hosts)
+                         OPT_WIDTH_BETWEEN_HOSTS=$2; shift
                          ;;
   --version|-v)          echo "$PRGNAME version: $PRGVRSN"; exit;;
   --)                    shift; break;;
@@ -218,6 +226,22 @@ if [ $order = 1 ]; then
     -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' |
     awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort --unique
   exit 0;
+fi
+
+if [[ -z "$OPT_WIDTH_BETWEEN_HOSTS" ]]; then
+  WIDTH_BETWEEN_HOSTS=200
+else
+  if [[ $OPT_WIDTH_BETWEEN_HOSTS -gt 250 ]]; then
+    echo "$PRGNAME: error: width between hosts too big" >&2
+    exit 1
+  fi
+
+  if [[ $OPT_WIDTH_BETWEEN_HOSTS -lt 100 ]]; then
+    echo "$PRGNAME: error: width between hosts too small" >&2
+    exit 1
+  fi
+
+  WIDTH_BETWEEN_HOSTS=$OPT_WIDTH_BETWEEN_HOSTS
 fi
 
 ##################################
@@ -387,20 +411,20 @@ fi
 
   echo
   # Add graph title
-  echo "  title=\"$title\";"
+  echo "  title=\"$title\""
 
   # Add graph variables
-  echo "  yLineSpace = 24;"
-  echo "  xHostSpace = 200;"
-  echo "  leftMargin = 100;"
-  echo "  rightMargin = 100;"
-  echo "  topMargin = 50;"
-  echo "  bottomMargin = 50;"
-  echo "  numTraces = numHosts;"
+  echo "  yLineSpace = 24"
+  echo "  xHostSpace = $WIDTH_BETWEEN_HOSTS"
+  echo "  leftMargin = 100"
+  echo "  rightMargin = 100"
+  echo "  topMargin = 50"
+  echo "  bottomMargin = 50"
+  echo "  numTraces = numHosts"
 
   # Add noLocalLoop to vars in order to delete self messaging
-  echo "  noLocalLoop=\"$noLocalLoop\";"
-  echo "  numLines = $(cat $DESTDIR/callflow.short | wc -l);"
+  echo "  noLocalLoop=\"$noLocalLoop\""
+  echo "  numLines = $(cat $DESTDIR/callflow.short | wc -l)"
   echo
 
   # Add colors from colorFile
