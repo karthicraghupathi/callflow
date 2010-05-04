@@ -68,16 +68,14 @@ else
     titleFile=none;
 fi
 
-if [ -f colors ]; then
-    colorFile=colors
-elif [ -f $CONFDIR/colors ]; then
-    colorFile=$CONFDIR/colors
+if [[ -f colors ]]; then
+  COLORS=$(cat colors)
+elif [[ -n "$COLORS" ]]; then
+  : # Do nothing
 else
-    colorFile=colors
-    for Color in black orange sienna red green purple chocolate olivedrab darkred \
-        darkslategrey midnightblue maroon; do
-        echo $Color
-    done > $colorFile
+  COLORS="black orange sienna red green purple chocolate olivedrab darkred
+    darkslategrey midnightblue maroon teal goldenrod gray darkolivegreen
+    darkcyan brown peru mediumorchild navy saddlebrown coral" 
 fi
 
 function usage()
@@ -118,7 +116,7 @@ Options:
                 Note 2: this option sould not be selected on the first run.
 
   --width-between-hosts
-                Distance between the hosts the in final picture.  The distance
+                Distance between the hosts in final picture.  The distance
                 may vary between 100 and 250.  Default = 200.
 
   --with-session, -s
@@ -428,11 +426,13 @@ fi
   echo
 
   # Add colors from colorFile
-  awk '{
-    printf("  color[%d] = \"%s\"\n", NR-1, $1)
+  awk 'BEGIN { I = 0} {
+    for (N = 1; N <= NF; N++) {
+      printf("  color[%d] = \"%s\"\n", I++, $N)
+    }
   } END {
     print "  colors = length(color) - 1"
-  }' $colorFile
+  }' <<< "$COLORS"
 
   echo
   cat $SETUPDIR/scripts/callflow.awk
