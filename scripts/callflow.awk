@@ -183,7 +183,12 @@ func line(x1,x2,y,output, c) {
     } else {
       # Print the line
       ORS = "";
-      printf "<text x=\"%d\" y=\"%d\" class=\"pkt-text\">%d</text>\n", leftMargin/2, y, $3;
+      printf ("<text x=\"%d\" y=\"%d\" class=\"pkt-text\" xml:space=\"preserve\" ", leftMargin - 10, y)
+      printf ("style=\"text-anchor: end;\">%d", $3)
+      if ( showTime == "yes" ) {
+        printf ("    %s", $1)
+      }
+      printf ("</text>\n")
 
       output = $9" "$10;
 

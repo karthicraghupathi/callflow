@@ -59,9 +59,9 @@ else
 fi
 
 if [[ -f title ]]; then
-    titleFile=title
+  titleFile=title
 else
-    titleFile=none
+  titleFile=none
 fi
 
 if [[ -f colors ]]; then
@@ -97,6 +97,9 @@ Options:
   --no-loops
                 Prevent flows from and to the same equipment to be represented.
 
+  --no-time
+                Do not show the time.
+
   --order-file, -o
                 Create an order file with the nodes in the trace file
                 (Don't forget to redirect output in another file.
@@ -127,7 +130,7 @@ readonly SHORTHELP="Usage: $PRGNAME [-dhorstv] <filename>"
 
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
-LOPT="help,order-file:,no-loops,remove-duplicate-frames,width-between-hosts:"
+LOPT="help,order-file:,no-loops,no-time,remove-duplicate-frames,width-between-hosts:"
 LOPT="$LOPT,use-cache,with-session,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
@@ -151,6 +154,9 @@ while true; do
                          # We want to disable auto flows (From and To the same equipment)
                          noLocalLoop=1;
                          echo "Flows from and to the same equipment will not be shown"
+                         ;;
+  --no-time)
+                         OPT_SHOW_TIME=no
                          ;;
   --order-file|-o)
                          # Inputfile is a cap-file
@@ -236,6 +242,12 @@ else
   fi
 
   WIDTH_BETWEEN_HOSTS=$OPT_WIDTH_BETWEEN_HOSTS
+fi
+
+if [[ -z "$OPT_SHOW_TIME" ]]; then
+  SHOW_TIME=yes
+else
+  SHOW_TIME=$OPT_SHOW_TIME
 fi
 
 ##################################
@@ -403,22 +415,30 @@ fi
 
 ( awk -f $SETUPDIR/scripts/makevars.awk $finalOrderFile
 
-  echo
-  # Add graph title
-  echo "  title=\"$title\""
+  cat << AWK_BEGIN_SECTION
+
+  title = "$title"
 
   # Add graph variables
-  echo "  yLineSpace = 24"
-  echo "  xHostSpace = $WIDTH_BETWEEN_HOSTS"
-  echo "  leftMargin = 100"
-  echo "  rightMargin = 100"
-  echo "  topMargin = 50"
-  echo "  bottomMargin = 50"
-  echo "  numTraces = numHosts"
+  yLineSpace = 24
+  xHostSpace = $WIDTH_BETWEEN_HOSTS
+  rightMargin = 100
+  topMargin = 50
+  bottomMargin = 50
+  showTime = "$SHOW_TIME"
+  if ( showTime == "yes" ) {
+    leftMargin = 120
+  } else {
+    leftMargin = 50
+  }
+  numTraces = numHosts
 
   # Add noLocalLoop to vars in order to delete self messaging
-  echo "  noLocalLoop=\"$noLocalLoop\""
-  echo "  numLines = $(cat $DESTDIR/callflow.short | wc -l)"
+  noLocalLoop = "$noLocalLoop"
+
+AWK_BEGIN_SECTION
+
+  echo "numLines = $(cat $DESTDIR/callflow.short | wc -l)"
   echo
 
   # Add colors from colorFile
