@@ -5,7 +5,7 @@
 callflow - Sequence Diagram Generator
 
 .SH SYNOPSIS
-callflow [-t] [-d] [-h] [-o] [-s] [-nl] capture-file.cap
+callflow [-t] [-d] [-h] [-o] [-s] [-nl] [-v] capture-file.cap
 
 .SH DESCRIPTION
 This is a collection of awk and shell scripts that will take a capture file that can be read by tshark and produce a callflow sequence diagram.  The scripts have been primarily tested with SIP call flows, but should work for other network traffic as well.
@@ -33,28 +33,85 @@ You may also find (depending on options chosen):
 You can view callflow.svg with the Adobe SVG plugin or Firefox, or you can view index*.html with any web browser.  Both the SVG file and the html file contain links into the frames directory so that you can look at the contents of the full packet frame.  All the frames have been processed to remove the IP headers, which usually aren't that interesting.
 
 .SH OPTIONS
-
+.PP
+.I Callflow
+accepts the followings options:
+.TP
+.PD 0
 .B -h
-print this help message
+print the short help message
 
-.B -o
-create an order file with the nodes in FILE.cap (Don't forget to redirect output in another file. Example of use: callflow -o capture.cap > order)
+.TP
+.PD 0
+.B --help
+print the long help message
 
-.B -t
-use callflow and callflow.long files from FILE directory. Note 1 - if -t and -d are used, only -t is executed. Note 2 - this option sould not be selected on the first run.
-  
-.B -d
-remove duplicate frames while computing. This option should not be selected on the first run.
-
-.B -s
-add a session ID to Sequence Lines in FILE/callflow.long. This option needs a session file in current folder or in the SETUP folder (example of session file contents: 'Call-Id:').
-
-.B -nl
-prevent flows from and to the same equipment to be represented.
-
+.TP
+.PD 0
 .B -v
+.TP
+.PD
+.B --version
 print version number.
 
+.TP
+.PD 0
+.B -nl
+.TP
+.PD
+.B --no-loops
+prevent flows from and to the same equipment to be represented.
+
+.TP
+.PD 0
+.B --no-time
+Do not show the time.
+
+
+.TP
+.PD 0
+.B -o
+.TP
+.PD
+.B --order-file
+create an order file with the nodes in the trace file (Don't forget to redirect output in another file. Example of use: callflow -o capture.cap > order)
+
+.TP
+.PD 0
+.B -d
+.TP
+.PD
+.B --remove-duplicate-frames
+remove duplicate frames while computing. This option should not be selected on the first run.
+
+.TP
+.PD 0
+.BI --title " title"
+specify the title of the callflow.  If not specified the name of file containing the trace will be used instead.
+
+.TP
+.PD 0
+.B -t
+.TP
+.PD 0
+.B -c
+.TP
+.PD
+.B --use-cache
+use callflow and callflow.long files from FILE directory. Note 1 - if -t and -d are used, only -t is executed. Note 2 - this option sould not be selected on the first run.
+
+.TP
+.PD 0
+.BI --width-between-hosts " width"
+distance between the hosts in final picture.  The distance may vary between 100 and 250.  Default = 200.
+
+.TP
+.PD 0
+.B -s
+.TP
+.PD
+.B --with-session
+add a session ID to Sequence Lines in FILE/callflow.long. This option needs a session file in current folder or in the SETUP folder (example of session file contents: 'Call-Id:').
 
 
 .SS Filtering the diagram
@@ -92,9 +149,7 @@ Make sure that the forced node does not resolve to a regex pattern that another 
 
 
 .SS Titling the diagram
-You can create a file in the current directory called title, or a file in the setup directory (eg : /usr/share/callflow/) called title which contains text to be displayed as a title to the diagram. 
-If neither of these files exist, then a title text will be generated based upon basename of the capture file name.
-
+You can title the diagram by using the --title option. If no --title option is provided, a default title based on the filename will be used.
 
 .SS Removing Duplicate Frames
 You can remove duplicate frames from the short text-file with:
@@ -103,7 +158,7 @@ callflow -d foo
 Duplicates are determined by examining each line in foo, and comparing frames/Frame<#>.html with all previously seen frames. Because we are comparing with html files, the duplicate option assumes that those html files exist.
 
   / \\
- / ! \\ To have this html file, the script must be run once without -d option.
+ / ! \\ To have these html files, the script must be run once without -d option.
  -----
 
 
@@ -197,16 +252,12 @@ You can add a comments to your diagram by adding a line that start with "# " to 
 .SS Create a filter file:
  $ echo "sip" > filter
 
-.SS Create a title file:
- $ echo "This is a sample capture" > title
-
 .SS Create an order file:
  $ callflow -o mycapture.cap > order
  (edit order file as needed)
 
 .SS Generate initial diagram:
  $ callflow mycapture.cap
-
 
 .SS Remove retransmitted SIP packets:
 We will now use "mycapture/callflow.short" and "mycapture/callflow.long" text files for further processing:
