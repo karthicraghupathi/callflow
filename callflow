@@ -24,7 +24,7 @@ readonly PRGNAME=$(basename $0)
 
 ##################################
 # Check configuration files :
-#   callflow.conf, session, filter, order, title, colors
+#   callflow.conf, session, filter, order, colors
 ##################################
 if [ -f callflow.conf ]; then
   . callflow.conf
@@ -56,12 +56,6 @@ if [[ -f order ]]; then
   orderFile=order
 else
   orderFile=none
-fi
-
-if [[ -f title ]]; then
-  titleFile=title
-else
-  titleFile=none
 fi
 
 if [[ -f colors ]]; then
@@ -109,14 +103,19 @@ Options:
                 Remove duplicate frames while computing.
                 This option should not be selected on the first run.
 
+  --title <title>
+                Use <title> as title in the callflow.  If not specified the
+                name of file containing the trace will be used instead. Surround
+                <title> by quotes in case the title contains spaces or tabs.
+
   --use-cache, -c, -t
                 Use cap.short and cap.long files.
                 Note 1: if -c and -d are used, only -c is executed.
                 Note 2: this option sould not be selected on the first run.
 
-  --width-between-hosts
-                Distance between the hosts in final picture.  The distance
-                may vary between 100 and 250.  Default = 200.
+  --width-between-hosts <width>
+                Distance between adjacent hosts in final picture.  The width may
+                vary between 100 and 250.  Default = 200.
 
   --with-session, -s
                 Add a session ID to Sequence Lines in FILE/callflow.long
@@ -130,7 +129,7 @@ readonly SHORTHELP="Usage: $PRGNAME [-dhorstv] <filename>"
 
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
-LOPT="help,order-file:,no-loops,no-time,remove-duplicate-frames,width-between-hosts:"
+LOPT="help,order-file:,no-loops,no-time,remove-duplicate-frames,title:,width-between-hosts:"
 LOPT="$LOPT,use-cache,with-session,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
@@ -167,6 +166,9 @@ while true; do
                          # Remove duplicate frames
                          removeDF=1
                          echo "Duplicate frames will be removed"
+                         ;;
+  --title)
+                         OPT_TITLE="$2"; shift
                          ;;
   --use-cache|-c|-t)
                          # Keep short and long files
@@ -248,6 +250,12 @@ if [[ -z "$OPT_SHOW_TIME" ]]; then
   SHOW_TIME=yes
 else
   SHOW_TIME=$OPT_SHOW_TIME
+fi
+
+if [[ -n "$OPT_TITLE" ]]; then
+  TITLE="$OPT_TITLE"
+else
+  TITLE="$inputfile"
 fi
 
 ##################################
@@ -406,18 +414,11 @@ else
     finalOrderFile=$TMPDIR/callflow.auto-uniq.$PPID
 fi
 
-# titleFile
-if [ $titleFile != none ]; then
-	title=`cat $titleFile`;
-else
-	title=`basename $inputfile`;
-fi
-
 ( awk -f $SETUPDIR/scripts/makevars.awk $finalOrderFile
 
   cat << AWK_BEGIN_SECTION
 
-  title = "$title"
+  title = "$TITLE"
 
   # Add graph variables
   yLineSpace = 24
