@@ -152,10 +152,11 @@ while true; do
   --no-loops)
                          # We want to disable auto flows (From and To the same equipment)
                          noLocalLoop=1;
-                         echo "Flows from and to the same equipment will not be shown"
+                         echo " * Flows from and to the same equipment will not be shown"
                          ;;
   --no-time)
                          OPT_SHOW_TIME=no
+                         echo " * Time will not be shown"
                          ;;
   --order-file|-o)
                          # Inputfile is a cap-file
@@ -165,15 +166,16 @@ while true; do
   --remove-duplicate-frames|-d)
                          # Remove duplicate frames
                          removeDF=1
-                         echo "Duplicate frames will be removed"
+                         echo " * Duplicate frames will be removed"
                          ;;
   --title)
                          OPT_TITLE="$2"; shift
+                         echo " * Title to use: $OPT_TITLE"
                          ;;
   --use-cache|-c|-t)
                          # Keep short and long files
                          keepSL=1
-                         echo "Short and Long files will be used"
+                         echo " * Short and Long files will be used"
                          ;;
   --with-session|-s)
                          if [ $sessionFile = none ]; then
@@ -182,10 +184,11 @@ while true; do
                          fi
                          # Add "Session ID"
                          sessionID=1
-                         echo "Session ID will be shown"
+                         echo " * Session ID will be shown"
                          ;;
   --width-between-hosts)
                          OPT_WIDTH_BETWEEN_HOSTS=$2; shift
+                         echo " * Width between hosts to use: $OPT_WIDTH_BETWEEN_HOSTS"
                          ;;
   --version|-v)          echo "$PRGNAME version: $PRGVRSN"; exit;;
   --)                    shift; break;;
@@ -194,6 +197,8 @@ while true; do
   esac
   shift
 done
+
+echo 
 
 inputfile=$1
 
@@ -233,7 +238,7 @@ fi
 if [[ -z "$OPT_WIDTH_BETWEEN_HOSTS" ]]; then
   WIDTH_BETWEEN_HOSTS=200
 else
-  if [[ $OPT_WIDTH_BETWEEN_HOSTS -gt 250 ]]; then
+  if [[ $OPT_WIDTH_BEeTWEEN_HOSTS -gt 250 ]]; then
     echo "$PRGNAME: error: width between hosts too big" >&2
     exit 1
   fi
@@ -346,26 +351,19 @@ else
   sed -i '/Malform/d' $DESTDIR/callflow.short
 fi
 
-##################################
-# Remove duplicate Frame
-##################################
+# Create Frames
+mkdir -p $DESTDIR/frames
+awk -f $SETUPDIR/scripts/long2html.awk -v destDir=$DESTDIR < $DESTDIR/callflow.long
 
+# Remove duplicate Frame
 if [ $removeDF = 1 ]; then
-  if [ -d $DESTDIR/frames ]; then
-    echo "Removing duplicate frames"
-  else
-    echo "Please run the script without -d once in order to build $DESTDIR directory"
-    exit 1;
-  fi
-  #awk -f $SETUPDIR/scripts/removedups.awk -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
+  echo "Removing duplicate frames"
   $SETUPDIR/scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR
   rm $DESTDIR/callflow.short
   mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
 fi
 
-##################################
 # Add session ID
-##################################
 if [ $sessionID = 1 ]; then
   awk -f $SETUPDIR/scripts/marksession.awk -v session_token="`cat $sessionFile`" -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
   rm $DESTDIR/callflow.short
@@ -375,10 +373,6 @@ fi
 ##################################
 # common
 ##################################
-# Create Frames
-mkdir -p $DESTDIR/frames
-awk -f $SETUPDIR/scripts/long2html.awk -v destDir=$DESTDIR < $DESTDIR/callflow.long
-
 # Compute nodes
 awk -F"|" '{ if ($0 !~ "^#") { printf("%s:%s\n%s:%s\n", $4, $5, $7, $8) }}' $DESTDIR/callflow.short | 
   sort -u > $TMPDIR/callflow.auto-uniq.$PPID
