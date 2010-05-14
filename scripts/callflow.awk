@@ -73,7 +73,7 @@ func arrow(x,y,d,c) {
 func line(x1,x2,y,output, c) {
 
   if (x1 == x2) {
-    printf "<polyline points=\"%d,%d %d,%d %d,%d %d,%d %d,%d %d,%d %d,%d %d,%d\" fill=\"none\" class=\"traceline\"/>\n",
+    printf "<polyline points=\"%d,%d %d,%d %d,%d %d,%d %d,%d %d,%d %d,%d %d,%d\" fill=\"none\" class=\"traceline\" style=\"stroke: %s;\"/>\n",
       x1,y-18+7,
       x1+5,y-18+7,
       x1+12,y-15+7,
@@ -81,8 +81,9 @@ func line(x1,x2,y,output, c) {
       x1+15,y-5+7,
       x1+12,y-2+7,
       x1+5,y+7,
-      x1,y+7;
-    arrow(x1,y+7,1);
+      x1,y+7,
+      color[c];
+    arrow(x1,y+7,1,c);
 
     xtext = x1 + 18;
     
