@@ -232,7 +232,7 @@ fi
 if [[ -z "$OPT_WIDTH_BETWEEN_HOSTS" ]]; then
   WIDTH_BETWEEN_HOSTS=200
 else
-  if [[ $OPT_WIDTH_BEeTWEEN_HOSTS -gt 250 ]]; then
+  if [[ $OPT_WIDTH_BETWEEN_HOSTS -gt 250 ]]; then
     echo "$PRGNAME: error: width between hosts too big" >&2
     exit 1
   fi
