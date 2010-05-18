@@ -66,7 +66,6 @@ if [[ -f colors ]]; then
 fi
 
 function usage()
-#################
 {
   ( echo "$SHORTHELP"
     echo "See $PRGNAME --help for extended help."
@@ -278,7 +277,8 @@ fi
 # DESTDIR
 DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
 mkdir -p $DESTDIR
-# Copy cap file into destdir
+
+# Copy the input file into destdir
 TRACEFILE=$(basename $inputfile)
 cp $inputfile $DESTDIR/$TRACEFILE
 
