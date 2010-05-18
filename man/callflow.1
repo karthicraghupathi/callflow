@@ -39,12 +39,12 @@ accepts the followings options:
 .TP
 .PD 0
 .B -h
-print the short help message
+Print the short help message
 
 .TP
 .PD 0
 .B --help
-print the long help message
+Print the long help message
 
 .TP
 .PD 0
@@ -52,7 +52,7 @@ print the long help message
 .TP
 .PD
 .B --version
-print version number.
+Print version number.
 
 .TP
 .PD 0
@@ -65,7 +65,7 @@ You can use a filter which contains a tshark DISPLAY filter (as opposed to a CAP
 .TP
 .PD 0
 .B --no-loops
-prevent flows from and to the same equipment to be represented.
+Prevent flows from and to the same equipment to be represented.
 
 .TP
 .PD 0
@@ -79,7 +79,7 @@ Do not show the time.
 .TP
 .PD
 .B --order-file
-create an order file with the nodes in the trace file (Don't forget to redirect output in another file. Example of use: callflow -o capture.cap > order)
+Create an order file with the nodes in the trace file (Don't forget to redirect output in another file. Example of use: callflow -o capture.cap > order)
 
 .TP
 .PD 0
@@ -87,7 +87,7 @@ create an order file with the nodes in the trace file (Don't forget to redirect 
 .TP
 .PD
 .B --remove-duplicate-frames
-remove duplicate frames while computing. This option should not be selected on the first run.
+Remove duplicate frames while computing. This option should not be selected on the first run.
 
 .TP
 .PD 0
@@ -97,7 +97,7 @@ Add a session ID to sequence lines and color lines related to this session ID. T
 .TP
 .PD 0
 .BI --title " title"
-specify the title of the callflow.  If not specified the name of file containing the trace will be used instead.
+Specify the title of the callflow.  If not specified the name of file containing the trace will be used instead.
 
 .TP
 .PD 0
@@ -108,12 +108,16 @@ specify the title of the callflow.  If not specified the name of file containing
 .TP
 .PD
 .B --use-cache
-use callflow and callflow.long files from FILE directory. Note 1 - if -t and -d are used, only -t is executed. Note 2 - this option sould not be selected on the first run.
+Use callflow and callflow.long files from FILE directory.
+.sp 0
+Note 1: if -t and -d are used, only -t is executed.
+.sp 0
+Note 2: this option sould not be selected on the first run.
 
 .TP
 .PD 0
 .BI --width-between-hosts " width"
-distance between the hosts in final picture.  The distance may vary between 100 and 250.  Default = 200.
+Distance between the hosts in final picture.  The distance may vary between 100 and 250.  Default = 200.
 
 
 .SS Filtering the diagram
@@ -155,7 +159,7 @@ You can title the diagram by using the --title option. If no --title option is p
 
 .SS Removing Duplicate Frames
 You can remove duplicate frames from the short text-file with:
-callflow -d foo
+callflow --remove-duplicate-frames foo
 
 Duplicates are determined by examining each line in foo, and comparing frames/Frame<#>.html with all previously seen frames. Because we are comparing with html files, the duplicate option assumes that those html files exist.
 
@@ -165,7 +169,7 @@ Duplicates are determined by examining each line in foo, and comparing frames/Fr
 
 
 .SS Adding "Session ID" to Sequence Lines
-You can have callflow to colorate every Frame based on a specific pattern. For instance, it can be usefull when all SIP packets contains a header "Call-Id:" (case insensitive). This header is followed by an identifier that indicates which "SIP dialog" this packet belongs to. Callflow can use the same color for all flows that have the same Call-Id.
+You can have callflow color every Frame based on a specific pattern. For instance, it can be usefull when all SIP packets contains a header "Call-Id:" (case insensitive). This header is followed by an identifier that indicates which "SIP dialog" this packet belongs to. Callflow can use the same color for all flows that have the same Call-Id.
 
 To have callflow to colorate, you have to create a file at either SETUPDIR/session or ./session with the contents:
 Call-Id:
