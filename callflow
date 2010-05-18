@@ -26,15 +26,27 @@ readonly PRGNAME=$(basename $0)
 # Check configuration files :
 #   callflow.conf, session, filter, order, colors
 ##################################
-if [ -f callflow.conf ]; then
-  . callflow.conf
-elif [ -f $CONFDIR/callflow.conf ]; then
-  . $CONFDIR/callflow.conf;
-else
-  # Basic conf
-  SETUPDIR="/usr/local/callflow"; 
-  TMPDIR="/tmp";
-fi
+for CONF in $CONFDIR/callflow.conf callflow.conf; do
+  [[ -f $CONF ]] && . $CONF
+done
+
+# Basic conf
+[[ -z "$SETUPDIR" ]] && SETUPDIR="/usr/local/callflow"
+[[ -z "$TMPDIR" ]] && TMPDIR="/tmp"
+
+[[ ! -d $SETUPDIR ]] && {
+  ( echo "$PRGNAME: error: setup directory \"$SETUPDIR\" does not exist"
+    echo "Adjust your configuration"
+  ) >&2
+  exit 1
+}
+
+[[ ! -d $TMPDIR ]] && {
+  ( echo "$PRGNAME: error: temporary directory \"$TMPDIR\" does not exist"
+    echo "Adjust your configuration"
+  ) >&2
+  exit 1
+}
 
 if [ -f session ]; then
     sessionFile=session;
