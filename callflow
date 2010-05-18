@@ -15,7 +15,6 @@
 CONFDIR="/etc/callflow";
 keepSL=0 # do not keep cap.short and cap.long files
 removeDF=0; # do not remove duplicate frames
-sessionID=0; # do not use session ID
 order=0; # do not build order file
 noLocalLoop=0; # do not take into account flows from and to the same element (rounded flows)
 readonly VersionSVN="$Id$"; #DO NOT EDIT THIS LINE BY HAND, DATE IS AUTOMATICALLY ADDED BY SUBVERSION
@@ -47,14 +46,6 @@ done
   ) >&2
   exit 1
 }
-
-if [ -f session ]; then
-    sessionFile=session;
-elif [ -f $CONFDIR/session ]; then
-    sessionFile=$CONFDIR/session;
-else
-    sessionFile=none;
-fi
 
 if [[ "$FILTER" == "" ]]; then
   FARG=""
@@ -94,7 +85,7 @@ Options:
   --help        Print this help and exit
   --version, -v Print version
 
-  --filter, -f
+  --filter <filter>, -f <filter>
                 You can use a filter which contains a tshark DISPLAY filter 
                 (as opposed to a CAPTURE filter).   You  can  learn  more  about
                 these  from  the  tshark  man page.  A useful filter for SIP 
@@ -115,6 +106,17 @@ Options:
                 Remove duplicate frames while computing.
                 This option should not be selected on the first run.
 
+  --session-token <session>, -s <session>
+                Add a session ID to sequence lines and color lines related
+                to this session ID.
+                This option is available by default and the value is 
+                'Call-Id:' (depending on your callflow configuration). 
+                You should use this option in order to overwrite the default
+                value.
+                If you want to disable the session detection (show ID and 
+                colorization), you should use a empty session token:
+                --session-token ""
+
   --title <title>
                 Use <title> as title in the callflow.  If not specified the
                 name of file containing the trace will be used instead. Surround
@@ -129,25 +131,19 @@ Options:
                 Distance between adjacent hosts in final picture.  The width may
                 vary between 100 and 250.  Default = 200.
 
-  --with-session, -s
-                Add a session ID to Sequence Lines in FILE/callflow.long
-                This option needs a session file in current folder or
-                in the SETUP folder (example of session file contents: 'Call-Id:').
-
 EOF
 }
 
-readonly SHORTHELP="Usage: $PRGNAME [-dhorstv] <filename>" 
+readonly SHORTHELP="Usage: $PRGNAME [options] <filename>" 
 
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
-LOPT="filter:,help,order-file:,no-loops,no-time,remove-duplicate-frames,title:,width-between-hosts:"
-LOPT="$LOPT,use-cache,with-session,version"
+LOPT="filter:,help,order-file:,no-loops,no-time,remove-duplicate-frames,session-token:,title:,width-between-hosts:,use-cache,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
 # separate word. The quotes around `$@' are essential!
 # We need TEMP as the `eval set --' would nuke the return value of getopt.
-TEMP=$(getopt --options=cdfhorstv --long $LOPT -n $PRGNAME -- "$@")
+TEMP=$(getopt --options=cdfhortv --long $LOPT -n $PRGNAME -- "$@")
 
 if [[ $? -ne 0 ]]; then
   echo "Terminating..." >&2
@@ -186,6 +182,10 @@ while true; do
                          removeDF=1
                          #echo " * Duplicate frames will be removed"
                          ;;
+  --session-token)
+                         SESSION="$2"; shift
+                         echo " * Session token to use: $SESSION"
+                         ;;
   --title)
                          OPT_TITLE="$2"; shift
                          #echo " * Title to use: $OPT_TITLE"
@@ -194,15 +194,6 @@ while true; do
                          # Keep short and long files
                          keepSL=1
                          #echo " * Short and Long files will be used"
-                         ;;
-  --with-session|-s)
-                         if [ $sessionFile = none ]; then
-                           echo "You must create either $CONFDIR/session or ./session to use -s option";
-                           exit 1;
-                         fi
-                         # Add "Session ID"
-                         sessionID=1
-                         #echo " * Session ID will be shown"
                          ;;
   --width-between-hosts)
                          OPT_WIDTH_BETWEEN_HOSTS=$2; shift
@@ -364,15 +355,15 @@ awk -f $SETUPDIR/scripts/long2html.awk -v destDir=$DESTDIR < $DESTDIR/callflow.l
 
 # Remove duplicate Frame
 if [ $removeDF = 1 ]; then
-  echo "Removing duplicate frames"
+  #echo "Removing duplicate frames"
   $SETUPDIR/scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR
   rm $DESTDIR/callflow.short
   mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
 fi
 
-# Add session ID
-if [ $sessionID = 1 ]; then
-  awk -f $SETUPDIR/scripts/marksession.awk -v session_token="`cat $sessionFile`" -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
+# Add session ID and colorization
+if [ ! $SESSION == "" ]; then
+  awk -f $SETUPDIR/scripts/marksession.awk -v session_token="$SESSION" -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
   rm $DESTDIR/callflow.short
   mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
 fi
