@@ -24,7 +24,7 @@ readonly PRGNAME=$(basename $0)
 
 ##################################
 # Check configuration files :
-#   callflow.conf, session, filter, order, colors
+#   callflow.conf, session, order, colors
 ##################################
 for CONF in $CONFDIR/callflow.conf callflow.conf; do
   [[ -f $CONF ]] && . $CONF
@@ -56,12 +56,12 @@ else
     sessionFile=none;
 fi
 
-if [ -f filter ]; then
-    filterFile=filter;
-elif [ -f $CONFDIR/filter ]; then
-    filterFile=$CONFDIR/filter;
+if [[ "$FILTER" == "" ]]; then
+  FARG=""
+  FVAL=""
 else
-    filterFile=none;
+  FARG="-R"
+  FVAL="$FILTER"
 fi
 
 if [[ -f order ]]; then
@@ -93,6 +93,12 @@ Options:
    -h           Print short help and exit
   --help        Print this help and exit
   --version, -v Print version
+
+  --filter, -f
+                You can use a filter which contains a tshark DISPLAY filter 
+                (as opposed to a CAPTURE filter).   You  can  learn  more  about
+                these  from  the  tshark  man page.  A useful filter for SIP 
+                traffic is "sip".
 
   --no-loops
                 Prevent flows from and to the same equipment to be represented.
@@ -135,13 +141,13 @@ readonly SHORTHELP="Usage: $PRGNAME [-dhorstv] <filename>"
 
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
-LOPT="help,order-file:,no-loops,no-time,remove-duplicate-frames,title:,width-between-hosts:"
+LOPT="filter:,help,order-file:,no-loops,no-time,remove-duplicate-frames,title:,width-between-hosts:"
 LOPT="$LOPT,use-cache,with-session,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
 # separate word. The quotes around `$@' are essential!
 # We need TEMP as the `eval set --' would nuke the return value of getopt.
-TEMP=$(getopt --options=cdhorstv --long $LOPT -n $PRGNAME -- "$@")
+TEMP=$(getopt --options=cdfhorstv --long $LOPT -n $PRGNAME -- "$@")
 
 if [[ $? -ne 0 ]]; then
   echo "Terminating..." >&2
@@ -155,6 +161,12 @@ while true; do
   case $1 in
   --help)                help; exit ;;
    -h)                   usage; exit;;
+
+  --filter|-f)
+                         # Overwrite the default filter previously red from the configuration file
+                         OPT_FILTER=$2; shift
+                         echo " * Will use the following filter: $OPT_FILTER"
+                         ;;
   --no-loops)
                          # We want to disable auto flows (From and To the same equipment)
                          noLocalLoop=1;
@@ -217,28 +229,16 @@ if [ ! -f "$inputfile" ]; then
 fi
 
 ##################################
-# order file
+# Configuration file overwritting by command line options
 ##################################
-# Build the order file and exit
-if [ $order = 1 ]; then
-  
-  if [[ "$filterFile" == "none" ]]; then
+if [[ ! -z "$OPT_FILTER" ]]; then
+  if [[ "$OPT_FILTER" == "" ]]; then
     FARG=""
     FVAL=""
-
-    echo 'Note: no filter file found -- no filters applied'
   else
-    FARG="-R"
-    FVAL="$(cat $filterFile)"
-
-    echo "Using the following wireshark display filter:"
-    echo "$FVAL"
+    FARS="-R"
+    FVAL="$OPT_FILTER"
   fi
-
-  tshark -r $inputfile $FARG "$FVAL" \
-    -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' |
-    awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort --unique
-  exit 0;
 fi
 
 if [[ -z "$OPT_WIDTH_BETWEEN_HOSTS" ]]; then
@@ -270,6 +270,18 @@ else
 fi
 
 ##################################
+# order file
+##################################
+# Build the order file and exit
+if [ $order = 1 ]; then
+
+  tshark -r $inputfile $FARG "$FVAL" \
+    -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' |
+    awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort --unique
+  exit 0;
+fi
+
+##################################
 # Build short and long files
 ##################################
 # DESTDIR
@@ -281,20 +293,6 @@ cp $inputfile $DESTDIR/$TRACEFILE
 
 # if we do want to build new short and long file
 if [ $keepSL = 0 ]; then
-
-  # filterFile
-  if [[ "$filterFile" == "none" ]]; then
-    FARG=""
-    FVAL=""
-
-    echo 'Note: no filter file found -- no filters applied'
-  else
-    FARG="-R"
-    FVAL="$(cat $filterFile)"
-
-    echo "Using the following wireshark display filter:"
-    echo "$FVAL"
-  fi
 
   tshark -r $inputfile $FARG "$FVAL" -V > $DESTDIR/callflow.long
 
