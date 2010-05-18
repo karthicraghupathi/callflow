@@ -106,7 +106,7 @@ Options:
                 Remove duplicate frames while computing.
                 This option should not be selected on the first run.
 
-  --session-token <session>, -s <session>
+  --session-token <session>
                 Add a session ID to sequence lines and color lines related
                 to this session ID.
                 This option is available by default and the value is 

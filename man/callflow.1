@@ -56,6 +56,14 @@ print version number.
 
 .TP
 .PD 0
+.BI -f " filter"
+.TP
+.PD
+.BI --filter " filter"
+You can use a filter which contains a tshark DISPLAY filter (as opposed to a CAPTURE filter). You  can  learn  more  about these  from  the  tshark  man page.  A useful filter for SIP traffic is "sip". The default filter in callflow configuration file is 'sip or diameter'.
+
+.TP
+.PD 0
 .B --no-loops
 prevent flows from and to the same equipment to be represented.
 
@@ -83,6 +91,11 @@ remove duplicate frames while computing. This option should not be selected on t
 
 .TP
 .PD 0
+.BI --session-token " session"
+Add a session ID to sequence lines and color lines related to this session ID. This option is available by default and the value is  'Call-Id:' (depending on your callflow configuration). You should use this option in order to overwrite the default value. If you want to disable the session detection (show ID and colorization), you should use a empty session token: --session-token ''
+
+.TP
+.PD 0
 .BI --title " title"
 specify the title of the callflow.  If not specified the name of file containing the trace will be used instead.
 
@@ -101,14 +114,6 @@ use callflow and callflow.long files from FILE directory. Note 1 - if -t and -d 
 .PD 0
 .BI --width-between-hosts " width"
 distance between the hosts in final picture.  The distance may vary between 100 and 250.  Default = 200.
-
-.TP
-.PD 0
-.B -s
-.TP
-.PD
-.B --with-session
-add a session ID to Sequence Lines in FILE/callflow.long. This option needs a session file in current folder or in the SETUP folder (example of session file contents: 'Call-Id:').
 
 
 .SS Filtering the diagram
