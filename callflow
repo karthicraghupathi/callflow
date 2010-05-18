@@ -14,12 +14,16 @@
 ##################################
 CONFDIR="/etc/callflow";
 keepSL=0 # do not keep cap.short and cap.long files
-removeDF=0; # do not remove duplicate frames
-order=0; # do not build order file
-noLocalLoop=0; # do not take into account flows from and to the same element (rounded flows)
+removeDF=0 # do not remove duplicate frames
+order=0 # do not build order file
+noLocalLoop=0 # do not take into account flows from and to the same element (rounded flows)
+WITH_SESSION=yes
 readonly VersionSVN="$Id$"; #DO NOT EDIT THIS LINE BY HAND, DATE IS AUTOMATICALLY ADDED BY SUBVERSION
 readonly PRGVRSN=$(awk '{split($4, A, "-"); print A[1] A[2] A[3] "." $3}' <<< "$VersionSVN")
 readonly PRGNAME=$(basename $0)
+
+# Define exit values
+readonly ERR_ARGUMENT=2
 
 ##################################
 # Check configuration files :
@@ -65,6 +69,11 @@ if [[ -f colors ]]; then
   COLORS=$(cat colors)
 fi
 
+[[ -z "$COLORS" ]] && {
+  # At least one color is needed, to prevent errors
+  COLORS="black"
+}
+
 function usage()
 {
   ( echo "$SHORTHELP"
@@ -93,6 +102,10 @@ Options:
   --no-loops
                 Prevent flows from and to the same equipment to be represented.
 
+  --no-session-token
+                Disable the session detection (show ID and colorization), for more
+                information see the --session-token argument.
+
   --no-time
                 Do not show the time.
 
@@ -113,8 +126,7 @@ Options:
                 You should use this option in order to overwrite the default
                 value.
                 If you want to disable the session detection (show ID and 
-                colorization), you should use a empty session token:
-                --session-token ""
+                colorization), you should use: --no-session-token.
 
   --title <title>
                 Use <title> as title in the callflow.  If not specified the
@@ -137,7 +149,8 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
-LOPT="filter:,help,order-file:,no-loops,no-time,remove-duplicate-frames,session-token:,title:,width-between-hosts:,use-cache,version"
+LOPT="filter:,help,order-file:,no-loops,no-session-token,no-time,remove-duplicate-frames"
+LOPT="$LOPT,session-token:,title:,width-between-hosts:,use-cache,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
 # separate word. The quotes around `$@' are essential!
@@ -167,6 +180,9 @@ while true; do
                          noLocalLoop=1;
                          #echo " * Flows from and to the same equipment will not be shown"
                          ;;
+  --no-session-token)
+                         WITH_SESSION=no
+                         ;;
   --no-time)
                          OPT_SHOW_TIME=no
                          #echo " * Time will not be shown"
@@ -183,7 +199,11 @@ while true; do
                          ;;
   --session-token)
                          SESSION="$2"; shift
-                         echo " * Session token to use: $SESSION"
+                         if [[ -n "$SESSION" ]]; then
+                           WITH_SESSION=yes
+                         else
+                           WITH_SESSION=no
+                         fi
                          ;;
   --title)
                          OPT_TITLE="$2"; shift
@@ -201,7 +221,6 @@ while true; do
   --version|-v)          echo "$PRGNAME version: $PRGVRSN"; exit;;
   --)                    shift; break;;
    *)                    echo "unknow argument \"$1\""; exit $ERR_ARGUMENT;;
-                         ;;
   esac
   shift
 done
@@ -258,6 +277,9 @@ if [[ -n "$OPT_TITLE" ]]; then
 else
   TITLE="$inputfile"
 fi
+
+[[ $WITH_SESSION == "yes" ]] && echo " * Session token to use: $SESSION"
+
 
 ##################################
 # order file
@@ -362,7 +384,7 @@ if [ $removeDF = 1 ]; then
 fi
 
 # Add session ID and colorization
-if [ ! $SESSION == "" ]; then
+if [[ $WITH_SESSION == "yes" ]]; then
   awk -f $SETUPDIR/scripts/marksession.awk -v session_token="$SESSION" -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
   rm $DESTDIR/callflow.short
   mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short

@@ -68,6 +68,12 @@ You can use a filter which contains a tshark DISPLAY filter (as opposed to a CAP
 Prevent flows from and to the same equipment to be represented.
 
 .TP
+.PD
+.B --no-session-token
+Disable the session detection (show ID and colorization), for more information
+see the --session-token argument.
+
+.TP
 .PD 0
 .B --no-time
 Do not show the time.
@@ -92,7 +98,7 @@ Remove duplicate frames while computing. This option should not be selected on t
 .TP
 .PD 0
 .BI --session-token " session"
-Add a session ID to sequence lines and color lines related to this session ID. This option is available by default and the value is  'Call-Id:' (depending on your callflow configuration). You should use this option in order to overwrite the default value. If you want to disable the session detection (show ID and colorization), you should use a empty session token: --session-token ''
+Add a session ID to sequence lines and color lines related to this session ID. This option is available by default and the value is  'Call-Id:' (depending on your callflow configuration). You should use this option in order to overwrite the default value. If you want to disable the session detection (show ID and colorization), you should --no-session-token.
 
 .TP
 .PD 0
