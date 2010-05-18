@@ -165,16 +165,16 @@ while true; do
   --filter|-f)
                          # Overwrite the default filter previously red from the configuration file
                          OPT_FILTER=$2; shift
-                         echo " * Will use the following filter: $OPT_FILTER"
+                         #echo " * Will use the following filter: $OPT_FILTER"
                          ;;
   --no-loops)
                          # We want to disable auto flows (From and To the same equipment)
                          noLocalLoop=1;
-                         echo " * Flows from and to the same equipment will not be shown"
+                         #echo " * Flows from and to the same equipment will not be shown"
                          ;;
   --no-time)
                          OPT_SHOW_TIME=no
-                         echo " * Time will not be shown"
+                         #echo " * Time will not be shown"
                          ;;
   --order-file|-o)
                          # Inputfile is a cap-file
@@ -184,16 +184,16 @@ while true; do
   --remove-duplicate-frames|-d)
                          # Remove duplicate frames
                          removeDF=1
-                         echo " * Duplicate frames will be removed"
+                         #echo " * Duplicate frames will be removed"
                          ;;
   --title)
                          OPT_TITLE="$2"; shift
-                         echo " * Title to use: $OPT_TITLE"
+                         #echo " * Title to use: $OPT_TITLE"
                          ;;
   --use-cache|-c|-t)
                          # Keep short and long files
                          keepSL=1
-                         echo " * Short and Long files will be used"
+                         #echo " * Short and Long files will be used"
                          ;;
   --with-session|-s)
                          if [ $sessionFile = none ]; then
@@ -202,11 +202,11 @@ while true; do
                          fi
                          # Add "Session ID"
                          sessionID=1
-                         echo " * Session ID will be shown"
+                         #echo " * Session ID will be shown"
                          ;;
   --width-between-hosts)
                          OPT_WIDTH_BETWEEN_HOSTS=$2; shift
-                         echo " * Width between hosts to use: $OPT_WIDTH_BETWEEN_HOSTS"
+                         #echo " * Width between hosts to use: $OPT_WIDTH_BETWEEN_HOSTS"
                          ;;
   --version|-v)          echo "$PRGNAME version: $PRGVRSN"; exit;;
   --)                    shift; break;;
@@ -224,7 +224,7 @@ inputfile=$1
 # Check input file
 ##################################
 if [ ! -f "$inputfile" ]; then 
-  echo "Input file does not exists!"
+  echo "$PRGNAME: error: Input file does not exists!"
   exit 1;
 fi
 
@@ -333,12 +333,15 @@ if [ $keepSL = 0 ]; then
 else
   # We want to keep SL files
   # disable duplicate frame remove
+  if [ $removeDF = 1 ]; then
+    echo "$PRGNAME: warning: duplicate frames will not be removed!"
+  fi
   removeDF=0
 fi
 
 # We have to check if short and long file exist
 if [ ! -f $DESTDIR/callflow.long ]; then
-  echo "File callflow.long does not exist!"
+  echo "$PRGNAME: error: File callflow.long does not exist!"
   exit 1;
 else
   # Some SIP messages don't include a space between the Call-ID tag and
@@ -347,7 +350,7 @@ else
 fi
 
 if [ ! -f $DESTDIR/callflow.short ]; then
-  echo "File callflow.short does not exist!"
+  echo "$PRGNAME: error: File callflow.short does not exist!"
   exit 1;
 else
   # Remove Malformed packages from callflow.short, especially because it
@@ -405,10 +408,10 @@ if [ $orderFile != none ]; then
 
     finalOrderFile=$TMPDIR/callflow.order-final.$PPID
 
-    echo Using the following order:
-    cat $finalOrderFile
+    #echo Using the following order:
+    #cat $finalOrderFile
 else
-    echo 'Warning: order file not found -- using alphabetical'
+    echo "$PRGNAME: warning: order file not found -- using alphabetical"
     finalOrderFile=$TMPDIR/callflow.auto-uniq.$PPID
 fi
 
