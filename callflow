@@ -29,7 +29,7 @@ readonly ERR_ARGUMENT=2
 # Check configuration files :
 #   callflow.conf, session, order, colors
 ##################################
-for CONF in $CONFDIR/callflow.conf callflow.conf; do
+for CONF in $CONFDIR/callflow.conf $HOME/.callflow/callflow.conf callflow.conf; do
   [[ -f $CONF ]] && . $CONF
 done
 
@@ -277,9 +277,6 @@ if [[ -n "$OPT_TITLE" ]]; then
 else
   TITLE="$inputfile"
 fi
-
-[[ $WITH_SESSION == "yes" ]] && echo " * Session token to use: $SESSION"
-
 
 ##################################
 # order file

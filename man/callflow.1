@@ -304,6 +304,13 @@ Well, this is kind of ugly:
     i.  clean up all the /tmp files
 
 
+.SH "FILES"
+The system-wide configuration file \fI/etc/callflow.conf\fR, and the personal ones \fI$HOME/.callflow.conf\fR
+and \fIcallflow.conf\fR are used by callflow.  If the system-wide configuration file exists, it is read first,
+overriding the default settings.  If the personal configuration files exists, they are read next, overriding
+any previous values.
+
+
 .SH TO DO
 It would be much nicer to take the tshark filtered output and build an intermediate XML representation of it.  Then use XSLT to transform it into the SVG file.  This way you could write up illustrative sequence diagrams more easily and make use of more tools that can manipulate XML.
 
@@ -312,6 +319,10 @@ Write port numbers at the ends of each arrow in an unobtrusive fashion.
 Automatically find a "best order" for the nodes, possibly based on total arrow length minimization.
 
 Specify output filenames and locations on the command line.
+
+
+.SH "SEE ALSO"
+Callflow project page at \fIhttp://callflow.sourceforge.net\fR
 
 
 .SH AUTHORS
