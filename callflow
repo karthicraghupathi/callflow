@@ -16,7 +16,7 @@ CONFDIR="/etc/callflow";
 keepSL=0 # do not keep cap.short and cap.long files
 removeDF=0 # do not remove duplicate frames
 order=0 # do not build order file
-noLocalLoop=0 # do not take into account flows from and to the same element (rounded flows)
+localLoop=1 # take into account flows from and to the same element (rounded flows)
 WITH_SESSION=yes
 readonly VersionSVN="$Id$"; #DO NOT EDIT THIS LINE BY HAND, DATE IS AUTOMATICALLY ADDED BY SUBVERSION
 readonly PRGVRSN=$(awk '{split($4, A, "-"); print A[1] A[2] A[3] "." $3}' <<< "$VersionSVN")
@@ -93,11 +93,14 @@ Options:
   --help        Print this help and exit
   --version, -v Print version
 
-  --filter <filter>, -f <filter>
-                You can use a filter which contains a tshark DISPLAY filter 
-                (as opposed to a CAPTURE filter).   You  can  learn  more  about
-                these  from  the  tshark  man page.  A useful filter for SIP 
-                traffic is "sip".
+  --capture-filter <filter>, -f <filter>
+                A filter can be used to show only those frames that match the
+                given filter criteria.  This filter is for traces that have been
+                captured with programs such as wireshark, snoop, tcpdump, thsark
+                and the like.  $PRGNAME uses tshark's DISPLAY filter functionality
+                to filter the trace.  More information about tshark's DISPLAY
+                filter can be obtained from the tshark man page.
+                A useful filter for SIP traffic is "sip".
 
   --no-loops
                 Prevent flows from and to the same equipment to be represented.
@@ -149,7 +152,7 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
-LOPT="filter:,help,order-file:,no-loops,no-session-token,no-time,remove-duplicate-frames"
+LOPT="capture-filter:,help,order-file:,no-loops,no-session-token,no-time,remove-duplicate-frames"
 LOPT="$LOPT,session-token:,title:,width-between-hosts:,use-cache,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
@@ -170,7 +173,7 @@ while true; do
   --help)                help; exit ;;
    -h)                   usage; exit;;
 
-  --filter|-f)
+  --capture-filter|-f)
                          # Overwrite the default filter previously red from the configuration file
                          OPT_FILTER=$2; shift
                          #echo " * Will use the following filter: $OPT_FILTER"
@@ -445,8 +448,8 @@ fi
   }
   numTraces = numHosts
 
-  # Add noLocalLoop to vars in order to delete self messaging
-  noLocalLoop = "$noLocalLoop"
+  # Add localLoop to vars in order to delete self messaging
+  localLoop = "$localLoop"
 
 AWK_BEGIN_SECTION
 
