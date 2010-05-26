@@ -59,8 +59,8 @@ Print version number.
 .BI -f " filter"
 .TP
 .PD
-.BI --filter " filter"
-You can use a filter which contains a tshark DISPLAY filter (as opposed to a CAPTURE filter). You  can  learn  more  about these  from  the  tshark  man page.  A useful filter for SIP traffic is "sip". The default filter in callflow configuration file is 'sip or diameter'.
+.BI --cap-filter " filter"
+A filter can be used to show only those frames that match the given filter criteria.  This filter is for traces that have been captured with programs such as wireshark, snoop, tcpdump, thsark and the like.  Callflow uses tshark's DISPLAY filter functionality to filter the trace.  More information about tshark's DISPLAY filter can be obtained from the tshark man page. A useful filter for SIP traffic is "sip".
 
 .TP
 .PD 0
