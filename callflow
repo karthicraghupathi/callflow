@@ -111,7 +111,7 @@ Options:
                 Do not show the time.
 
   --list-nodes, -o
-                Lists the unique nodes in the trace file
+                List the unique nodes in the trace file
                 (Don't forget to redirect output in another file.
                  Example of use: $PRGNAME --list-nodes capture.cap > order)
 

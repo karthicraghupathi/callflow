@@ -64,6 +64,14 @@ A filter can be used to show only those frames that match the given filter crite
 
 .TP
 .PD 0
+.B -o
+.TP
+.PD
+.B --list-nodes
+List the unique nodes in the trace file (don't forget to redirect output in another file. Example of use: callflow -o capture.cap > order).
+
+.TP
+.PD 0
 .B --no-loops
 Prevent flows from and to the same equipment to be represented.
 
@@ -77,15 +85,6 @@ see the --session-token argument.
 .PD 0
 .B --no-time
 Do not show the time.
-
-
-.TP
-.PD 0
-.B -o
-.TP
-.PD
-.B --order-file
-Create an order file with the nodes in the trace file (Don't forget to redirect output in another file. Example of use: callflow -o capture.cap > order)
 
 .TP
 .PD 0
@@ -122,8 +121,8 @@ Note 2: this option sould not be selected on the first run.
 
 .TP
 .PD 0
-.BI --width-between-hosts " width"
-Distance between the hosts in final picture.  The distance may vary between 100 and 250.  Default = 200.
+.BI --width-between-nodes " width"
+Distance between the nodes in final picture.  The distance may vary between 100 and 250.  Default = 200.
 
 
 .SS Filtering the diagram
@@ -134,7 +133,7 @@ You can create a file in the current directory called filter, or a file in the s
 If you know what nodes in your network are logically connected, you can have the diagram ordered in a meaningful way.  Just create a file called order in your current directory or in the setup directory with the order of your network nodes, one per line.  You must use the exact name or IP address that appears in your capture file in the form: <host/ip>:<port>, or use a regular expression that resolves to that name. Using a regular expression can be useful to collapse several nodes in to one logical node.
 
 You can generate an order file with:
-  callflow -o capture-file.cap > order
+  callflow --list-nodes capture-file.cap > order
 
 The format of the order file is as follows:
 <node-regex-pattern> [optional-label]
@@ -261,11 +260,8 @@ You can add a comments to your diagram by adding a line that start with "# " to 
 
 
 .SH Example
-.SS Create a filter file:
- $ echo "sip" > filter
-
 .SS Create an order file:
- $ callflow -o mycapture.cap > order
+ $ callflow --list-nodes mycapture.cap > order
  (edit order file as needed)
 
 .SS Generate initial diagram:
