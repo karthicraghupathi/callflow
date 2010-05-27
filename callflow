@@ -6,7 +6,6 @@
 ###
 ###  Output: $DESTDIR/callflow.svg, $DESTDIR/callflow.png, $DESTDIR/index.html, $DESTDIR/frames/frame*.html
 ###
-###  Files:  order, filter, session, $CONFDIR/order, $CONFDIR/filter, $CONFDIR/session
 ###
 
 ##################################
@@ -15,7 +14,7 @@
 CONFDIR="/etc/callflow";
 keepSL=0 # do not keep cap.short and cap.long files
 removeDF=0 # do not remove duplicate frames
-order=0 # do not build order file
+ORDER=0 # do not build order file
 localLoop=1 # take into account flows from and to the same element (rounded flows)
 WITH_SESSION=yes
 readonly VersionSVN="$Id$"; #DO NOT EDIT THIS LINE BY HAND, DATE IS AUTOMATICALLY ADDED BY SUBVERSION
@@ -27,7 +26,7 @@ readonly ERR_ARGUMENT=2
 
 ##################################
 # Check configuration files :
-#   callflow.conf, session, order, colors
+#   callflow.conf, order, colors
 ##################################
 for CONF in $CONFDIR/callflow.conf $HOME/.callflow/callflow.conf callflow.conf; do
   [[ -f $CONF ]] && . $CONF
@@ -74,17 +73,16 @@ fi
   COLORS="black"
 }
 
-function usage()
-{
+function usage() {
+
   ( echo "$SHORTHELP"
     echo "See $PRGNAME --help for extended help."
   ) >&2
   exit 0
 }
 
-function help ()
-################
-{
+function help () {
+
   cat << EOF >&1
 Usage: $PRGNAME [options] <trace file>
 
@@ -112,10 +110,10 @@ Options:
   --no-time
                 Do not show the time.
 
-  --order-file, -o
-                Create an order file with the nodes in the trace file
+  --list-nodes, -o
+                Lists the unique nodes in the trace file
                 (Don't forget to redirect output in another file.
-                 Example of use: callflow -o capture.cap > order)
+                 Example of use: $PRGNAME --list-nodes capture.cap > order)
 
   --remove-duplicate-frames, -d
                 Remove duplicate frames while computing.
@@ -141,8 +139,8 @@ Options:
                 Note 1: if -c and -d are used, only -c is executed.
                 Note 2: this option sould not be selected on the first run.
 
-  --width-between-hosts <width>
-                Distance between adjacent hosts in final picture.  The width may
+  --width-between-nodes <width>
+                Distance between adjacent nodes in final picture.  The width may
                 vary between 100 and 250.  Default = 200.
 
 EOF
@@ -152,8 +150,8 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
-LOPT="capture-filter:,help,order-file:,no-loops,no-session-token,no-time,remove-duplicate-frames"
-LOPT="$LOPT,session-token:,title:,width-between-hosts:,use-cache,version"
+LOPT="capture-filter:,help,list-nodes,no-loops,no-session-token,no-time,remove-duplicate-frames"
+LOPT="$LOPT,session-token:,title:,width-between-nodes:,use-cache,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
 # separate word. The quotes around `$@' are essential!
@@ -178,6 +176,9 @@ while true; do
                          OPT_FILTER=$2; shift
                          #echo " * Will use the following filter: $OPT_FILTER"
                          ;;
+  --list-nodes|-o)
+                         ORDER=1
+                         ;;
   --no-loops)
                          # We want to disable auto flows (From and To the same equipment)
                          noLocalLoop=1;
@@ -189,11 +190,6 @@ while true; do
   --no-time)
                          OPT_SHOW_TIME=no
                          #echo " * Time will not be shown"
-                         ;;
-  --order-file|-o)
-                         # Inputfile is a cap-file
-                         # make it an order file
-                         order=1
                          ;;
   --remove-duplicate-frames|-d)
                          # Remove duplicate frames
@@ -217,9 +213,9 @@ while true; do
                          keepSL=1
                          #echo " * Short and Long files will be used"
                          ;;
-  --width-between-hosts)
-                         OPT_WIDTH_BETWEEN_HOSTS=$2; shift
-                         #echo " * Width between hosts to use: $OPT_WIDTH_BETWEEN_HOSTS"
+  --width-between-nodes)
+                         OPT_WIDTH_BETWEEN_NODES=$2; shift
+                         #echo " * Width between nodes to use: $OPT_WIDTH_BETWEEN_NODES"
                          ;;
   --version|-v)          echo "$PRGNAME version: $PRGVRSN"; exit;;
   --)                    shift; break;;
@@ -236,7 +232,7 @@ inputfile=$1
 # Check input file
 ##################################
 if [ ! -f "$inputfile" ]; then 
-  echo "$PRGNAME: error: Input file does not exists!"
+  echo "$PRGNAME: error: Input file ($inputfile) does not exists!"
   exit 1;
 fi
 
@@ -253,20 +249,20 @@ if [[ ! -z "$OPT_FILTER" ]]; then
   fi
 fi
 
-if [[ -z "$OPT_WIDTH_BETWEEN_HOSTS" ]]; then
-  WIDTH_BETWEEN_HOSTS=200
+if [[ -z "$OPT_WIDTH_BETWEEN_NODES" ]]; then
+  WIDTH_BETWEEN_NODES=200
 else
-  if [[ $OPT_WIDTH_BETWEEN_HOSTS -gt 250 ]]; then
-    echo "$PRGNAME: error: width between hosts too big" >&2
+  if [[ $OPT_WIDTH_BETWEEN_NODES -gt 250 ]]; then
+    echo "$PRGNAME: error: width between nodes too big" >&2
     exit 1
   fi
 
-  if [[ $OPT_WIDTH_BETWEEN_HOSTS -lt 100 ]]; then
-    echo "$PRGNAME: error: width between hosts too small" >&2
+  if [[ $OPT_WIDTH_BETWEEN_NODES -lt 100 ]]; then
+    echo "$PRGNAME: error: width between nodes too small" >&2
     exit 1
   fi
 
-  WIDTH_BETWEEN_HOSTS=$OPT_WIDTH_BETWEEN_HOSTS
+  WIDTH_BETWEEN_NODES=$OPT_WIDTH_BETWEEN_NODES
 fi
 
 if [[ -z "$OPT_SHOW_TIME" ]]; then
@@ -285,7 +281,7 @@ fi
 # order file
 ##################################
 # Build the order file and exit
-if [ $order = 1 ]; then
+if [[ $ORDER = 1 ]]; then
 
   tshark -r $inputfile $FARG "$FVAL" \
     -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' |
@@ -436,7 +432,7 @@ fi
 
   # Add graph variables
   yLineSpace = 24
-  xHostSpace = $WIDTH_BETWEEN_HOSTS
+  xHostSpace = $WIDTH_BETWEEN_NODES
   rightMargin = 100
   topMargin = 50
   bottomMargin = 50
