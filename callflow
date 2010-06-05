@@ -73,6 +73,45 @@ fi
   COLORS="black"
 }
 
+function make_long_and_short_caches() {
+
+  tshark -r $inputfile $FARG "$FVAL" -V > $DESTDIR/callflow.long
+
+  tshark -r $inputfile $FARG "$FVAL" -t a \
+    -o 'column.format: "No.", "%m", "Time", "%t", "Src", "%s", "Port", "%S", "Ignored", "%m", "Dest", "%d", "Port", "%D", "Protocol", "%p", "Info", "%i"' |
+    sed 's/^[[:blank:]]*//;s/\([0-9]\{3\}\)000 /\1 /' | awk '{
+      # The match and the substr are working together to get the string starting
+      # at field 9 till the end of the line.  This provides the frame summary line.
+      # But the frame summary may contain characters that influence the match,
+      # such as the "(" and ")" characters.  Therefor look for the end of the
+      # protocol field (8) as the protocol field contains most likely regular
+      # ascii characters.
+
+      # The A[0, "start"] gives the start position of the $8
+      match($0, $8, A)
+      SUMMARY_START = A[0, "start"] + length($8) + 1
+      SUMMARY = substr($0, SUMMARY_START)
+      printf("%s|%s|%s|%s||%s|%s|%s|%s\n", $1, $2, $3, $4, $6, $7, $8, SUMMARY)
+
+  }' > $TMPDIR/${PRGNAME}-tshark-1.$$
+
+  tshark -r $inputfile $FARG "$FVAL" -t a \
+    -o 'column.format: "No.", "%m", "Cseq", "%Cus:sip.CSeq"' |
+    sed 's/^[[:blank:]]*//;s/ /|/' > $TMPDIR/${PRGNAME}-tshark-2.$$
+
+  ( # echo "time|no|trace|src|srcport|dir|dst|dstport|prot|summary|remark"
+    join -t "|" --nocheck-order $TMPDIR/${PRGNAME}-tshark-1.$$ $TMPDIR/${PRGNAME}-tshark-2.$$ | awk -F "|" '{
+      printf("%s||%s|", $2, $1)
+      for ( N = 3; N < NF; N++) {
+        printf("%s|", $N)
+      }
+      printf("%s\n", $N)
+    }'
+  ) > $DESTDIR/callflow.short
+
+  rm $TMPDIR/${PRGNAME}-tshark-1.$$ $TMPDIR/${PRGNAME}-tshark-2.$$
+}
+
 function usage() {
 
   ( echo "$SHORTHELP"
@@ -224,8 +263,6 @@ while true; do
   shift
 done
 
-echo 
-
 inputfile=$1
 
 ##################################
@@ -277,25 +314,28 @@ else
   TITLE="$inputfile"
 fi
 
+# DESTDIR
+DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
+mkdir -p $DESTDIR
+
 ##################################
 # order file
 ##################################
 # Build the order file and exit
 if [[ $ORDER = 1 ]]; then
 
-  tshark -r $inputfile $FARG "$FVAL" \
-    -o 'column.format: "Src", "%s", "Port", "%S", "Dest", "%d", "Port", "%D"' |
-    awk '{ printf("%s:%s\n%s:%s\n", $1, $2, $3, $4); }' | sort --unique
-  exit 0;
+  [[ ! -f $DESTDIR/callflow.short ]] && make_long_and_short_caches
+
+  awk -F"|" '{
+    if ($0 !~ "#" ) { printf ("%s:%s\n%s:%s\n", $4, $5, $7, $8) }
+  }' $DESTDIR/callflow.short | sort --unique
+
+  exit 0
 fi
 
 ##################################
 # Build short and long files
 ##################################
-# DESTDIR
-DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
-mkdir -p $DESTDIR
-
 # Copy the input file into destdir
 TRACEFILE=$(basename $inputfile)
 cp $inputfile $DESTDIR/$TRACEFILE
@@ -303,41 +343,7 @@ cp $inputfile $DESTDIR/$TRACEFILE
 # if we do want to build new short and long file
 if [ $keepSL = 0 ]; then
 
-  tshark -r $inputfile $FARG "$FVAL" -V > $DESTDIR/callflow.long
-
-  tshark -r $inputfile $FARG "$FVAL" -t a \
-    -o 'column.format: "No.", "%m", "Time", "%t", "Src", "%s", "Port", "%S", "Ignored", "%m", "Dest", "%d", "Port", "%D", "Protocol", "%p", "Info", "%i"' |
-    sed 's/^[[:blank:]]*//;s/\([0-9]\{3\}\)000 /\1 /' | awk '{
-      # The match and the substr are working together to get the string starting
-      # at field 9 till the end of the line.  This provides the frame summary line.
-      # But the frame summary may contain characters that influence the match,
-      # such as the "(" and ")" characters.  Therefor look for the end of the
-      # protocol field (8) as the protocol field contains most likely regular
-      # ascii characters.
-
-      # The A[0, "start"] gives the start position of the $8
-      match($0, $8, A)
-      SUMMARY_START = A[0, "start"] + length($8) + 1
-      SUMMARY = substr($0, SUMMARY_START)
-      printf("%s|%s|%s|%s||%s|%s|%s|%s\n", $1, $2, $3, $4, $6, $7, $8, SUMMARY)
-
-  }' > $TMPDIR/${PRGNAME}-tshark-1.$PPID
-
-  tshark -r $inputfile $FARG "$FVAL" -t a \
-    -o 'column.format: "No.", "%m", "Cseq", "%Cus:sip.CSeq"' |
-    sed 's/^[[:blank:]]*//;s/ /|/' > $TMPDIR/${PRGNAME}-tshark-2.$PPID
-
-  ( # echo "time|no|trace|src|srcport|dir|dst|dstport|prot|summary|remark"
-    join -t "|" --nocheck-order $TMPDIR/${PRGNAME}-tshark-1.$PPID $TMPDIR/${PRGNAME}-tshark-2.$PPID | awk -F "|" '{
-      printf("%s||%s|", $2, $1)
-      for ( N = 3; N < NF; N++) {
-        printf("%s|", $N)
-      }
-      printf("%s\n", $N)
-    }'
-  ) > $DESTDIR/callflow.short
-
-  rm $TMPDIR/${PRGNAME}-tshark-1.$PPID $TMPDIR/${PRGNAME}-tshark-2.$PPID
+  make_long_and_short_caches
 
 else
   # We want to keep SL files
