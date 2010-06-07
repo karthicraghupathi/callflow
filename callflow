@@ -110,6 +110,10 @@ function make_long_and_short_caches() {
   ) > $DESTDIR/callflow.short
 
   rm $TMPDIR/${PRGNAME}-tshark-1.$$ $TMPDIR/${PRGNAME}-tshark-2.$$
+
+  TRACE_FILE=$(basename $inputfile)
+  MD5SUM=$(md5sum $inputfile | awk '{print $1}')
+  echo "$TRACE_FILE|$MD5SUM" > $DESTDIR/metadb
 }
 
 function usage() {
@@ -318,13 +322,35 @@ fi
 DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
 mkdir -p $DESTDIR
 
+# Use cache?
+if [[ -f $DESTDIR/metadb ]]; then
+  if [[ -f $DESTDIR/callflow.short ]]; then
+    FILE=$(basename $inputfile)
+    MD5_FILE=$(md5sum $inputfile | awk '{print $1}')
+
+    MD5_CACHE=$(awk -F"|" -v FILE=$FILE '{if ($1 == FILE) {print $2} }' $DESTDIR/metadb)
+
+    if [[ $MD5_FILE == $MD5_CACHE ]]; then
+      USE_CACHE=yes
+    else
+      USE_CACHE=no
+    fi
+  else
+    # The file $DESTDIR/callflow.short does not exist
+    USE_CACHE=no
+  fi
+else
+  # The file $DESTDIR/metadb does not exist
+  USE_CACHE=no
+fi
+
 ##################################
 # order file
 ##################################
 # Build the order file and exit
 if [[ $ORDER = 1 ]]; then
 
-  [[ ! -f $DESTDIR/callflow.short ]] && make_long_and_short_caches
+  [[ $USE_CACHE == "no" ]] && make_long_and_short_caches
 
   awk -F"|" '{
     if ($0 !~ "#" ) { printf ("%s:%s\n%s:%s\n", $4, $5, $7, $8) }
