@@ -39,12 +39,12 @@ accepts the followings options:
 .TP
 .PD 0
 .B -h
-Print the short help message
+Print the short help message.
 
 .TP
 .PD 0
 .B --help
-Print the long help message
+Print the long help message.
 
 .TP
 .PD 0
@@ -126,7 +126,7 @@ Distance between the nodes in final picture.  The distance may vary between 100 
 
 
 .SS Filtering the diagram
-You can create a file in the current directory called filter, or a file in the setup directory called filter which contains a tshark DISPLAY filter (as opposed to a CAPTURE filter).  You can learn more about these from the tshark man page.  A useful filter for SIP traffic is 'sip'.
+A filter can be used to show only those frames that match the given filter criteria.  This filter is for traces that have been captured with programs such as wireshark, snoop, tcpdump, thsark and the like.  Callflow uses tshark's DISPLAY filter functionality to filter the trace.  More information about tshark's DISPLAY filter can be obtained from the tshark man page. A useful filter for SIP traffic is "sip".
 
 
 .SS Ordering the diagram
@@ -166,21 +166,13 @@ You can title the diagram by using the --title option. If no --title option is p
 You can remove duplicate frames from the short text-file with:
 callflow --remove-duplicate-frames foo
 
-Duplicates are determined by examining each line in foo, and comparing frames/Frame<#>.html with all previously seen frames. Because we are comparing with html files, the duplicate option assumes that those html files exist.
-
-  / \\
- / ! \\ To have these html files, the script must be run once without -d option.
- -----
-
+Duplicates are determined by examining each line in foo, and comparing frames/Frame<#>.html with all previously seen frames.
 
 .SS Adding "Session ID" to Sequence Lines
-You can have callflow color every Frame based on a specific pattern. For instance, it can be usefull when all SIP packets contains a header "Call-Id:" (case insensitive). This header is followed by an identifier that indicates which "SIP dialog" this packet belongs to. Callflow can use the same color for all flows that have the same Call-Id.
+By default, callflow colors every frame based on a specific pattern: 'Call-Id:'. This pattern is a header followed by an identifier that indicates which "SIP dialog" this packet belongs to. Callflow can use the same color for all flows that have the same identifier.
 
-To have callflow to colorate, you have to create a file at either SETUPDIR/session or ./session with the contents:
-Call-Id:
-
-and run callflow with:
-callflow -s capture-file.cap;
+You can change the pattern by using the --session-token option:
+callflow --session-token capture-file.cap;
 
 
 .SH TWEAKING TSHARK PREFERENCE
@@ -244,7 +236,7 @@ To process your text files, type the following:
 
 
 .SH ADDING COMMENTS
-You can add a comments to your diagram by adding a line that start with "# " to short text-file. If in the middle of the line there is a " ! " token, then the comment becomes a hyper-link with what precedes the " ! " is the text that is displayed, and what comes after is the link to be followed when a user clicks on the text.
+You can add a comment to your diagram by adding a line that start with "# " to short text-file. If in the middle of the line there is a " ! " token, then the comment becomes a hyper-link with what precedes the " ! " is the text that is displayed, and what comes after is the link to be followed when a user clicks on the text.
 
 .I For example:
 

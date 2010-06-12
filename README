@@ -8,7 +8,7 @@ Building the callflow plateform independant package
 ===================================================
 
 Prerequisites:	
-		(g)awk
+		gawk
 		tshark
 		inkscape
 
@@ -40,26 +40,13 @@ You can view callflow.svg with the Adobe SVG plugin or Firefox, or you can view 
 Options availables
 ==================
 Usage: callflow [OPTION] FILE
-  -h, print this help message
-  -o, create an order file with the nodes in FILE.cap
-      (Don't forget to redirect output in another file. 
-      Example of use: callflow -o capture.cap > order)
-  -t, use callflow and callflow.long files from FILE directory.
-      note 1 - if -t and -d are used, only -t is executed.
-      note 2 - this option sould not be selected on the first run.
-  -d, remove duplicate frames while computing.
-      This option should not be selected on the first run.
-  -s, add a session ID to Sequence Lines in FILE/callflow.long
-      This option needs a session file in current folder or
-      in the SETUP folder (example of session file contents: 'Call-Id:').
-  -nl, prevent flows from and to the same equipment to be represented.
-  -v, print version number.
+See man page for available options.
 
 
 Filtering the diagram
 =====================
 
-You can create a file in the current directory called filter, or a file in the setup directory called filter which contains a tshark DISPLAY filter (as opposed to a CAPTURE filter).  You can learn more about these from the tshark man page.  A useful filter for SIP traffic is 'sip'.
+A filter can be used to show only those frames that match the given filter criteria.  This filter is for traces that have been captured with programs such as wireshark, snoop, tcpdump, thsark and the like.  Callflow uses tshark's DISPLAY filter functionality to filter the trace.  More information about tshark's DISPLAY filter can be obtained from the tshark man page. A useful filter for SIP traffic is "sip".
 
 
 Ordering the diagram
@@ -68,7 +55,7 @@ Ordering the diagram
 If you know what nodes in your network are logically connected, you can have the diagram ordered in a meaningful way.  Just create a file called order in your current directory or in the setup directory with the order of your network nodes, one per line.  You must use the exact name or IP address that appears in your capture file in the form: <host/ip>:<port>, or use a regular expression that resolves to that name. Using a regular expression can be useful to collapse several nodes in to one logical node.
 
 You can generate an order file with:
-  callflow -o capture-file.cap > order
+  callflow --list-nodes capture-file.cap > order
 
 The format of the order file is as follows:
 <node-regex-pattern> [optional-label]
@@ -103,32 +90,24 @@ firewall !f!Firewall
 Titling the diagram
 ===================
 
-You can create a file in the current directory called title, or a file in the setup directory (eg : /usr/share/callflow/) called title which contains text to be displayed as a title to the diagram. 
-If neither of these files exist, then a title text will be generated based upon basename of the capture file name.
+You can title the diagram by using the --title option. If no --title option is provided, a default title based on the filename will be used.
 
 
 Removing Duplicate Frames
 =========================
 
 You can remove duplicate frames from the short text-file with:
-callflow -d foo
+callflow --remove-duplicate-frames foo
 
 Duplicates are determined by examining each line in foo, and comparing frames/Frame<#>.html with all previously seen frames. Because we are comparing with html files, the duplicate option assumes that those html files exist.
-
- / \
-/ ! \ To have this html file, the script must be run once without -d option.
------
 
 
 Adding "Session ID" to Sequence Lines
 =====================================
-You can have callflow to colorate every Frame based on a specific pattern. For instance, it can be usefull when all SIP packets contains a header "Call-Id:" (case insensitive). This header is followed by an identifier that indicates which "SIP dialog" this packet belongs to. Callflow can use the same color for all flows that have the same Call-Id.
+By default, callflow colors every frame based on a specific pattern: 'Call-Id:'. This pattern is a header followed by an identifier that indicates which "SIP dialog" this packet belongs to. Callflow can use the same color for all flows that have the same identifier.
 
-To have callflow to colorate, you have to create a file at either SETUPDIR/session or ./session with the contents:
-Call-Id:
-
-and run callflow with:
-callflow -s capture-file.cap;
+You can change the pattern by using the --session-token option:
+callflow --session-token capture-file.cap;
 
 
 Tweaking ~/.wireshark/preferences for frames/Frame*.html
@@ -152,12 +131,12 @@ When you run callflow, you can take the output files callflow.short and callflow
 
 The first file (.short) contains the trace information, one transaction per line, in the following format:
 
-<frame #> <src node> <src port> <ignored or session> <dest node> <dest port> <description>
+ <time>|<trace-filename>|<frame #>|<src node>|<src port>|<direction-sessionID>|<dest node>|<dest port>|<protocol>|<summary>|<remark>
 
 For example:
 
-1 Alice 1000 -> Bob 2000 Alice sends Bob an Invite
-2 Bob 2000 -> Alice 1000 Bob sends Alice a 200
+16:07:56.616502||31|172.20.154.66|sip|{1}|172.20.154.92|dsmeter_iatc|SIP/SDP|Request: INVITE sip:68@openims.fr, with session description
+16:07:56.617453||32|172.20.154.92|dsmeter_iatc|{1}|172.20.154.66|sip|SIP|Status: 100 trying -- your call is important to us
 etc.
 
  / \
@@ -196,7 +175,7 @@ To process your text files, type the following:
 
 Adding Comments
 ===============
-You can add a comments to your diagram by adding a line that start with "# " to short text-file. If in the middle of the line there is a " ! " token, then the comment becomes a hyper-link with what precedes the " ! " is the text that is displayed, and what comes after is the link to be followed when a user clicks on the text.
+You can add a comment to your diagram by adding a line that start with "# " to short text-file. If in the middle of the line there is a " ! " token, then the comment becomes a hyper-link with what precedes the " ! " is the text that is displayed, and what comes after is the link to be followed when a user clicks on the text.
 
 For example:
 
@@ -214,14 +193,8 @@ etc.
 Example
 =======
 
-Create a filter file:
-$ echo "sip" > filter
-
-Create a title file:
-$ echo "This is a sample capture" > title
-
 Create an order file:
-$ callflow -o mycapture.cap > order
+$ callflow --list-nodes mycapture.cap > order
 (edit order file as needed)
 
 Generate initial diagram:
@@ -261,6 +234,13 @@ Well, this is kind of ugly:
     i.  generate html index files
     i.  clean up all the /tmp files
 
+Files
+=====
+
+The system-wide configuration file /etc/callflow.conf, and the personal ones $HOME/.callflow.conf
+and callflow.conf are used by callflow.  If the system-wide configuration file exists, it is read first,
+overriding the default settings.  If the personal configuration files exists, they are read next, overriding
+any previous values.
 
 TO DO
 =====
