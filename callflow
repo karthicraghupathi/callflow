@@ -612,6 +612,11 @@ else
   exit 1
 fi
 
+echo "The output can be used with a browser: "
+echo " ${BROWSER:=firefox} $DESTDIR/index.html"
+echo " $BROWSER $DESTDIR/index_dynamic.html"
+echo " $BROWSER $DESTDIR/index_with_frames.html"
+
 \rm imagemap
 exit 0;
 
