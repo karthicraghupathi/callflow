@@ -12,7 +12,6 @@
 # Variables
 ##################################
 CONFDIR="/etc/callflow";
-keepSL=0 # do not keep cap.short and cap.long files
 removeDF=0 # do not remove duplicate frames
 ORDER=0 # do not build order file
 localLoop=1 # take into account flows from and to the same element (rounded flows)
@@ -113,7 +112,7 @@ function make_long_and_short_caches() {
 
   TRACE_FILE=$(basename $inputfile)
   MD5SUM=$(md5sum $inputfile | awk '{print $1}')
-  echo "$TRACE_FILE|$MD5SUM" > $DESTDIR/metadb
+  echo "$TRACE_FILE|$MD5SUM|$FVAL" > $DESTDIR/metadb
 }
 
 function usage() {
@@ -158,6 +157,12 @@ Options:
                 (Don't forget to redirect output in another file.
                  Example of use: $PRGNAME --list-nodes capture.cap > order)
 
+  --refresh-cache
+                Refresh the contents of the callflow.short and callflow.long
+                files.  By default these are cached.  The cache is automatically
+                refreshed, when a changed input file, or a different filter is
+                is used.
+
   --remove-duplicate-frames, -d
                 Remove duplicate frames while computing.
                 This option should not be selected on the first run.
@@ -177,11 +182,6 @@ Options:
                 name of file containing the trace will be used instead. Surround
                 <title> by quotes in case the title contains spaces or tabs.
 
-  --use-cache, -c, -t
-                Use cap.short and cap.long files.
-                Note 1: if -c and -d are used, only -c is executed.
-                Note 2: this option sould not be selected on the first run.
-
   --width-between-nodes <width>
                 Distance between adjacent nodes in final picture.  The width may
                 vary between 100 and 250.  Default = 200.
@@ -193,13 +193,13 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
-LOPT="capture-filter:,help,list-nodes,no-loops,no-session-token,no-time,remove-duplicate-frames"
-LOPT="$LOPT,session-token:,title:,width-between-nodes:,use-cache,version"
+LOPT="capture-filter:,help,list-nodes,no-loops,no-session-token,no-time,refresh-cache"
+LOPT="$LOPT,remove-duplicate-frames,session-token:,title:,width-between-nodes:,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
 # separate word. The quotes around `$@' are essential!
 # We need TEMP as the `eval set --' would nuke the return value of getopt.
-TEMP=$(getopt --options=cdfhortv --long $LOPT -n $PRGNAME -- "$@")
+TEMP=$(getopt --options=dfhorv --long $LOPT -n $PRGNAME -- "$@")
 
 if [[ $? -ne 0 ]]; then
   echo "Terminating..." >&2
@@ -234,6 +234,9 @@ while true; do
                          OPT_SHOW_TIME=no
                          #echo " * Time will not be shown"
                          ;;
+  --refresh-cache)
+                         OPT_REFRESH_CACHE=yes
+                         ;;
   --remove-duplicate-frames|-d)
                          # Remove duplicate frames
                          removeDF=1
@@ -250,11 +253,6 @@ while true; do
   --title)
                          OPT_TITLE="$2"; shift
                          #echo " * Title to use: $OPT_TITLE"
-                         ;;
-  --use-cache|-c|-t)
-                         # Keep short and long files
-                         keepSL=1
-                         #echo " * Short and Long files will be used"
                          ;;
   --width-between-nodes)
                          OPT_WIDTH_BETWEEN_NODES=$2; shift
@@ -323,25 +321,38 @@ DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
 mkdir -p $DESTDIR
 
 # Use cache?
-if [[ -f $DESTDIR/metadb ]]; then
-  if [[ -f $DESTDIR/callflow.short ]]; then
-    FILE=$(basename $inputfile)
-    MD5_FILE=$(md5sum $inputfile | awk '{print $1}')
+if [[ "$OPT_REFRESH_CACHE" == "yes" ]]; then
+  USE_CACHE=no
+else
+  if [[ -f $DESTDIR/metadb ]]; then
+    if [[ -f $DESTDIR/callflow.short ]]; then
+      FILE=$(basename $inputfile)
+      MD5_FILE=$(md5sum $inputfile | awk '{print $1}')
 
-    MD5_CACHE=$(awk -F"|" -v FILE=$FILE '{if ($1 == FILE) {print $2} }' $DESTDIR/metadb)
+      MD5_CACHE=$(awk -F"|" -v FILE=$FILE '{if ($1 == FILE) {print $2} }' $DESTDIR/metadb)
 
-    if [[ $MD5_FILE == $MD5_CACHE ]]; then
-      USE_CACHE=yes
+      if [[ $MD5_FILE == $MD5_CACHE ]]; then
+
+        # Are the cached filter and used filter the same?
+        CACHED_FILTER=$(awk -F"|" -v FILE=$FILE '{if ($1 == FILE) {print $3} }' $DESTDIR/metadb)
+
+        if [[ "$FVAL" == "$CACHED_FILTER" ]]; then
+          USE_CACHE=yes
+        else
+          USE_CACHE=no
+        fi
+      else
+        # The input file changed
+        USE_CACHE=no
+      fi
     else
+      # The file $DESTDIR/callflow.short does not exist
       USE_CACHE=no
     fi
   else
-    # The file $DESTDIR/callflow.short does not exist
+    # The file $DESTDIR/metadb does not exist
     USE_CACHE=no
   fi
-else
-  # The file $DESTDIR/metadb does not exist
-  USE_CACHE=no
 fi
 
 ##################################
@@ -367,7 +378,7 @@ TRACEFILE=$(basename $inputfile)
 cp $inputfile $DESTDIR/$TRACEFILE
 
 # if we do want to build new short and long file
-if [ $keepSL = 0 ]; then
+if [[ $USE_CACHE == "no" ]]; then
 
   make_long_and_short_caches
 
