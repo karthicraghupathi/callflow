@@ -504,91 +504,93 @@ awk -F "|" -f $TMPDIR/callflow.awk.$PPID $DESTDIR/callflow.short > $DESTDIR/call
 # Remove temporary files
 \rm $TMPDIR/callflow.*.$PPID
 
-# Build callflow.png
-inkscape --export-dpi=90 -C --export-background=white --export-png=$DESTDIR/callflow.png $DESTDIR/callflow.svg
+# Build callflow.png if inkscape is available
+if [ ! -z $(which inkscape) ]; then
+	inkscape --export-dpi=90 -C --export-background=white --export-png=$DESTDIR/callflow.png $DESTDIR/callflow.svg
 
-# Build HTML files
-( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
-  echo "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
-  echo "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">"
-  echo " <head>"
-  echo "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>"
-  echo "  <title>Callflow: $inputfile</title>"
-  echo "  <style type=\"text/css\">"
-  echo ".callflow-image img {"
-  echo " display: block;"
-  echo " border: 0px;"
-  echo " margin-left: auto;"
-  echo " margin-right: auto;"
-  echo "}"
-  echo "  </style>"
-  echo " </head>"
-  echo " <body>"
-  echo "  <div class=\"callflow-image\">"
-  cat imagemap
-  echo "   <p>"
-  echo "    <img src=\"callflow.png\" usemap=\"#callflowmap\" alt=\"Call flow sequence diagram for $inputfile\"/>"
-  echo "   </p>"
-  echo "   <p>"
-  echo "    <a href=\"$TRACEFILE\">Trace source</a>"
-  echo "   </p>"
-  echo "  </div>"
-  echo " </body>"
-  echo "</html>"
-) > $DESTDIR/index.html
- 
-( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
-  echo "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
-  echo "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">"
-  echo " <head>"
-  echo "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>"
-  echo "  <title>Callflow: $inputfile</title>"
-  echo "  <style type=\"text/css\">"
-  echo ".callflow-image img {"
-  echo " display: block;"
-  echo " border: 0px;"
-  echo " margin-left: auto;"
-  echo " margin-right: auto;"
-  echo "}"
-  echo "  </style>"
-  echo "  <script type=\"text/javascript\" src=\"js/overlib.js\"></script>"
-  echo "  <script type=\"text/javascript\" src=\"js/callflow.js\"></script>"
-  echo " </head>"
-  echo " <body>"
-  echo "  <div class=\"callflow-image\">"
-  cat imagemap
-  echo "   <p>"
-  echo "    <img src=\"callflow.png\" usemap=\"#callflowmap\" alt=\"Call flow sequence diagram for $inputfile\"/>"
-  echo "   </p>"
-  echo "   <p>"
-  echo "    <a href=\"$TRACEFILE\">Trace source</a>"
-  echo "   </p>"
-  echo "  </div>"
-  echo " </body>"
-  echo "</html>"
-) > $DESTDIR/index_dynamic.html
- 
-#Copy JavaScript files into DESTDIR
-cp -af $SETUPDIR/js $DESTDIR/
+	# Build HTML files
+	( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
+	  echo "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
+	  echo "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">"
+	  echo " <head>"
+	  echo "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>"
+	  echo "  <title>Callflow: $inputfile</title>"
+	  echo "  <style type=\"text/css\">"
+	  echo ".callflow-image img {"
+	  echo " display: block;"
+	  echo " border: 0px;"
+	  echo " margin-left: auto;"
+	  echo " margin-right: auto;"
+	  echo "}"
+	  echo "  </style>"
+	  echo " </head>"
+	  echo " <body>"
+	  echo "  <div class=\"callflow-image\">"
+	  cat imagemap
+	  echo "   <p>"
+	  echo "    <img src=\"callflow.png\" usemap=\"#callflowmap\" alt=\"Call flow sequence diagram for $inputfile\"/>"
+	  echo "   </p>"
+	  echo "   <p>"
+	  echo "    <a href=\"$TRACEFILE\">Trace source</a>"
+	  echo "   </p>"
+	  echo "  </div>"
+	  echo " </body>"
+	  echo "</html>"
+	) > $DESTDIR/index.html
+	 
+	( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
+	  echo "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
+	  echo "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">"
+	  echo " <head>"
+	  echo "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>"
+	  echo "  <title>Callflow: $inputfile</title>"
+	  echo "  <style type=\"text/css\">"
+	  echo ".callflow-image img {"
+	  echo " display: block;"
+	  echo " border: 0px;"
+	  echo " margin-left: auto;"
+	  echo " margin-right: auto;"
+	  echo "}"
+	  echo "  </style>"
+	  echo "  <script type=\"text/javascript\" src=\"js/overlib.js\"></script>"
+	  echo "  <script type=\"text/javascript\" src=\"js/callflow.js\"></script>"
+	  echo " </head>"
+	  echo " <body>"
+	  echo "  <div class=\"callflow-image\">"
+	  cat imagemap
+	  echo "   <p>"
+	  echo "    <img src=\"callflow.png\" usemap=\"#callflowmap\" alt=\"Call flow sequence diagram for $inputfile\"/>"
+	  echo "   </p>"
+	  echo "   <p>"
+	  echo "    <a href=\"$TRACEFILE\">Trace source</a>"
+	  echo "   </p>"
+	  echo "  </div>"
+	  echo " </body>"
+	  echo "</html>"
+	) > $DESTDIR/index_dynamic.html
+	 
+	#Copy JavaScript files into DESTDIR
+	cp -af $SETUPDIR/js $DESTDIR/
 
 
-sed 's/coords=/target=\"msg\" coords=/' $DESTDIR/index.html > $DESTDIR/graph.html
+	sed 's/coords=/target=\"msg\" coords=/' $DESTDIR/index.html > $DESTDIR/graph.html
 
-firstFrame=$(awk -F "|" '{ if (NR == 1) print $3 }' $DESTDIR/callflow.short)
+	firstFrame=$(awk -F "|" '{ if (NR == 1) print $3 }' $DESTDIR/callflow.short)
 
-( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\""
-  echo "   \"http://www.w3.org/TR/html4/frameset.dtd\">"
-  echo "<html>"
-  echo " <head>"
-  echo "  <meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\" >"
-  echo "  <title>Callflow: $title</title>"
-  echo " </head>"
-  echo " <frameset cols=\"75%,25%\">"
-  echo "  <frame name=\"graph\" src=\"graph.html\">"
-  echo "  <frame name=\"msg\" src=\"frames/Frame${firstFrame}.html\">"
-  echo " </frameset>"
-  echo "</html>"
-) > $DESTDIR/index_with_frames.html
+	( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\""
+	  echo "   \"http://www.w3.org/TR/html4/frameset.dtd\">"
+	  echo "<html>"
+	  echo " <head>"
+	  echo "  <meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\" >"
+	  echo "  <title>Callflow: $title</title>"
+	  echo " </head>"
+	  echo " <frameset cols=\"75%,25%\">"
+	  echo "  <frame name=\"graph\" src=\"graph.html\">"
+	  echo "  <frame name=\"msg\" src=\"frames/Frame${firstFrame}.html\">"
+	  echo " </frameset>"
+	  echo "</html>"
+	) > $DESTDIR/index_with_frames.html
+fi
 
 \rm imagemap
 exit 0;
