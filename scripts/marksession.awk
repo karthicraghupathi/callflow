@@ -5,7 +5,7 @@ BEGIN {
 }
 
 {
-  if ($1 ~ "[0-9]+") {
+  if ($3 ~ "[0-9]+") {
     # See if the current line is already in the table
     frame_file = destDir "/frames/Frame"$3".html"
     session_line = ""
