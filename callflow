@@ -382,13 +382,6 @@ if [[ $USE_CACHE == "no" ]]; then
 
   make_long_and_short_caches
 
-else
-  # We want to keep SL files
-  # disable duplicate frame remove
-  if [ $removeDF = 1 ]; then
-    echo "$PRGNAME: warning: duplicate frames will not be removed!"
-  fi
-  removeDF=0
 fi
 
 # We have to check if short and long file exist

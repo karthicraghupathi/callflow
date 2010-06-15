@@ -57,9 +57,17 @@ END {
 }' >&2
 
 # Join the files
-for i in $(cat $TMPDIR/pckts.$$); do
-  awk -F"|" -v pckt=$i '{if ($3 == pckt) print $0}' $DESTDIR/callflow.short
-done > $DESTDIR/callflow.short.new
+awk -F"|" -v PKGS="$TMPDIR/pckts.$$" 'BEGIN {
+  while ( getline < PKGS > 0 ) {
+    cmd[$0] = "INCLUDE"
+  }
+}
+{
+  if ($1 ~ "#" ) {
+    print $0
+  } else if (cmd[$3] == "INCLUDE") print $0
+
+}' $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
 
 #Remove temp files
 rm -f $TMPDIR/md5sums.$$
