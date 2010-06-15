@@ -63,6 +63,8 @@ awk -F"|" -v PKGS="$TMPDIR/pckts.$$" 'BEGIN {
   }
 }
 {
+  # The user may have added comments to the cache (callflow.short), these
+  # comments must be kept!
   if ($1 ~ "#" ) {
     print $0
   } else if (cmd[$3] == "INCLUDE") print $0
