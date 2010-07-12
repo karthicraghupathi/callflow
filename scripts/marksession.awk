@@ -10,6 +10,7 @@ BEGIN {
     frame_file = destDir "/frames/Frame"$3".html"
     session_line = ""
     "grep -i \"" session_token "\" " frame_file | getline session_line
+    close(grep)
 
     if (session_line == "" ) {
       $6 = "{0}"
