@@ -1,0 +1,21 @@
+body {
+ color: #1f1f1f;
+ font-size: small;
+}
+
+.sip {
+ display: inline;
+ color: black;
+ font-weight: bold;
+ background-color: #EBECE4;
+ padding-right: 0.5em;
+}
+
+.media {
+ display: inline;
+ color: black;
+ font-weight: bold;
+ background-color: #ECF1EF;
+ padding-right: 0.5em;
+}
+
