@@ -513,12 +513,13 @@ if which inkscape >/dev/null 2>&1; then
   inkscape --export-dpi=90 -C --export-background=white --export-png=$DESTDIR/callflow.png $DESTDIR/callflow.svg
 
   # Build HTML files
+  # Frameless; (SIP) messages will be presented in the same window as the callflow picture
   ( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
     echo "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
     echo "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">"
     echo " <head>"
     echo "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>"
-    echo "  <title>Callflow: $inputfile</title>"
+    echo "  <title>$PRGNAME - $TITLE</title>"
     echo "  <style type=\"text/css\">"
     echo ".callflow-image img {"
     echo " display: block;"
@@ -540,14 +541,15 @@ if which inkscape >/dev/null 2>&1; then
     echo "  </div>"
     echo " </body>"
     echo "</html>"
-  ) > $DESTDIR/index.html
+  ) > $DESTDIR/index_frameless.html
    
+  # (SIP) Messages will be presented in popups on the callflow picture
   ( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
     echo "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
     echo "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">"
     echo " <head>"
     echo "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>"
-    echo "  <title>Callflow: $inputfile</title>"
+    echo "  <title>$PRGNAME - $TITLE</title>"
     echo "  <style type=\"text/css\">"
     echo ".callflow-image img {"
     echo " display: block;"
@@ -577,7 +579,8 @@ if which inkscape >/dev/null 2>&1; then
   cp -af $SETUPDIR/js $DESTDIR/
 
 
-  sed 's/coords=/target=\"msg\" coords=/' $DESTDIR/index.html > $DESTDIR/graph.html
+  # (SIP) Messages will be presented in right frame
+  sed 's/coords=/target=\"msg\" coords=/' $DESTDIR/index_frameless.html > $DESTDIR/graph.html
 
   firstFrame=$(awk -F "|" '{ if (NR == 1) print $3 }' $DESTDIR/callflow.short)
 
@@ -586,17 +589,20 @@ if which inkscape >/dev/null 2>&1; then
     echo "<html>"
     echo " <head>"
     echo "  <meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\" >"
-    echo "  <title>Callflow: $title</title>"
+    echo "  <title>$PRGNAME - $TITLE</title>"
     echo " </head>"
     echo " <frameset cols=\"75%,25%\">"
     echo "  <frame name=\"graph\" src=\"graph.html\">"
     echo "  <frame name=\"msg\" src=\"frames/Frame${firstFrame}.html\">"
     echo " </frameset>"
     echo "</html>"
-  ) > $DESTDIR/index_with_frames.html
+  ) > $DESTDIR/index_frame_right.html
+
+  # (SIP) Messages will be presented in bottom frame
+  sed 's/cols=/rows=/' $DESTDIR/index_frame_right.html > $DESTDIR/index_frame_bottom.html
 
 else
-  ( echo "Eroor $PRGNAME: inkscape not found."
+  ( echo "Error $PRGNAME: inkscape not found."
     echo "The Scalable Vector Graphic (.svg) has been made, but no"
     echo "Portable Network Graphic (.png) can be created."
     echo "Install inkscape, to enjoy all that $PRGNAME can give to you!"
@@ -605,10 +611,12 @@ else
   exit 1
 fi
 
+echo
 echo "The output can be used with a browser: "
-echo " ${BROWSER:=firefox} $DESTDIR/index.html"
+echo " ${BROWSER:=firefox} $DESTDIR/index_frame_right.html"
+echo " $BROWSER $DESTDIR/index_frame_bottom.html"
+echo " $BROWSER $DESTDIR/index_frameless.html"
 echo " $BROWSER $DESTDIR/index_dynamic.html"
-echo " $BROWSER $DESTDIR/index_with_frames.html"
 
 \rm imagemap
 exit 0;
