@@ -602,6 +602,11 @@ if which inkscape >/dev/null 2>&1; then
   # (SIP) Messages will be presented in bottom frame
   sed 's/cols=/rows=/' $DESTDIR/index_frame_right.html > $DESTDIR/index_frame_bottom.html
 
+  mkdir -p $DESTDIR/images
+  cp -a $SETUPDIR/images/*png $DESTDIR/images
+  sed "s/@TITLE@/$PRGNAME - $TITLE/;s/@TRACE@/$inputfile/" \
+    $SETUPDIR/images/index.tpl > $DESTDIR/index.html
+
 else
   ( echo "Error $PRGNAME: inkscape not found."
     echo "The Scalable Vector Graphic (.svg) has been made, but no"
@@ -613,11 +618,8 @@ else
 fi
 
 echo
-echo "The output can be used with a browser: "
-echo " ${BROWSER:=firefox} $DESTDIR/index_frame_right.html"
-echo " $BROWSER $DESTDIR/index_frame_bottom.html"
-echo " $BROWSER $DESTDIR/index_frameless.html"
-echo " $BROWSER $DESTDIR/index_dynamic.html"
+echo "The output can be viewed with a browser: "
+echo " ${BROWSER:=firefox} $DESTDIR/index.html"
 
 \rm imagemap
 exit 0;
