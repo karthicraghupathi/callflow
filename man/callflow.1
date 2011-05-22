@@ -18,17 +18,15 @@ With callflow in your path, just type:
 
 This will produce a directory named like your capture file in your working directory (eg: if file is capture-file.cap, the directory will be capture-file).
 In this, you will find at least:
-  -callflow.svg file
-  -callflow.png file
-  -index.html file
-  -index_dynamic.html file,
-  -index_with_frames.html file,
-  -graph.html file,
-  -frames directory with FrameX.html files inside.
+  - callflow.svg file
+  - callflow.png file
+  - several html index files
+  - graph.html file
+  - frames directory with FrameX.html files inside
 
 You may also find (depending on options chosen):
-  -callflow.long,
-  -callflow.short.
+  - callflow.long
+  - callflow.short
 
 You can view callflow.svg with the Adobe SVG plugin or Firefox, or you can view index*.html with any web browser.  Both the SVG file and the html file contain links into the frames directory so that you can look at the contents of the full packet frame.  All the frames have been processed to remove the IP headers, which usually aren't that interesting.
 
@@ -68,7 +66,7 @@ A filter can be used to show only those frames that match the given filter crite
 .TP
 .PD
 .B --list-nodes
-List the unique nodes in the trace file (don't forget to redirect output in another file. Example of use: callflow -o capture.cap > order).
+List the unique nodes in the trace file (don't forget to redirect output in another file. Example of use: callflow --list-nodes capture.cap > order).
 
 .TP
 .PD 0
@@ -96,13 +94,13 @@ Remove duplicate frames while computing. This option should not be selected on t
 
 .TP
 .PD 0
-.BI --session-token " session"
-Add a session ID to sequence lines and color lines related to this session ID. This option is available by default and the value is  'Call-Id:' (depending on your callflow configuration). You should use this option in order to overwrite the default value. If you want to disable the session detection (show ID and colorization), you should --no-session-token.
+.BI --session-token "session"
+Add a session ID to sequence lines and color lines related to this session ID.  This option is enabled by default and the value is  'Call-Id:' (depending on your callflow configuration). You should use this option in order to overwrite the default value. If you want to disable the session detection (show ID and colorization), you should --no-session-token.
 
 .TP
 .PD 0
 .BI --title " title"
-Specify the title of the callflow.  If not specified the name of file containing the trace will be used instead.
+Specify the title of the callflow.  If not specified the file name containing the trace will be used.
 
 .TP
 .PD 0
@@ -115,7 +113,7 @@ Specify the title of the callflow.  If not specified the name of file containing
 .B --use-cache
 Use callflow and callflow.long files from FILE directory.
 .sp 0
-Note 1: if -t and -d are used, only -t is executed.
+Note 1: if -t and --remove-duplicate-frames are used, only -t is executed.
 .sp 0
 Note 2: this option sould not be selected on the first run.
 
