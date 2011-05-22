@@ -4,12 +4,12 @@
 
 function mkmd5sum {
   grep -v "Arrival Time" $1 |
-    grep -v "Frame [:digit:]*" |
+    grep -v "Frame [[:digit:]]*" |
     grep -v "Resent Packet" |
     grep -v "Suspected resend of frame" |
-    grep -v "Request Frame: [:digit:]*" |
-    grep -v "Response Time (ms): [:digit:]*" |
-    grep -v "Release Time (ms): [:digit:]*"  | md5sum
+    grep -v "Request Frame: [[:digit:]]*" |
+    grep -v "Response Time (ms): [[:digit:]]*" |
+    grep -v "Release Time (ms): [[:digit:]]*"  | md5sum
 }
 
 
@@ -31,7 +31,7 @@ TMPDIR=$3
     N=${i##Frame}		# ## is used to remove Frame from FrameXX.html (N is like XX.html)
     #echo $N >&2
     sed "s/-$//;s/^/${N%%.html} /" <<< $MD5SUM
-  done > $TMPDIR/md5sums.$$
+  done | sort -n > $TMPDIR/md5sums.$$
 )
 
 #echo Looking for unique frames >&2
