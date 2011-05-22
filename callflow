@@ -406,6 +406,7 @@ fi
 # Create Frames
 mkdir -p $DESTDIR/frames
 awk -f $SETUPDIR/scripts/long2html.awk -v destDir=$DESTDIR < $DESTDIR/callflow.long
+cp $SETUPDIR/css/callflow.css $DESTDIR/frames
 
 # Remove duplicate Frame
 if [ $removeDF = 1 ]; then

@@ -3,7 +3,8 @@
 # mkmdsum DESTDIR FRAMEDIR TMPDIR
 
 function mkmd5sum {
-  grep -v "Arrival Time" $1 |
+  grep -v "title" $1 |
+    grep -v "Arrival Time" |
     grep -v "Frame [[:digit:]]*" |
     grep -v "Resent Packet" |
     grep -v "Suspected resend of frame" |

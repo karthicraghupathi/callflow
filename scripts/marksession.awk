@@ -17,9 +17,12 @@ BEGIN {
       print $0
 
     } else {
-      found = 0;
+      # Remove HTML tags
+      gsub (/<[^>][^>]*>/, "", session_line)
       split(session_line, array, " ")
       session = array[2]
+
+      found = 0;
       for (i=0; i < session_count; i++) {
         if (sessions[i] == session) {
           found = 1
