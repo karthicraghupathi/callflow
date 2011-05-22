@@ -7,7 +7,7 @@ BEGIN{
 #  printf "<pre>\n" >filename;
 #  discard = 0;
 #}
-/^Frame [0-9]+ (.*)/ {
+/^Frame [0-9]+: (.*)/ {
   # New frame, closing <pre> and html> from previous frame before compute new filename
   if (first==0){
     print "</pre></html>" >filename;
@@ -15,7 +15,9 @@ BEGIN{
   else{
     first=0;
   }
-  filename = destDir "/frames/Frame" $2 ".html";
+  nbr = $2
+  sub (":", "", nbr)
+  filename = destDir "/frames/Frame" nbr ".html";
   printf "<html>\n" >filename;
   printf "<pre>\n" >filename;
   print $0 >filename;
