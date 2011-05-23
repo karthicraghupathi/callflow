@@ -1,9 +1,43 @@
-body {
+body.callflow {
+ color: #654400;
+ padding-left: 0.5em;
+}
+
+h1 {
+ font-size: x-large; 
+}
+
+h2 {
+ font-size: medium; 
+}
+
+img {
+ border: 1px solid #aaa;
+ padding: 1px;
+ margin: 0 0 1em 1em;
+}
+
+p.info {
+ font-size: small;
+ border-top: 1px solid #aaa;
+ display: inline;
+ padding: 0.1em 1em 0 1em;
+}
+
+table tr {
+ vertical-align: top;
+}
+
+table td {
+ padding-right: 2em;
+}
+
+pre.msg {
  color: #1f1f1f;
  font-size: small;
 }
 
-.sip {
+div.sip {
  display: inline;
  color: black;
  font-weight: bold;
@@ -11,7 +45,7 @@ body {
  padding-right: 0.5em;
 }
 
-.media {
+div.media {
  display: inline;
  color: black;
  font-weight: bold;

@@ -29,7 +29,7 @@ BEGIN{
   printf "  <title>callflow - frame %s</title>\n", nbr >filename
   printf " </head>\n" >filename
   printf " <body>\n" >filename
-  printf "  <pre>\n" >filename
+  printf "  <pre class=\"msg\">\n" >filename
   print $0 >filename
   # Print time
   getline

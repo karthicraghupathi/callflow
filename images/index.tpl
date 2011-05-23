@@ -2,48 +2,11 @@
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
  <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <title>@TITLE@</title>
-  <style type="text/css">
-
-body {
- color: #885800;
- color: #654400;
- padding-left: 0.5em;
-}
-
-h1 {
- font-size: x-large; 
-}
-
-h2 {
- font-size: medium; 
-}
-
-img {
- border: 1px solid #aaa;
- padding: 1px;
- margin: 0 0 1em 1em;
-}
-
-p.info {
- font-size: small;
- border-top: 1px solid #aaa;
- display: inline;
- padding: 0.1em 1em 0 1em;
-}
-
-table tr {
- vertical-align: top;
-}
-
-table td {
- padding-right: 2em;
-}
-
-  </style>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <link rel="stylesheet" type="text/css" href="frames/callflow.css" />
  </head>
- <body>
+ <body class="callflow">
   <h1>@TITLE@</h1>
   <h2>Available diagram presentations</h2>
   <p>The callflow diagram is offered in several presentations.  They are shown below, just
@@ -74,7 +37,7 @@ table td {
   </table>
 
   <h2>Trace file</h2>
-  <p>The <a href="@TRACE@">trace file</a> used to create those diagrams.</p>
+  <p>The <a href="@TRACE@">trace file</a> that resulted in the callflow diagrams.</p>
   <p class="info">Those diagrams were created with <a href="http://callflow.sourceforge.net">callflow</a></p>
  </body>
 </html>
