@@ -44,7 +44,7 @@ table td {
   </style>
  </head>
  <body>
-  <h1>callflow - AR one way speech</h1>
+  <h1>@TITLE@</h1>
   <h2>Available diagram presentations</h2>
   <p>The callflow diagram is offered in several presentations.  They are shown below, just
    click at the snapshot for the presentation that you want to use.
