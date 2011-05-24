@@ -57,12 +57,6 @@ else
   FVAL="$FILTER"
 fi
 
-if [[ -f order ]]; then
-  orderFile=order
-else
-  orderFile=none
-fi
-
 if [[ -f colors ]]; then
   COLORS=$(cat colors)
 fi
@@ -366,6 +360,14 @@ if [[ $ORDER = 1 ]]; then
   awk -f $SETUPDIR/scripts/list-nodes.awk $DESTDIR/callflow.short
 
   exit 0
+fi
+
+if [[ -f order ]]; then
+  orderFile=order
+elif [[ -f $DESTDIR/order ]]; then
+  orderFile=$DESTDIR/order
+else
+  orderFile=none
 fi
 
 ##################################
