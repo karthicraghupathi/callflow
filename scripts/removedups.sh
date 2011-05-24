@@ -1,7 +1,7 @@
 #!/bin/bash
 # script to be called with these arguments:
 # removedups.sh DESTDIR FRAMEDIR TMPDIR MODE
-# MODE: REMOVE_MIRROR_DUPS, REMOVE_ALL_DUPS
+#   MODE: REMOVE_MIRROR_DUPS, REMOVE_ALL_DUPS
 
 function mkmd5sum {
   grep -v "title" $1 |

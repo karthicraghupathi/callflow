@@ -106,6 +106,7 @@ BEGIN{
       if ($1 ~ "Remote-Party-ID:" ) MARK = "sip"
       if ($1 ~ "Require:" ) MARK = "sip"
       if ($1 ~ "Request-Line:" ) MARK = "sip"
+      if ($1 ~ "Request-Disposition:" ) MARK = "sip"
       if ($1 ~ "Route:" ) MARK = "sip"
       if ($1 ~ "RSeq:" ) MARK = "sip"
       if ($1 ~ "Server:" ) MARK = "sip"
