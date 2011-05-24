@@ -414,7 +414,7 @@ cp $STYLESHEET $DESTDIR/frames
 # Remove duplicate Frame
 if [ $removeDF = 1 ]; then
   #echo "Removing duplicate frames"
-  $SETUPDIR/scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR
+  $SETUPDIR/scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR REMOVE_ALL_DUPS
   rm $DESTDIR/callflow.short
   mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
 fi

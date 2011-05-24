@@ -1,6 +1,7 @@
 #!/bin/bash
 # script to be called with these arguments:
-# removedups.sh DESTDIR FRAMEDIR TMPDIR
+# removedups.sh DESTDIR FRAMEDIR TMPDIR MODE
+# MODE: REMOVE_MIRROR_DUPS, REMOVE_ALL_DUPS
 
 function mkmd5sum {
   grep -v "title" $1 |
@@ -13,7 +14,7 @@ function mkmd5sum {
     grep -v "Release Time (ms): [[:digit:]]*"  | md5sum
 }
 
-if [ $# -ne 3 ]; then
+if [ $# -ne 4 ]; then
   echo "Bad arguments: $#"
   exit 1
 fi
@@ -21,6 +22,7 @@ fi
 DESTDIR=$1
 FRAMEDIR=$2
 TMPDIR=$3
+MODE=$4
 
 #echo Making md5sums >&2
 ( cd $FRAMEDIR
@@ -33,10 +35,50 @@ TMPDIR=$3
   done | sort -n > $TMPDIR/md5sums.$$
 )
 
-#echo Looking for unique frames >&2
-for M in $(awk '{print $2}' $TMPDIR/md5sums.$$ | sort -u); do
-  grep $M $TMPDIR/md5sums.$$ | head -1
-done | awk '{print $1}' | sort -n  > $TMPDIR/pckts.$$
+if [[ $MODE = "REMOVE_MIRROR_DUPS" ]]; then
+  
+  # This mode removes a package if the subsequent frames are the same.
+  # The package that is kept is the first one sent, the subsequent one is skipped
+  # This is often encountered on traces that are obtained via port mirroring
+  # on a router.
+
+  awk '{
+    FRAMES[NR] = $0
+
+  } END {
+     
+    # Print first frame number
+    split(FRAMES[1], F, " ")
+    print F[1]
+    PREV_MD5 = F[2]
+
+    MAX = length(FRAMES)
+    for (i=2; i<=MAX; i++) {
+
+      split(FRAMES[i], F, " ")
+      CUR_MD5 = F[2] 
+
+      if (CUR_MD5 != PREV_MD5) {
+        # Print the current frame number
+        printf "%s\n", F[1]
+      }
+
+      PREV_MD5 = CUR_MD5
+    }
+
+  }' $TMPDIR/md5sums.$$ > $TMPDIR/pckts.$$
+
+elif [[ $MODE = "REMOVE_ALL_DUPS" ]]; then
+
+  # This mode removes any duplicate package it encounters....
+  for M in $(awk '{print $2}' $TMPDIR/md5sums.$$ | sort -u); do
+    grep $M $TMPDIR/md5sums.$$ | head -1
+  done | awk '{print $1}' | sort -n  > $TMPDIR/pckts.$$
+
+else
+  echo "error: unknow mode: \"$MODE\"" >&2
+  exit 1
+fi
 
 # Output the frame (number) that are not duplicated
 awk -F"|" -v PKGS="$TMPDIR/pckts.$$" 'BEGIN {
