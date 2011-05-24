@@ -119,10 +119,10 @@ BEGIN{
       if ($0 ~ "Connection Information") MARK = "media"
       # Use ... here.  Actually "(a)" should be used, but awk does not like the
       # parenthesis (), workaround it with the dots.
-      if ($0 ~ "Media Attribute ...:") MARK = "media"
+      if ($0 ~ "Media Attribute .a.:") MARK = "media"
       if ($0 ~ "Media Description, name and address") MARK = "media"
       if ($0 ~ "Owner/Creator, Session Id") MARK = "media"
-      if ($0 ~ "Session Attribute ...:") MARK = "media"
+      if ($0 ~ "Session Attribute .a.:") MARK = "media"
       if ($0 ~ "Session Description Protocol Version") MARK = "media"
       if ($0 ~ "Session Name") MARK = "media"
       if ($0 ~ "Time Description, active time") MARK = "media"
