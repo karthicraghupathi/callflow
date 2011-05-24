@@ -363,9 +363,7 @@ if [[ $ORDER = 1 ]]; then
 
   [[ $USE_CACHE == "no" ]] && make_long_and_short_caches
 
-  awk -F"|" '{
-    if ($0 !~ "#" ) { printf ("%s:%s\n%s:%s\n", $4, $5, $7, $8) }
-  }' $DESTDIR/callflow.short | sort --unique
+  awk -f $SETUPDIR/scripts/list-nodes.awk $DESTDIR/callflow.short
 
   exit 0
 fi
