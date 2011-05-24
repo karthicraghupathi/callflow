@@ -1,6 +1,6 @@
 #!/bin/bash
-# script to be called with these parameters:
-# mkmdsum DESTDIR FRAMEDIR TMPDIR
+# script to be called with these arguments:
+# removedups.sh DESTDIR FRAMEDIR TMPDIR
 
 function mkmd5sum {
   grep -v "title" $1 |
@@ -13,10 +13,8 @@ function mkmd5sum {
     grep -v "Release Time (ms): [[:digit:]]*"  | md5sum
 }
 
-
-if [ $# -ne 3 ]
-then
-  echo Bad arguments $#
+if [ $# -ne 3 ]; then
+  echo "Bad arguments: $#"
   exit 1
 fi
 
@@ -40,6 +38,25 @@ for M in $(awk '{print $2}' $TMPDIR/md5sums.$$ | sort -u); do
   grep $M $TMPDIR/md5sums.$$ | head -1
 done | awk '{print $1}' | sort -n  > $TMPDIR/pckts.$$
 
+# Output the frame (number) that are not duplicated
+awk -F"|" -v PKGS="$TMPDIR/pckts.$$" 'BEGIN {
+  while ( getline < PKGS > 0 ) {
+    # $1 contains the frame number to be included
+    cmd[$1] = "INCLUDE"
+  }
+}
+{
+  # The user may have added comments to the cache (callflow.short), these
+  # comments must be kept!
+  if ($1 ~ "#" ) {
+    print $0
+
+    # $3 from callflow.short contains the frame number
+  } else if (cmd[$3] == "INCLUDE") print $0
+
+}' $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
+
+# Provide statistics
 wc -l $TMPDIR/md5sums.$$ $TMPDIR/pckts.$$ | awk '
   NR == 1 { FRAMES = $1 }
   NR == 2 { LEFT = $1 }
@@ -56,21 +73,6 @@ END {
     print "No duplicate frames found"
   }
 }' >&2
-
-# Join the files
-awk -F"|" -v PKGS="$TMPDIR/pckts.$$" 'BEGIN {
-  while ( getline < PKGS > 0 ) {
-    cmd[$0] = "INCLUDE"
-  }
-}
-{
-  # The user may have added comments to the cache (callflow.short), these
-  # comments must be kept!
-  if ($1 ~ "#" ) {
-    print $0
-  } else if (cmd[$3] == "INCLUDE") print $0
-
-}' $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
 
 #Remove temp files
 rm -f $TMPDIR/md5sums.$$
