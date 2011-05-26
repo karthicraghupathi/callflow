@@ -114,6 +114,7 @@ BEGIN{
       if ($1 ~ "Min-SE:" ) MARK = "sip"
       if ($1 ~ "P-[A-Z][a-z].*:" ) MARK = "sip"
       if ($1 ~ "Privacy:" ) MARK = "sip"
+      if ($1 ~ "Proxy-Authenticate:" ) MARK = "sip"
       if ($1 ~ "RAck:" ) MARK = "sip"
       if ($1 ~ "Remote-Party-ID:" ) MARK = "sip"
       if ($1 ~ "Require:" ) MARK = "sip"
