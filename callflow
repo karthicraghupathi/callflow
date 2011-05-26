@@ -414,7 +414,7 @@ cp $STYLESHEET $DESTDIR/frames
 # Remove duplicate Frame
 if [ $removeDF = 1 ]; then
   #echo "Removing duplicate frames"
-  $SETUPDIR/scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR REMOVE_ALL_DUPS
+  $SETUPDIR/scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR ${REMOVE_DUP_MODE:-REMOVE_ALL_DUPS}
   rm $DESTDIR/callflow.short
   mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
 fi
@@ -430,8 +430,7 @@ fi
 # common
 ##################################
 # Compute nodes
-awk -F"|" '{ if ($0 !~ "^#") { printf("%s:%s\n%s:%s\n", $4, $5, $7, $8) }}' $DESTDIR/callflow.short | 
-  sort -u > $TMPDIR/callflow.auto-uniq.$PPID
+awk -f $SETUPDIR/scripts/list-nodes.awk $DESTDIR/callflow.short > $TMPDIR/callflow.auto-uniq.$PPID
 
 # orderFile
 if [ $orderFile != none ]; then
@@ -460,7 +459,7 @@ if [ $orderFile != none ]; then
     #echo Using the following order:
     #cat $finalOrderFile
 else
-    echo "$PRGNAME: warning: order file not found -- using alphabetical"
+    echo "$PRGNAME: warning: order file not found -- using auto generated"
     finalOrderFile=$TMPDIR/callflow.auto-uniq.$PPID
 fi
 

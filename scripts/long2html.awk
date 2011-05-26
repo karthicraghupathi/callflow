@@ -85,8 +85,20 @@ BEGIN{
       gsub("<","\\&lt;");
 
       MARK = "no"
+      # Abbreviated SIP messages
+      if ($1 == "c:" ) MARK = "sip"
+      if ($1 == "f:" ) MARK = "sip"
+      if ($1 == "i:" ) MARK = "sip"
+      if ($1 == "k:" ) MARK = "sip"
+      if ($1 == "l:" ) MARK = "sip"
+      if ($1 == "m:" ) MARK = "sip"
+      if ($1 == "t:" ) MARK = "sip"
+      if ($1 == "v:" ) MARK = "sip"
+
+      # SIP messages
       if ($0 ~ "Session Initiation Protocol" ) MARK = "sip"
       if ($1 ~ "Accept:" ) MARK = "sip"
+      if ($1 ~ "Alert-Info:" ) MARK = "sip"
       if ($1 ~ "Allow:" ) MARK = "sip"
       if ($1 ~ "Allow-Events:" ) MARK = "sip"
       if ($0 ~ "Call-ID:" ) MARK = "sip"
@@ -99,7 +111,7 @@ BEGIN{
       if ($1 ~ "Date:" ) MARK = "sip"
       if ($1 ~ "Expires:" ) MARK = "sip"
       if ($1 ~ "From:" ) MARK = "sip"
-      if ($1 ~ "From:" ) MARK = "sip"
+      if ($1 ~ "Min-SE:" ) MARK = "sip"
       if ($1 ~ "P-[A-Z][a-z].*:" ) MARK = "sip"
       if ($1 ~ "Privacy:" ) MARK = "sip"
       if ($1 ~ "RAck:" ) MARK = "sip"
@@ -116,6 +128,7 @@ BEGIN{
       if ($1 ~ "User-Agent:" ) MARK = "sip"
       if ($1 ~ "Via:" ) MARK = "sip"
 
+      # SDP part
       if ($0 ~ "Session Description Protocol") MARK = "media"
       if ($0 ~ "Connection Information") MARK = "media"
       # Use ... here.  Actually "(a)" should be used, but awk does not like the
