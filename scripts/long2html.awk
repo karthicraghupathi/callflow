@@ -1,5 +1,5 @@
 BEGIN{
-  first = 1;
+  first = 1
 }
 
 /^Frame [0-9]+: (.*)/ {
@@ -35,54 +35,64 @@ BEGIN{
   getline
   gsub("^ *", "")
   print $0 >filename;
-  discard = 1;
+
+  discard = 1
+  protocol = ""
 }
 /^Internet Protocol,/ {
-  print $0 >filename;
-  discard = 1;
+  print $0 >filename
+  discard = 1
 }
 /^Internet Protocol$/ {
-  discard = 0;
+  discard = 0
 }
 /^User Datagram Protocol,/ {
-  print $0 >filename;
-  discard = 1;
+  print $0 >filename
+  discard = 1
 }
 /^User Datagram Protocol$/ {
-  discard = 0;
+  discard = 0
 }
 /^Transmission Control Protocol,/ {
-  print $0 >filename;
-  discard = 1;
+  print $0 >filename
+  discard = 1
 }
 /^Transmission Control Protocol$/ {
-  discard = 0;
+  discard = 0
 }
 /^Internet Control Message Protocol/ {
-  discard = 0;
+  discard = 0
 }
 /^Session Initiation Protocol/ {
-  discard = 0;
+  discard = 0
+  protocol = "SIP"
 }
 /^Diameter Protocol/ {
-  discard = 0;
+  discard = 0
 }
 /^WebSocket Protocol/ {
-  discard = 0;
+  discard = 0
 }
 /^Hypertext Transfer Protocol/ {
-  discard = 0;
+  discard = 0
 }
 /^Call Specification Language/ {
-  discard = 0;
+  discard = 0
+}
+/^Stream Control Transmission Protocol/ {
+  discard = 0
+}
+/^MEGACO/ {
+  discard = 0
 }
 {
-  if (discard==0)
-    {
-      
-      gsub("&","\\&amp;");
-      gsub(">","\\&gt;");
-      gsub("<","\\&lt;");
+  if (discard == 0) {
+
+    gsub("&","\\&amp;")
+    gsub(">","\\&gt;")
+    gsub("<","\\&lt;")
+
+    if (protocol == "SIP") {
 
       MARK = "no"
       # Abbreviated SIP messages
@@ -151,7 +161,10 @@ BEGIN{
       } else {
         print $0 > filename;
       }
+    } else {
+      print $0 > filename;
     }
+  }
 }
 END {
   printf "  </pre>\n" >filename

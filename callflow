@@ -70,9 +70,11 @@ function make_long_and_short_caches() {
 
   tshark -r $inputfile $FARG "$FVAL" -V > $DESTDIR/callflow.long
 
+  # The string (ITU) shows up in the protocol description "ISUP(ITU)".
+  # awk doesn't like the "(" and ")", hence remove them.
   tshark -r $inputfile $FARG "$FVAL" -t a \
     -o 'column.format: "No.", "%m", "Time", "%t", "Src", "%s", "Port", "%S", "Ignored", "%m", "Dest", "%d", "Port", "%D", "Protocol", "%p", "Info", "%i"' |
-    sed 's/^[[:blank:]]*//;s/\([0-9]\{3\}\)000 /\1 /' | awk '{
+    sed 's/^[[:blank:]]*//;s/\([0-9]\{3\}\)000 /\1 /;s/(ITU)//' | awk '{
       # The match and the substr are working together to get the string starting
       # at field 9 till the end of the line.  This provides the frame summary line.
       # But the frame summary may contain characters that influence the match,
