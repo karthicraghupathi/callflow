@@ -191,12 +191,7 @@ func line(x1,x2,y,output, c) {
       }
       printf ("</text>\n")
 
-      output = $9" "$10;
-
-      gsub("SIP(/SDP|/XML|) *(Status|Request): *","", output);
-      gsub(", with session description *$"," w/SDP",output);
-    
-      line(x1,x2,y,output,c);
+      line(x1,x2,y,$10,c);
     }
   }
 }

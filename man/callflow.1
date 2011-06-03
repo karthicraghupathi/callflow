@@ -74,12 +74,6 @@ List the unique nodes in the trace file (don't forget to redirect output in anot
 Prevent flows from and to the same equipment to be represented.
 
 .TP
-.PD
-.B --no-session-token
-Disable the session detection (show ID and colorization), for more information
-see the --session-token argument.
-
-.TP
 .PD 0
 .B --no-time
 Do not show the time.
@@ -91,11 +85,6 @@ Do not show the time.
 .PD
 .B --remove-duplicate-frames
 Remove duplicate frames while computing. This option should not be selected on the first run.
-
-.TP
-.PD 0
-.BI --session-token "session"
-Add a session ID to sequence lines and color lines related to this session ID.  This option is enabled by default and the value is  'Call-Id:' (depending on your callflow configuration). You should use this option in order to overwrite the default value. If you want to disable the session detection (show ID and colorization), you should --no-session-token.
 
 .TP
 .PD 0
@@ -166,11 +155,8 @@ callflow --remove-duplicate-frames foo
 
 Duplicates are determined by examining each line in foo, and comparing frames/Frame<#>.html with all previously seen frames.
 
-.SS Adding "Session ID" to Sequence Lines
-By default, callflow colors every frame based on a specific pattern: 'Call-Id:'. This pattern is a header followed by an identifier that indicates which "SIP dialog" this packet belongs to. Callflow can use the same color for all flows that have the same identifier.
-
-You can change the pattern by using the --session-token option:
-callflow --session-token capture-file.cap;
+.SS "Session ID" to Sequence Lines
+Callflow colors every frame based on the specific pattern: 'Call-Id:' or 'i:' (for abbreviated SIP messages.
 
 
 .SH TWEAKING TSHARK PREFERENCE
@@ -260,10 +246,6 @@ You can add a comment to your diagram by adding a line that start with "# " to s
 .SS Remove retransmitted SIP packets:
 We will now use "mycapture/callflow.short" and "mycapture/callflow.long" text files for further processing:
  $ callflow -d mycapture.cap
-
-.SS Add "Session ID" to Sequence Lines:
- $ echo "Call-Id:" > session
- $ callflow -s mycapture.cap
 
 .SS Add any desired comments to callflow, then regenerate diagram (repeat as needed):
  $ callflow -t mycapture.cap

@@ -15,7 +15,6 @@ CONFDIR="/etc/callflow";
 removeDF=0 # do not remove duplicate frames
 ORDER=0 # do not build order file
 localLoop=1 # take into account flows from and to the same element (rounded flows)
-WITH_SESSION=yes
 readonly VersionSVN="$Id$"; #DO NOT EDIT THIS LINE BY HAND, DATE IS AUTOMATICALLY ADDED BY SUBVERSION
 readonly PRGVRSN=$(awk '{split($4, A, "-"); print A[1] A[2] A[3] "." $3}' <<< "$VersionSVN")
 readonly PRGNAME=$(basename $0)
@@ -70,51 +69,127 @@ function make_long_and_short_caches() {
 
   tshark -r $inputfile $FARG "$FVAL" -V > $DESTDIR/callflow.long
 
+  # Create a datafile with the data needed to create the callflow.
+  # This is done in 2 steps, because of the following reasons:  the tshark command
+  # with the '-T fields' argument, provides the IP addresses and SIP CSeq and Call-ID
+  # data.  Some additional information about the Call-ID; this field can show up
+  # in (at least) 2 ways in SIP messages.  The field can indeed be called "Call-ID",
+  # but just "i" in abbreviated SIP messages!  Both formats can be used in 1 call.
+  tshark -r $inputfile $FARG "$FVAL" -t a -T fields -E separator='|' \
+    -e frame.number -e ip.src -e ip.dst -e sip.CSeq -e sip.Call-ID | awk '
+  BEGIN {
+    FS = "|"
+    OFS = "|"
+    NOC = 1 # Number Of Call-IDs
+  }
+  {
+    # Map the often very long Call-IDs to a short index, with only 1 or 2 digits
+    if (( $5 != "" ) && ( CALLID[$5] == "" )) {
+      CALLID[$5] = NOC
+      NOC++
+    }
+      
+    printf "%s||%s|%s|%s|{%s}\n", $1, $2, $3, $4, CALLID[$5]
+
+  }' > $TMPDIR/${PRGNAME}-tshark-1.$$
+
+  # The second step in getting SIP data required by callflow.  This step delivers
+  # the source and destination ports independent whether the datagram is UDP or
+  # TCP based.  As SIP can be delivered over UDP or TCP using this tshark command
+  # seems to be good choice.  Further more this command delivers the frame information
+  # (summary), that can not be obtained with tshart '-T fields' command above.
+  #
+  # For messages containing ISUP payload this step could deliver the IP addresses
+  # when using % variables %ns and %nd (network source and destination).  If the
+  # % variables %s and %d are used the highest source and destination addresses are
+  # used, in case of ISUP message that are the OPC and DPC data, for details see
+  # wireshark bug 5969.
+  #
+  # The available % variables can be found at:
+  #   http://anonsvn.wireshark.org/viewvc/trunk/epan/column.c?view=markup
+  #
+  # Information about the stream editor (sed) manipulations:
   # - The string (ITU) shows up in the protocol description "ISUP(ITU)".
   #   awk doesn't like the "(" and ")", hence remove them.
-  # - Megaco has "with session description" in its info string, shorten
-  #   this to just SDP.
+  # - Short the string "with session description" to just SDP.
   # - Megaco has a "|" in its info sting, this character is however the
   #   field separator in the output file, remove it.  The actual string
   #   being removed is " |=".
   tshark -r $inputfile $FARG "$FVAL" -t a \
-    -o 'column.format: "No.", "%m", "Time", "%t", "Src", "%s", "Port", "%S", "Ignored", "%m", "Dest", "%d", "Port", "%D", "Protocol", "%p", "Info", "%i"' |
-    sed 's/^[[:blank:]]*//;
-      s/\([0-9]\{3\}\)000 /\1 /;
-      s/with session description/SDP/g;
-      s/[[:blank:]]*|=/ /;
-      s/(ITU)//' | awk '{
+    -o 'column.format: "No.", "%m", "Time", %t, "Protocol", "%p", "srcport", %S, "dstport", %D, "Info", "%i"' |
+      sed -e 's/^[[:blank:]]*//' \
+        -e 's/[[:blank:]]*|=/=/' \
+        -e 's/ Status: / /' \
+        -e 's/ Request: / /' \
+        -e 's/(ITU)//' \
+        -e 's/with session description/SDP/g' | awk '{
 
-      # The match and the substr are working together to get the string starting
-      # at field 9 till the end of the line.  This provides the frame summary line.
-      # But the frame summary may contain characters that influence the match,
-      # such as the "(" and ")" characters.  Therefor look for the end of the
-      # protocol field (8) as the protocol field contains most likely regular
-      # ascii characters.
+    split($0, A, " ")
 
-      # The A[0, "start"] gives the start position of the $8
-      match($0, $8, A)
-      SUMMARY_START = A[0, "start"] + length($8) + 1
-      SUMMARY = substr($0, SUMMARY_START)
-      printf("%s|%s|%s|%s||%s|%s|%s|%s\n", $1, $2, $3, $4, $6, $7, $8, SUMMARY)
+    for (i = 1; i <= 5; i++) {
+      printf "%s|", $i
+    }
 
-  }' > $TMPDIR/${PRGNAME}-tshark-1.$$
+    L = length(A)
+    for (i = 6; i < L; i++) {
+      printf "%s ", $i
+    }
 
-  tshark -r $inputfile $FARG "$FVAL" -t a \
-    -o 'column.format: "No.", "%m", "Cseq", "%Cus:sip.CSeq"' |
-    sed 's/^[[:blank:]]*//;s/ /|/' > $TMPDIR/${PRGNAME}-tshark-2.$$
+    printf "%s\n", $L
 
-  ( # echo "time|no|trace|src|srcport|dir|dst|dstport|prot|summary|remark"
-    join -t "|" --nocheck-order $TMPDIR/${PRGNAME}-tshark-1.$$ $TMPDIR/${PRGNAME}-tshark-2.$$ | awk -F "|" '{
-      printf("%s||%s|", $2, $1)
-      for ( N = 3; N < NF; N++) {
-        printf("%s|", $N)
-      }
-      printf("%s\n", $N)
-    }'
-  ) > $DESTDIR/callflow.short
+  }' > $TMPDIR/${PRGNAME}-tshark-2.$$
+    
+  # Join the 2 datafiles that have been obtained above together
+  join -t "|" --nocheck-order $TMPDIR/${PRGNAME}-tshark-1.$$ $TMPDIR/${PRGNAME}-tshark-2.$$ > $TMPDIR/${PRGNAME}-tshark-3.$$
 
-  rm $TMPDIR/${PRGNAME}-tshark-1.$$ $TMPDIR/${PRGNAME}-tshark-2.$$
+  # Order the fields
+  awk 'BEGIN {
+    FS = "|"
+
+    # The order in which the fields will be arranged in the output file
+    # 1: time
+    # 2: tracefile
+    # 3: frame.number
+    # 4: ip.src
+    # 5: ip.srcport 
+    # 6: session information
+    # 7: ip.dst
+    # 8: ip.dstport
+    # 9: protocol
+    # 10: info field
+    # 11: SIP CSeq
+
+    # The array (A) that the 'split' command creates, maps the input fields
+    # to the output file order.  As example: input field 7 is mapped to
+    # output field 1 and input field 5 is mapped to output field 11.
+    split("7 2 1 3 9 6 4 10 8 11 5", A, " ")
+  }
+  {
+    # Look for "200 OK" or "200 Ok" and add the SIP method, from the
+    # call sequence field to the 200 OK message.
+    #
+    # Attention: use the input fields values and not the ones mentioned in
+    # the BEGIN part.
+    # - $5 contains the sip.CSeq data.
+    # - $8 contains the protocol
+    # - $11 contains the info field data.
+    if (($8 ~ "SIP") && ($11 ~ "200 O")) {
+      # split the call sequence message (#ID SIP_method)
+      split($5, S, " ")
+      $11 = sprintf("%s (%s)", $11, S[2])
+    }
+
+    # Perform the actual mapping of the input to the output fields
+    L = length(A)
+    for (i = 1; i < L; i++) {
+      printf "%s|", $A[i]
+    }
+
+    printf "%s\n", $A[L]
+
+  }' $TMPDIR/${PRGNAME}-tshark-3.$$ > $DESTDIR/callflow.short
+
+  rm $TMPDIR/${PRGNAME}-tshark-[123].$$
 
   TRACE_FILE=$(basename $inputfile)
   MD5SUM=$(md5sum $inputfile | awk '{print $1}')
@@ -151,10 +226,6 @@ Options:
   --no-loops
                 Prevent flows from and to the same equipment to be represented.
 
-  --no-session-token
-                Disable the session detection (show ID and colorization), for more
-                information see the --session-token argument.
-
   --no-time
                 Do not show the time.
 
@@ -173,16 +244,6 @@ Options:
                 Remove duplicate frames while computing.
                 This option should not be selected on the first run.
 
-  --session-token <session>
-                Add a session ID to sequence lines and color lines related
-                to this session ID.
-                This option is available by default and the value is 
-                'Call-Id:' (depending on your callflow configuration). 
-                You should use this option in order to overwrite the default
-                value.
-                If you want to disable the session detection (show ID and 
-                colorization), you should use: --no-session-token.
-
   --title <title>
                 Use <title> as title in the callflow.  If not specified the
                 name of file containing the trace will be used instead. Surround
@@ -199,8 +260,8 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
-LOPT="capture-filter:,help,list-nodes,no-loops,no-session-token,no-time,refresh-cache"
-LOPT="$LOPT,remove-duplicate-frames,session-token:,title:,width-between-nodes:,version"
+LOPT="capture-filter:,help,list-nodes,no-loops,no-time,refresh-cache"
+LOPT="$LOPT,remove-duplicate-frames,title:,width-between-nodes:,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
 # separate word. The quotes around `$@' are essential!
@@ -233,9 +294,6 @@ while true; do
                          noLocalLoop=1;
                          #echo " * Flows from and to the same equipment will not be shown"
                          ;;
-  --no-session-token)
-                         WITH_SESSION=no
-                         ;;
   --no-time)
                          OPT_SHOW_TIME=no
                          #echo " * Time will not be shown"
@@ -247,14 +305,6 @@ while true; do
                          # Remove duplicate frames
                          removeDF=1
                          #echo " * Duplicate frames will be removed"
-                         ;;
-  --session-token)
-                         SESSION="$2"; shift
-                         if [[ -n "$SESSION" ]]; then
-                           WITH_SESSION=yes
-                         else
-                           WITH_SESSION=no
-                         fi
                          ;;
   --title)
                          OPT_TITLE="$2"; shift
@@ -427,13 +477,6 @@ cp $STYLESHEET $DESTDIR/frames
 if [ $removeDF = 1 ]; then
   #echo "Removing duplicate frames"
   $SETUPDIR/scripts/removedups.sh $DESTDIR $DESTDIR/frames $TMPDIR ${REMOVE_DUP_MODE:-REMOVE_ALL_DUPS}
-  rm $DESTDIR/callflow.short
-  mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
-fi
-
-# Add session ID and colorization
-if [[ $WITH_SESSION == "yes" ]]; then
-  awk -f $SETUPDIR/scripts/marksession.awk -v session_token="$SESSION" -v destDir=$DESTDIR < $DESTDIR/callflow.short > $DESTDIR/callflow.short.new
   rm $DESTDIR/callflow.short
   mv $DESTDIR/callflow.short.new $DESTDIR/callflow.short
 fi
