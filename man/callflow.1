@@ -176,7 +176,7 @@ When you run callflow, you can take the output files callflow.short and callflow
 
 The first file (.short) contains the trace information, one transaction per line, in the following format:
 
- <time>|<trace-filename>|<frame #>|<src node>|<src port>|<direction-sessionID>|<dest node>|<dest port>|<protocol>|<summary>|<remark>
+ <time>|<trace-filename>|<frame #>|<src node>|<src port>|<sessionID>|<dest node>|<dest port>|<protocol>|<summary>|<remark>
 
 .I For example:
 
@@ -245,16 +245,16 @@ You can add a comment to your diagram by adding a line that start with "# " to s
 
 .SS Remove retransmitted SIP packets:
 We will now use "mycapture/callflow.short" and "mycapture/callflow.long" text files for further processing:
- $ callflow -d mycapture.cap
+ $ callflow --remove-duplicate-frames mycapture.cap
 
 .SS Add any desired comments to callflow, then regenerate diagram (repeat as needed):
- $ callflow -t mycapture.cap
+ $ callflow mycapture.cap
 
 
 .SH HOW IT WORKS
 Well, this is kind of ugly:
 
-    a.  check for order, session, title, filter files
+    a.  look for the order files
     b.  run tshark twice to get short and long output files
     c.  use long2html.awk to convert long output file into frame*.html files
     d.  get all the unique nodes from the short output file
@@ -297,3 +297,4 @@ Callflow project page at \fIhttp://callflow.sourceforge.net\fR
 Man page created by Arnaud Morin <arnaud.morin@gmail.com>.
 
 See AUTHORS file provided with this package to see all project contributors.
+

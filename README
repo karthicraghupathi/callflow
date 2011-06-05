@@ -25,9 +25,7 @@ This will produce a directory named like your capture file in your working direc
 In this, you will find at least:
 	- callflow.svg file, 
 	- callflow.png file, 
-	- index.html file, 
-	- index_dynamic.html file,
-	- index_with_frames.html file,
+	- several index.html files, 
 	- graph.html file,
 	- frames directory with FrameX.html files inside.
 
@@ -106,9 +104,6 @@ Adding "Session ID" to Sequence Lines
 =====================================
 By default, callflow colors every frame based on a specific pattern: 'Call-Id:'. This pattern is a header followed by an identifier that indicates which "SIP dialog" this packet belongs to. Callflow can use the same color for all flows that have the same identifier.
 
-You can change the pattern by using the --session-token option:
-callflow --session-token capture-file.cap;
-
 
 Tweaking ~/.wireshark/preferences for frames/Frame*.html
 =======================================================
@@ -119,7 +114,7 @@ ip.ip_summary_in_tree
 tcp.tcp_summary_in_tree
 udp.udp_summary_in_tree
 
-If any of these items are set to TRUE, then only the summary line will appear in frames/Frame*.html. Otherwise, the gory details will be displayed.
+If any of these items are set to TRUE, then only the summary line will appear in frames/Frame*.html. Otherwise, the glory details will be displayed.
 
 
 Creating diagrams manually
@@ -131,7 +126,7 @@ When you run callflow, you can take the output files callflow.short and callflow
 
 The first file (.short) contains the trace information, one transaction per line, in the following format:
 
- <time>|<trace-filename>|<frame #>|<src node>|<src port>|<direction-sessionID>|<dest node>|<dest port>|<protocol>|<summary>|<remark>
+ <time>|<trace-filename>|<frame #>|<src node>|<src port>|<sessionID>|<dest node>|<dest port>|<protocol>|<summary>|<remark>
 
 For example:
 
@@ -202,14 +197,10 @@ $ callflow mycapture.cap
 
 We will now use "mycapture/callflow.short" and "mycapture/callflow.long" text files for further processing:
 Remove retransmitted SIP packets:
-$ callflow -d mycapture.cap
-
-Add "Session ID" to Sequence Lines:
-$ echo "Call-Id:" > session
-$ callflow -s mycapture.cap
+$ callflow --remove-duplicate-frames mycapture.cap
 
 Add any desired comments to callflow, then regenerate diagram (repeat as needed):
-$ callflow -t mycapture.cap
+$ callflow mycapture.cap
 
 
 How it works
@@ -217,7 +208,7 @@ How it works
 
 Well, this is kind of ugly:
 
-    a.  check for order, session, title, filter files
+    a.  look for the order file
     b.  run tshark twice to get short and long output files
     c.  use long2html.awk to convert long output file into frame*.html files
     d.  get all the unique nodes from the short output file
@@ -257,3 +248,4 @@ Specify output filenames and locations on the command line.
 Authors
 =======
 see AUTHORS file provided with this package.
+

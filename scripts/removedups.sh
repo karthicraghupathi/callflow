@@ -31,7 +31,7 @@ MODE=$4
     MD5SUM=$(mkmd5sum $i)
     N=${i##Frame}		# ## is used to remove Frame from FrameXX.html (N is like XX.html)
     #echo $N >&2
-    sed "s/-$//;s/^/${N%%.html} /" <<< $MD5SUM
+    sed "s/ -$//;s/^/${N%%.html} /" <<< $MD5SUM
   done | sort -n > $TMPDIR/md5sums.$$
 )
 
@@ -68,12 +68,93 @@ if [[ $MODE = "REMOVE_MIRROR_DUPS" ]]; then
 
   }' $TMPDIR/md5sums.$$ > $TMPDIR/pckts.$$
 
+elif [[ $MODE = "REMOVE_MIRROR_DUPS_2" ]]; then
+
+  sed -i 's/ /|/g' $TMPDIR/md5sums.$$
+  join -t "|" --nocheck-order -1 3 $DESTDIR/callflow.short $TMPDIR/md5sums.$$  > $TMPDIR/md5sum-2.$$
+
+  awk 'BEGIN {
+    FS = "|"
+    DEBUG = 0
+
+    # In SIP the first retry can be after 0.5 seconds
+    MAX_TIME_DELTA = 0.5
+
+    # The number of previous frames to investigate
+    MAX_FRAME_DELTA = 5
+
+  } {
+
+    FRAME[NR] = $1
+    TIME[NR] = $2
+    MD5SUM[NR] = $12
+
+  } END {
+
+    # The first frame can always be printed
+    if (DEBUG) print FRAME[1], TIME[1], MD5SUM[1]
+    print FRAME[1]
+
+    for (i = 2; i <= NR; i++) {
+
+     if (DEBUG) print "NEW: i =", i
+
+      # p: previous frame
+      DELTA = 1
+      p = i - DELTA
+
+      SEEN = "no"
+      CONT = 1
+      while (CONT) {
+        
+        if (DEBUG) printf "DEBUG 1: i = %d, Frame = %d, Time = %s, MD5SUM = %s\n", i, FRAME[i], TIME[i], MD5SUM[i]
+        if (DEBUG) printf "DEBUG 2: p = %d, Frame = %d, Time = %s, MD5SUM = %s\n", p, FRAME[p], TIME[p], MD5SUM[p]
+
+        if (MD5SUM[i] == MD5SUM[p]) {
+          CONT = 0
+          SEEN = "yes"
+        } else {
+          DELTA++
+
+          if ( DELTA > MAX_FRAME_DELTA ) {
+            CONT = 0
+          } else {
+
+            p = i - DELTA
+
+            if ( p < 1 ) {
+              CONT = 0
+            } else {
+
+              # Time format is: 11:41:00.134538, use only the seconds (last part)
+              # The previous frame may have time stamp 11:40:59.921807
+              # The delta in seconds (00.134538 - 59.921807) will be negative for
+              # those 2 frames, in this case add 60 seconds to it.
+              split(TIME[i], TC, ":")
+              split(TIME[p], TP, ":")
+              TIME_DELTA = TC[3] - TP[3]
+              if ( TIME_DELTA < 0 ) TIME_DELTA += 60
+              if ( TIME_DELTA > MAX_TIME_DELTA ) CONT = 0
+              if (DEBUG) printf "DEBUG 3: TC = %s, TP = %s, Delta = %s\n", TC[3], TP[3], TIME_DELTA
+            }
+          }
+        }
+      }
+
+      if (SEEN == "no") {
+        if (DEBUG) print "UNIQUE:", FRAME[i], TIME[i], MD5SUM[i]
+        print FRAME[i]
+      }
+    }
+
+  }' $TMPDIR/md5sum-2.$$ > $TMPDIR/pckts.$$
+
 elif [[ $MODE = "REMOVE_ALL_DUPS" ]]; then
 
   # This mode removes any duplicate package it encounters....
   for M in $(awk '{print $2}' $TMPDIR/md5sums.$$ | sort -u); do
     grep $M $TMPDIR/md5sums.$$ | head -1
-  done | awk '{print $1}' | sort -n  > $TMPDIR/pckts.$$
+  done | awk '{print $1}' | sort -n > $TMPDIR/pckts.$$
 
 else
   echo "error: unknow mode: \"$MODE\"" >&2
@@ -117,7 +198,8 @@ END {
 }' >&2
 
 #Remove temp files
-rm -f $TMPDIR/md5sums.$$
 rm -f $TMPDIR/pckts.$$
+rm -f $TMPDIR/md5sums.$$
+rm -f $TMPDIR/md5sums-2.$$
 rm -f $TMPDIR/callflow.short.$$
 
