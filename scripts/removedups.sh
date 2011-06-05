@@ -1,7 +1,7 @@
 #!/bin/bash
 # script to be called with these arguments:
 # removedups.sh DESTDIR FRAMEDIR TMPDIR MODE
-#   MODE: REMOVE_MIRROR_DUPS, REMOVE_ALL_DUPS
+#   MODE: REMOVE_MIRROR_DUPS_2, REMOVE_MIRROR_DUPS, REMOVE_ALL_DUPS
 
 function mkmd5sum {
   grep -v "title" $1 |
@@ -29,7 +29,7 @@ MODE=$4
   for i in Frame*html; do
     #echo $i >&2
     MD5SUM=$(mkmd5sum $i)
-    N=${i##Frame}		# ## is used to remove Frame from FrameXX.html (N is like XX.html)
+    N=${i##Frame}              # ## is used to remove Frame from FrameXX.html (N is like XX.html)
     #echo $N >&2
     sed "s/ -$//;s/^/${N%%.html} /" <<< $MD5SUM
   done | sort -n > $TMPDIR/md5sums.$$
@@ -37,8 +37,12 @@ MODE=$4
 
 if [[ $MODE = "REMOVE_MIRROR_DUPS" ]]; then
   
-  # This mode removes a package if the subsequent frames are the same.
-  # The package that is kept is the first one sent, the subsequent one is skipped
+  ( echo "$MODE is deprecated, may be removed in the future without notice,"
+    echo "  please use \"REMOVE_MIRROR_DUPS_2\" instead."
+  ) >&2
+
+  # This mode removes a frame if the prior and the current frame are the same.
+  # The frame kept is the first one sent, the current one is removed.
   # This is often encountered on traces that are obtained via port mirroring
   # on a router.
 
@@ -70,8 +74,14 @@ if [[ $MODE = "REMOVE_MIRROR_DUPS" ]]; then
 
 elif [[ $MODE = "REMOVE_MIRROR_DUPS_2" ]]; then
 
-  sed -i 's/ /|/g' $TMPDIR/md5sums.$$
-  join -t "|" --nocheck-order -1 3 $DESTDIR/callflow.short $TMPDIR/md5sums.$$  > $TMPDIR/md5sum-2.$$
+  # The md5sum calculation has been performed before already.  Do it
+  # here anyway again, as this "remove duplicated frames mode" seems to be
+  # the better one.  The others may be removed, including the md5sum
+  # processing done above.
+  awk -F"|" '{print $3, $1}' $DESTDIR/callflow.short | while read FRAME TIME; do
+    MD5SUM=$(mkmd5sum $DESTDIR/frames/Frame${FRAME}.html | sed 's/ .*//')
+    echo "$FRAME|$TIME|$MD5SUM"
+  done > $TMPDIR/md5sums.$$
 
   awk 'BEGIN {
     FS = "|"
@@ -87,7 +97,7 @@ elif [[ $MODE = "REMOVE_MIRROR_DUPS_2" ]]; then
 
     FRAME[NR] = $1
     TIME[NR] = $2
-    MD5SUM[NR] = $12
+    MD5SUM[NR] = $3
 
   } END {
 
@@ -110,32 +120,41 @@ elif [[ $MODE = "REMOVE_MIRROR_DUPS_2" ]]; then
         if (DEBUG) printf "DEBUG 1: i = %d, Frame = %d, Time = %s, MD5SUM = %s\n", i, FRAME[i], TIME[i], MD5SUM[i]
         if (DEBUG) printf "DEBUG 2: p = %d, Frame = %d, Time = %s, MD5SUM = %s\n", p, FRAME[p], TIME[p], MD5SUM[p]
 
-        if (MD5SUM[i] == MD5SUM[p]) {
-          CONT = 0
-          SEEN = "yes"
-        } else {
-          DELTA++
+        # Time format is: 11:41:00.134538, use only the seconds (last part)
+        # The previous frame may have timestamp 11:40:59.921807
+        # The delta in seconds (00.134538 - 59.921807) will be negative for
+        # those 2 frames, in this case add 60 seconds to it.
+        split(TIME[i], TC, ":")
+        split(TIME[p], TP, ":")
+        TIME_DELTA = TC[3] - TP[3]
+        if ( TIME_DELTA < 0 ) TIME_DELTA += 60
+        if ( TIME_DELTA > MAX_TIME_DELTA ) CONT = 0
+        if (DEBUG) printf "DEBUG 5: TC = %s, TP = %s, Delta = %s\n", TC[3], TP[3], TIME_DELTA
 
-          if ( DELTA > MAX_FRAME_DELTA ) {
+        if ( TIME_DELTA > MAX_TIME_DELTA ) {
+          CONT = 0
+          if (DEBUG) printf "DEBUG 9: STOP: passed time delta (%s)\n", MAX_TIME_DELTA
+        } else {
+
+          if (MD5SUM[i] == MD5SUM[p]) {
             CONT = 0
+            SEEN = "yes"
+            if (DEBUG) printf "DEBUG 6: STOP: not unique\n"
           } else {
 
-            p = i - DELTA
+            DELTA++
 
-            if ( p < 1 ) {
+            if ( DELTA > MAX_FRAME_DELTA ) {
               CONT = 0
+              if (DEBUG) printf "DEBUG 7: STOP: max frame delta (%s) reached\n", MAX_FRAME_DELTA
             } else {
 
-              # Time format is: 11:41:00.134538, use only the seconds (last part)
-              # The previous frame may have time stamp 11:40:59.921807
-              # The delta in seconds (00.134538 - 59.921807) will be negative for
-              # those 2 frames, in this case add 60 seconds to it.
-              split(TIME[i], TC, ":")
-              split(TIME[p], TP, ":")
-              TIME_DELTA = TC[3] - TP[3]
-              if ( TIME_DELTA < 0 ) TIME_DELTA += 60
-              if ( TIME_DELTA > MAX_TIME_DELTA ) CONT = 0
-              if (DEBUG) printf "DEBUG 3: TC = %s, TP = %s, Delta = %s\n", TC[3], TP[3], TIME_DELTA
+              p = i - DELTA
+
+              if ( p < 1 ) {
+                CONT = 0
+                if (DEBUG) printf "DEBUG 8: STOP: previous frame array index < 1\n"
+              }
             }
           }
         }
@@ -147,9 +166,13 @@ elif [[ $MODE = "REMOVE_MIRROR_DUPS_2" ]]; then
       }
     }
 
-  }' $TMPDIR/md5sum-2.$$ > $TMPDIR/pckts.$$
+  }' $TMPDIR/md5sums.$$ > $TMPDIR/pckts.$$
 
 elif [[ $MODE = "REMOVE_ALL_DUPS" ]]; then
+
+  ( echo "$MODE is deprecated, may be removed in the future without notice,"
+    echo "  please use \"REMOVE_MIRROR_DUPS_2\" instead."
+  ) >&2
 
   # This mode removes any duplicate package it encounters....
   for M in $(awk '{print $2}' $TMPDIR/md5sums.$$ | sort -u); do
@@ -200,6 +223,5 @@ END {
 #Remove temp files
 rm -f $TMPDIR/pckts.$$
 rm -f $TMPDIR/md5sums.$$
-rm -f $TMPDIR/md5sums-2.$$
 rm -f $TMPDIR/callflow.short.$$
 
