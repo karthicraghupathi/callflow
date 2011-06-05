@@ -539,7 +539,7 @@ if [ $orderFile != none ]; then
     #echo Using the following order:
     #cat $finalOrderFile
 else
-    echo "$PRGNAME: warning: order file not found -- using auto generated"
+    echo "$PRGNAME: warning: no \"order\" file found -- using auto generated"
     finalOrderFile=$TMPDIR/callflow.auto-uniq.$PPID
 fi
 
