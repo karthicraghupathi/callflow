@@ -1,4 +1,4 @@
-.TH CALLFLOW 1 "2010/04/22" callflow "callflow - Sequence Diagram Generator"
+.TH CALLFLOW 1 "2011/06/05" callflow "callflow - Sequence Diagram Generator"
 
 
 .SH NAME
@@ -14,6 +14,7 @@ This is a collection of awk and shell scripts that will take a capture file that
 .SS Using callflow
 With callflow in your path, just type:
   callflow capture-file.cap
+.sp 0
 (see below for more options)
 
 This will produce a directory named like your capture file in your working directory (eg: if file is capture-file.cap, the directory will be capture-file).
@@ -57,7 +58,7 @@ Print version number.
 .BI -f " filter"
 .TP
 .PD
-.BI --cap-filter " filter"
+.BI --capture-filter " filter"
 A filter can be used to show only those frames that match the given filter criteria.  This filter is for traces that have been captured with programs such as wireshark, snoop, tcpdump, thsark and the like.  Callflow uses tshark's DISPLAY filter functionality to filter the trace.  More information about tshark's DISPLAY filter can be obtained from the tshark man page. A useful filter for SIP traffic is "sip".
 
 .TP
@@ -66,7 +67,7 @@ A filter can be used to show only those frames that match the given filter crite
 .TP
 .PD
 .B --list-nodes
-List the unique nodes in the trace file (don't forget to redirect output in another file. Example of use: callflow --list-nodes capture.cap > order).
+List the unique nodes in the trace file (don't forget to redirect output in another file. Example of use: callflow --list-nodes capture.cap > order).  See the description of the file \fIorder\fR in the \fIfiles\fR section.
 
 .TP
 .PD 0
@@ -77,6 +78,20 @@ Prevent flows from and to the same equipment to be represented.
 .PD 0
 .B --no-time
 Do not show the time.
+
+.TP
+.PD 0
+.B --nodenames <filename>
+A file containing the element or node names that belong to the
+addresses shown in the callflow.  The file is space separated, the first column
+contains the IP address of the node the rest of the line is the node alias.
+E.g.:
+.sp 0
+10.10.20.30 Subscriber A
+.sp 0
+10.20.100.111 Asterisk
+.sp 0
+See the description of the file \fInodenames.conf\fR in the \fIfiles\fR section.
 
 .TP
 .PD 0
@@ -92,17 +107,11 @@ Remove duplicate frames while computing. This option should not be selected on t
 Specify the title of the callflow.  If not specified the file name containing the trace will be used.
 
 .TP
-.PD 0
-.B -t
-.TP
-.PD 0
-.B -c
-.TP
 .PD
-.B --use-cache
+.B --refresh-cache
 Use callflow and callflow.long files from FILE directory.
 .sp 0
-Note 1: if -t and --remove-duplicate-frames are used, only -t is executed.
+Note 1: if --refresh-cache and --remove-duplicate-frames are used, only --refresh-cache is executed.
 .sp 0
 Note 2: this option sould not be selected on the first run.
 
@@ -156,7 +165,7 @@ callflow --remove-duplicate-frames foo
 Duplicates are determined by examining each line in foo, and comparing frames/Frame<#>.html with all previously seen frames.
 
 .SS "Session ID" to Sequence Lines
-Callflow colors every frame based on the specific pattern: 'Call-Id:' or 'i:' (for abbreviated SIP messages.
+Callflow colors every frame based on the specific pattern: 'Call-Id:' or 'i:' (for abbreviated SIP messages).
 
 
 .SH TWEAKING TSHARK PREFERENCE
@@ -273,11 +282,17 @@ Well, this is kind of ugly:
 
 
 .SH "FILES"
+.SS callflow.conf
 The system-wide configuration file \fI/etc/callflow.conf\fR, and the personal ones \fI$HOME/.callflow.conf\fR
 and \fIcallflow.conf\fR are used by callflow.  If the system-wide configuration file exists, it is read first,
 overriding the default settings.  If the personal configuration files exists, they are read next, overriding
 any previous values.
 
+.SS order
+The file order is expected in the current working directory, and determines the order of the nodes in the callflow.
+
+.SS nodenames.conf
+The file nodenames.conf is expected in respectively $HOME/.callflow, the current working directory or the file can be defined with the argument --nodenames.  The last nodenames.conf file (or the file specified with --nodenames) found will be used.
 
 .SH TO DO
 It would be much nicer to take the tshark filtered output and build an intermediate XML representation of it.  Then use XSLT to transform it into the SVG file.  This way you could write up illustrative sequence diagrams more easily and make use of more tools that can manipulate XML.

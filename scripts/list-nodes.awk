@@ -55,9 +55,24 @@ BEGIN {
   }
 
 } END {
+
+  # Create an array with node names, the index is the IP address of the node
+  if (NODENAMES != "") {
+    while ( getline < NODENAMES > 0 ) {
+      sub(" ", "|")
+      NAMES[$1] = $2
+    }
+  }
+
   MAX = length(POS)
   for (i=0; i < MAX; i++) {
-    print DEVICES[i], POS[i]
+    if (POS[i] in NAMES) {
+      ID = POS[i]
+      ALIAS = NAMES[ID]
+    } else {
+      ALIAS = POS[i]
+    }
+    print DEVICES[i], ALIAS
   }
 }
 

@@ -223,16 +223,20 @@ Options:
                 filter can be obtained from the tshark man page.
                 A useful filter for SIP traffic is "sip".
 
+  --list-nodes, -o
+                List the unique nodes in the trace file
+                (Don't forget to redirect output in another file.
+                 Example of use: $PRGNAME --list-nodes capture.cap > order)
+
   --no-loops
                 Prevent flows from and to the same equipment to be represented.
 
   --no-time
                 Do not show the time.
 
-  --list-nodes, -o
-                List the unique nodes in the trace file
-                (Don't forget to redirect output in another file.
-                 Example of use: $PRGNAME --list-nodes capture.cap > order)
+  --nodenames
+                A file containing the element or node names that belong to the
+                addresses shown in the callflow.
 
   --refresh-cache
                 Refresh the contents of the callflow.short and callflow.long
@@ -260,7 +264,7 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
-LOPT="capture-filter:,help,list-nodes,no-loops,no-time,refresh-cache"
+LOPT="capture-filter:,help,list-nodes,no-loops,no-time,nodenames:,refresh-cache"
 LOPT="$LOPT,remove-duplicate-frames,title:,width-between-nodes:,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
@@ -297,6 +301,9 @@ while true; do
   --no-time)
                          OPT_SHOW_TIME=no
                          #echo " * Time will not be shown"
+                         ;;
+  --nodenames)
+                         OPT_NODENAMES=$2; shift
                          ;;
   --refresh-cache)
                          OPT_REFRESH_CACHE=yes
@@ -360,6 +367,15 @@ else
   WIDTH_BETWEEN_NODES=$OPT_WIDTH_BETWEEN_NODES
 fi
 
+[[ -n "$OPT_NODENAMES" ]] && {
+  if [[ -f "$OPT_NODENAMES" ]]; then
+    NODENAMES="$OPT_NODENAMES"
+  else
+    echo "$PRGNAME: error: nodenames file does not exist (--nodenames)" >&2
+    exit 1
+  fi
+}
+
 if [[ -z "$OPT_SHOW_TIME" ]]; then
   SHOW_TIME=yes
 else
@@ -415,11 +431,19 @@ fi
 # order file
 ##################################
 # Build the order file and exit
+[[ -z "$NODENAMES" ]] && {
+  for FILE in $HOME/.callflow/nodenames.conf nodenames.conf; do
+    if [[ -f $FILE ]]; then
+      NODENAMES=$FILE
+    fi
+  done
+}
+
 if [[ $ORDER = 1 ]]; then
 
   [[ $USE_CACHE == "no" ]] && make_long_and_short_caches
 
-  awk -f $SETUPDIR/scripts/list-nodes.awk $DESTDIR/callflow.short
+  awk -f $SETUPDIR/scripts/list-nodes.awk -v NODENAMES=$NODENAMES $DESTDIR/callflow.short
 
   exit 0
 fi
@@ -485,7 +509,8 @@ fi
 # common
 ##################################
 # Compute nodes
-awk -f $SETUPDIR/scripts/list-nodes.awk $DESTDIR/callflow.short > $TMPDIR/callflow.auto-uniq.$PPID
+awk -f $SETUPDIR/scripts/list-nodes.awk -v NODENAMES=$NODENAMES \
+  $DESTDIR/callflow.short > $TMPDIR/callflow.auto-uniq.$PPID
 
 # orderFile
 if [ $orderFile != none ]; then
