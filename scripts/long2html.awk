@@ -218,6 +218,12 @@ BEGIN {
       PL[id] = $0
       id++
 
+      # The payload has the following format:
+      # 0000  74 2d 4c 65 6e 67 74 68 3a 20 32 31 33 0d 0a 50   t-Length: 213..P
+      # 0010  2d 41 73 73 65 72 74 65 64 2d 49 64 65 6e 74 69   -Asserted-Identi
+      # ....
+      # 0160  76 65 64 2d 55 73 65 72 3a 20 3c 73 69 70 3a 62   ved-User: <sip:b
+      # The following code block displays the data in a human readable format
       if ((length($1) == 4) && ($1 != "Data")) {
         PAYLOAD = substr($0, 7, 50)
         L = split(PAYLOAD, CHARS, " ")
