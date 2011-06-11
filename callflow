@@ -352,15 +352,24 @@ if [[ ! -z "$OPT_FILTER" ]]; then
 fi
 
 if [[ -z "$OPT_WIDTH_BETWEEN_NODES" ]]; then
-  WIDTH_BETWEEN_NODES=200
-else
+  if [[ -z "$WIDTH_BETWEEN_NODES" ]]; then
+    WIDTH_BETWEEN_NODES=200
+  else
+    # In case the WIDTH_BETWEEN_NODES has been defined in the configuration
+    # file callflow.conf, prepare it to be verified.
+    OPT_WIDTH_BETWEEN_NODES=$WIDTH_BETWEEN_NODES
+  fi
+fi
+
+if [[ -n "$OPT_WIDTH_BETWEEN_NODES" ]]; then
+
   if [[ $OPT_WIDTH_BETWEEN_NODES -gt 250 ]]; then
-    echo "$PRGNAME: error: width between nodes too big" >&2
+    echo "$PRGNAME: error: width ($OPT_WIDTH_BETWEEN_NODES) between nodes too big" >&2
     exit 1
   fi
 
   if [[ $OPT_WIDTH_BETWEEN_NODES -lt 100 ]]; then
-    echo "$PRGNAME: error: width between nodes too small" >&2
+    echo "$PRGNAME: error: width ($OPT_WIDTH_BETWEEN_NODES) between nodes too small" >&2
     exit 1
   fi
 
@@ -492,10 +501,12 @@ fi
 # Create Frames
 mkdir -p $DESTDIR/frames
 awk -f $SETUPDIR/scripts/long2html.awk -v destDir=$DESTDIR < $DESTDIR/callflow.long
+
 for FILE in $SETUPDIR/css/callflow.css $HOME/.callflow/callflow.css callflow.css; do
   [[ -f $FILE ]] && STYLESHEET=$FILE
 done
-cp $STYLESHEET $DESTDIR/frames
+
+sed s/@SIP_MSG_FONT_SIZE@/${SIP_MSG_FONT_SIZE:-small}/ $STYLESHEET > $DESTDIR/frames/callflow.css
 
 # Remove duplicate Frame
 if [ $removeDF = 1 ]; then
@@ -657,10 +668,11 @@ if which inkscape >/dev/null 2>&1; then
     echo " </body>"
     echo "</html>"
   ) > $DESTDIR/index_dynamic.html
+
+  \rm imagemap
    
   #Copy JavaScript files into DESTDIR
   cp -af $SETUPDIR/js $DESTDIR/
-
 
   # (SIP) Messages will be presented in right frame
   sed 's/coords=/target=\"msg\" coords=/' $DESTDIR/index_frameless.html > $DESTDIR/graph.html
@@ -701,8 +713,11 @@ fi
 
 echo
 echo "The output can be viewed with a browser: "
-echo " ${BROWSER:=firefox} $DESTDIR/index.html"
+if [[ -z "$WEBSERVER_URL" ]]; then
+  echo " ${BROWSER:=firefox} $DESTDIR/index.html"
+else
+  echo " ${BROWSER:=firefox} $WEBSERVER_URL/$DESTDIR/index.html"
+fi
 
-\rm imagemap
 exit 0;
 

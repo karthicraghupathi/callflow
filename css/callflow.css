@@ -34,7 +34,7 @@ table td {
 
 pre.msg {
  color: #1f1f1f;
- font-size: small;
+ font-size: @SIP_MSG_FONT_SIZE@;
 }
 
 div.sip {
