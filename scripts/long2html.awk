@@ -1,10 +1,35 @@
-BEGIN{
+# Hexadecimal to decimal convertor
+function hex2dec(str) {
+  hstr = "0123456789abcdef"
+  res = 0
+  n = split(tolower(str), digit, "")
+
+  for(j = 1; j <= n; j++) {
+    num = index(hstr, digit[j]) - 1
+    res = res + (num*16^(n-j))
+  }
+
+  return res
+}
+
+BEGIN {
   first = 1
 }
 
 /^Frame [0-9]+: (.*)/ {
   # New frame, closing <pre> and html> from previous frame before compute new filename
   if (first == 0) {
+
+    if (protocol == "DATA") {
+      printf "\n" > filename
+      printf "<div class=\"sip\">Raw data</div>\n" > filename
+      printf "<hr/>\n" > filename
+      L = length(PL)
+      for (i = 0; i <= L; i++) {
+        print PL[i] > filename
+      }
+    }
+
     printf "  </pre>\n" >filename
     printf " </body>\n" >filename
     printf "</html>\n" >filename
@@ -31,16 +56,18 @@ BEGIN{
   printf " <body>\n" >filename
   printf "  <pre class=\"msg\">\n" >filename
   print $0 >filename
-  # Print time
+
+  # Print Arrival Time
   getline
   gsub("^ *", "")
-  print $0 >filename;
+  print $0 >filename
 
   discard = 1
   protocol = ""
 }
+
 /^Internet Protocol,/ {
-  print $0 >filename
+  print $0 > filename
   discard = 1
 }
 /^Internet Protocol$/ {
@@ -66,25 +93,46 @@ BEGIN{
 /^Session Initiation Protocol/ {
   discard = 0
   protocol = "SIP"
+  printf "\n" > filename
 }
+
 /^Diameter Protocol/ {
   discard = 0
 }
+
 /^WebSocket Protocol/ {
   discard = 0
 }
+
 /^Hypertext Transfer Protocol/ {
   discard = 0
 }
+
 /^Call Specification Language/ {
   discard = 0
 }
+
 /^Stream Control Transmission Protocol/ {
   discard = 0
+  protocol = "SCTP"
+  printf "\n" > filename
 }
+
+/^Data/ {
+  discard = 0
+  protocol = "DATA"
+  delete PL
+  id = 0
+  printf "\n" > filename
+  printf "<div class=\"sip\">Fragmented data</div>\n" > filename
+}
+
 /^MEGACO/ {
   discard = 0
+  protocol = "MEGACO"
+  printf "\n" > filename
 }
+
 {
   if (discard == 0) {
 
@@ -92,7 +140,7 @@ BEGIN{
     gsub(">","\\&gt;")
     gsub("<","\\&lt;")
 
-    if (protocol == "SIP") {
+    if ((protocol == "SIP") || (protocol == "MEGACO"))  {
 
       MARK = "no"
       # Abbreviated SIP messages
@@ -106,6 +154,7 @@ BEGIN{
       if ($1 == "v:" ) MARK = "sip"
 
       # SIP messages
+      if ($0 ~ "MEGACO" ) MARK = "sip"
       if ($0 ~ "Session Initiation Protocol" ) MARK = "sip"
       if ($1 ~ "Accept:" ) MARK = "sip"
       if ($1 ~ "Alert-Info:" ) MARK = "sip"
@@ -153,14 +202,31 @@ BEGIN{
       if ($0 ~ "Time Description, active time") MARK = "media"
 
       if (MARK == "sip") {
-        printf "<div class=\"sip\">%s</div>\n", $0 > filename;
+        printf "<div class=\"sip\">%s</div>\n", $0 > filename
 
       } else if (MARK == "media") {
-        printf "<div class=\"media\">%s</div>\n", $0 > filename;
+        printf "<div class=\"media\">%s</div>\n", $0 > filename
 
       } else {
-        print $0 > filename;
+        print $0 > filename
       }
+
+    } else if (protocol == "DATA") {
+
+      # Memorize the current PayLoad (PL) line, so it can be dumped
+      # in a raw data block later
+      PL[id] = $0
+      id++
+
+      if ((length($1) == 4) && ($1 != "Data")) {
+        PAYLOAD = substr($0, 7, 50)
+        L = split(PAYLOAD, CHARS, " ")
+        for (i = 1; i <= L; i++) {
+          dec = hex2dec(CHARS[i])
+          printf "%c", dec > filename
+        }
+      }
+
     } else {
       print $0 > filename;
     }
