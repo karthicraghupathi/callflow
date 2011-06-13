@@ -214,6 +214,9 @@ Options:
   --help        Print this help and exit
   --version, -v Print version
 
+  --browser
+                Launch a browser with the callflow.
+
   --capture-filter <filter>, -f <filter>
                 A filter can be used to show only those frames that match the
                 given filter criteria.  This filter is for traces that have been
@@ -264,7 +267,8 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
-LOPT="capture-filter:,help,list-nodes,no-loops,no-time,nodenames:,refresh-cache"
+LOPT="browser"
+LOPT="$LOPT,capture-filter:,help,list-nodes,no-loops,no-time,nodenames:,refresh-cache"
 LOPT="$LOPT,remove-duplicate-frames,title:,width-between-nodes:,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
@@ -285,6 +289,9 @@ while true; do
   --help)                help; exit ;;
    -h)                   usage; exit;;
 
+  --browser)
+                         START_BROWSER="yes"
+                         ;;
   --capture-filter|-f)
                          # Overwrite the default filter previously red from the configuration file
                          OPT_FILTER=$2; shift
@@ -711,12 +718,21 @@ else
   exit 1
 fi
 
-echo
-echo "The output can be viewed with a browser: "
-if [[ -z "$WEBSERVER_URL" ]]; then
-  echo " ${BROWSER:=firefox} $DESTDIR/index.html"
+if [[ "$START_BROWSER" == "yes" ]]; then
+  # Start the browser in the background
+  if [[ -z "$WEBSERVER_URL" ]]; then
+    "${BROWSER:=firefox}" "$DESTDIR/index.html" &
+  else
+    "${BROWSER:=firefox}" "$WEBSERVER_URL/$DESTDIR/index.html" &
+  fi
 else
-  echo " ${BROWSER:=firefox} $WEBSERVER_URL/$DESTDIR/index.html"
+  echo
+  echo "The output can be viewed with a browser: "
+  if [[ -z "$WEBSERVER_URL" ]]; then
+    echo " ${BROWSER:=firefox} $DESTDIR/index.html"
+  else
+    echo " ${BROWSER:=firefox} $WEBSERVER_URL/$DESTDIR/index.html"
+  fi
 fi
 
 exit 0;
