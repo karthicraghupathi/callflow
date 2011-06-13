@@ -214,6 +214,12 @@ Options:
   --help        Print this help and exit
   --version, -v Print version
 
+  --archive <archive type>
+                Create an archive with the files for showing the callflow
+                diagram.  Available archive types are: files, bzip2 and zip.
+                The archive type files just list the files required for the
+                callflow diagram.  It can be used to create an archive with it.
+
   --browser
                 Launch a browser with the callflow.
 
@@ -267,7 +273,7 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
-LOPT="browser"
+LOPT="archive:,browser"
 LOPT="$LOPT,capture-filter:,help,list-nodes,no-loops,no-time,nodenames:,refresh-cache"
 LOPT="$LOPT,remove-duplicate-frames,title:,width-between-nodes:,version"
 
@@ -289,6 +295,10 @@ while true; do
   --help)                help; exit ;;
    -h)                   usage; exit;;
 
+  --archive)
+                         ARCHIVE="yes"
+                         OPT_ARCHIVE_TYPE=$2; shift
+                         ;;
   --browser)
                          START_BROWSER="yes"
                          ;;
@@ -391,6 +401,21 @@ fi
     exit 1
   fi
 }
+
+if [[ "$ARCHIVE" == "yes" ]]; then
+
+  case "$OPT_ARCHIVE_TYPE" in
+
+      bzip2|files|zip) ARCHIVE_TYPE="$OPT_ARCHIVE_TYPE"
+      ;;
+
+    *)
+      echo "$PRGNAME: error: archive type ($OPT_ARCHIVE_TYPE) does not exist" >&2
+      exit
+      ;;
+  esac
+
+fi
 
 if [[ -z "$OPT_SHOW_TIME" ]]; then
   SHOW_TIME=yes
@@ -611,7 +636,15 @@ awk -F "|" -f $TMPDIR/callflow.awk.$PPID $DESTDIR/callflow.short > $DESTDIR/call
 
 # Build callflow.png if inkscape is available
 if which inkscape >/dev/null 2>&1; then
-  inkscape --export-dpi=90 -C --export-background=white --export-png=$DESTDIR/callflow.png $DESTDIR/callflow.svg
+
+  # Inkscape does not have a quiet option, it might get one in version 0.49
+  # Workaround; sent the output to /dev/null in case the files to be archived
+  # will be listed on the screen
+  if [[ "$ARCHIVE_TYPE" == "files" ]]; then
+    inkscape --export-dpi=90 -C --export-background=white --export-png=$DESTDIR/callflow.png $DESTDIR/callflow.svg >/dev/null 2>&1
+  else
+    inkscape --export-dpi=90 -C --export-background=white --export-png=$DESTDIR/callflow.png $DESTDIR/callflow.svg
+  fi
 
   # Build HTML files
   # Frameless; (SIP) messages will be presented in the same window as the callflow picture
@@ -716,6 +749,40 @@ else
   ) >&2
   
   exit 1
+fi
+
+if [[ "$ARCHIVE" == "yes" ]]; then
+
+  # Be specific in the files to be included in the archive
+  ODIR="$PWD"
+  cd $DESTDIR
+  DIRS="frames images js"
+  FILES=$(find $DIRS -type f)
+  cd "$ODIR"
+
+  FILES="$FILES $TRACEFILE callflow.png graph.html"
+  FILES="$FILES index_dynamic.html index_frame_bottom.html index_frameless.html"
+  FILES="$FILES index_frame_right.html index.html"
+  ARCHIVE_FILES=$(tr " " "\n" <<< "$FILES" | sort)
+
+  if [[ "$ARCHIVE_TYPE" == "files" ]]; then
+    echo "$ARCHIVE_FILES"
+    exit 0
+  else
+    
+    ARCHIVE_NAME=$(basename $DESTDIR)
+    FILES=$(sed "s,^,$ARCHIVE_NAME/," <<< "$ARCHIVE_FILES")
+
+    cd $DESTDIR/..
+    if [[ "$ARCHIVE_TYPE" == "zip" ]]; then
+      zip --quiet $DESTDIR/$ARCHIVE_NAME.zip $FILES
+      echo "$PRGNAME: zip archive available at \"$DESTDIR/$ARCHIVE_NAME.zip\""
+    else
+      tar cjf $DESTDIR/$ARCHIVE_NAME.tar.bz2 $FILES
+      echo "$PRGNAME: bzip2 archive available at \"$DESTDIR/$ARCHIVE_NAME.tar.bz2\""
+    fi
+    cd "$ODIR"
+  fi
 fi
 
 if [[ "$START_BROWSER" == "yes" ]]; then
