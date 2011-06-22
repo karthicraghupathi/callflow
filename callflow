@@ -600,7 +600,7 @@ fi
   bottomMargin = 50
   showTime = "$SHOW_TIME"
   if ( showTime == "yes" ) {
-    leftMargin = 120
+    leftMargin = 125
   } else {
     leftMargin = 50
   }
