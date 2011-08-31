@@ -112,7 +112,7 @@ function make_long_and_short_caches() {
   # - The string (ITU) shows up in the protocol description "ISUP(ITU)".
   #   awk doesn't like the "(" and ")", hence remove them.
   # - Short the string "with session description" to just SDP.
-  # - Megaco has a "|" in its info sting, this character is however the
+  # - Megaco has a "|" in its info string, this character is however the
   #   field separator in the output file, remove it.  The actual string
   #   being removed is " |=".
   tshark -r $inputfile $FARG "$FVAL" -t a \
