@@ -78,7 +78,8 @@ elif [[ $MODE = "REMOVE_MIRROR_DUPS_2" ]]; then
   # here anyway again, as this "remove duplicated frames mode" seems to be
   # the better one.  The others may be removed, including the md5sum
   # processing done above.
-  awk -F"|" '{print $3, $1}' $DESTDIR/callflow.short | while read FRAME TIME; do
+  # The code block /^[^#]/ takes care that comments skipped
+  awk -F"|" '/^[^#]/ {print $3, $1}' $DESTDIR/callflow.short | while read FRAME TIME; do
     MD5SUM=$(mkmd5sum $DESTDIR/frames/Frame${FRAME}.html | sed 's/ .*//')
     echo "$FRAME|$TIME|$MD5SUM"
   done > $TMPDIR/md5sums.$$
