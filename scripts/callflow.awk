@@ -45,7 +45,7 @@ func insertStyleDefs () {
   printf " .pkt-text { color: red; font-family: Trebuchet MS,Helvetica, sans-serif;\n";
   printf "            font-size: 8pt; stroke: none; fill: black;}\n";
   printf " .comment-text { color: black; font-family: Trebuchet MS,Helvetica, sans-serif;\n";
-  printf "            font-size: 9pt; font-style: italic; stroke: none; fill: green;}\n";
+  printf "            font-size: 9pt; stroke: none; fill: green;}\n";
   printf " .host-text { color: black; font-family: Trebuchet MS,Helvetica,sans-serif;\n";
   printf "             font-size: 10pt; stroke:none; fill:blue;}\n";
   printf " .title-text { color: black; font-family: Trebuchet MS,Helvetica,sans-serif;\n";
@@ -115,34 +115,24 @@ func line(x1,x2,y,output, c) {
   y = NR;
   y = y * yLineSpace + ystart;
 
-  if($0 ~ "^#") {
-    output = "";
-    split($0, A, " ")
+  if ($0 ~ "^#") {
 
-    for (i=2; i <= length(A); i++) {
-
-      if (A[i] == "!")
-        break;
-      output = output " " A[i];
-    }
-
-    link = "";
-    if (A[i] == "!") {
-
-      i++;
-      for(;i <= length(A); i++) {
-        link = link " " A[i];
-      }
-    }
-
-    if (link != "") {
-
-      printf("<text x=\"%d\" y=\"%d\" class=\"link\">%s</text>\n", 50, y, output);
-      printf("    <area href=\"%s\" coords=\"%d,%d,%d,%d\"/>\n", link, 50, y-yLineSpace+2, w, y+1) >> "imagemap";
+    # The "!" is link identifier
+    LINK = index($0, "!")
+    if (LINK == 0) {
+      # There is no link, everything behind the first "#" is the comment
+      sub("#", "", $0)
+      printf("<text x=\"%d\" y=\"%d\" class=\"comment-text\" xml:space=\"preserve\">%s</text>\n", leftMargin + 5, y, $0);
 
     } else {
+      # Make the comment a hyperlink
+      # - Everything before the "!" is the link text
+      # - Everything behind the "!" is the hyperlink
+      output = substr($0, 2, LINK - 2)
+      link = substr($0, LINK + 1)
 
-      printf("<text x=\"%d\" y=\"%d\" class=\"comment-text\">%s</text>\n", 50, y, output);
+      printf("<text x=\"%d\" y=\"%d\" class=\"link\" xml:space=\"preserve\">%s</text>\n", leftMargin + 5, y, output);
+      printf("    <area href=\"%s\" coords=\"%d,%d,%d,%d\"/>\n", link, leftMargin + 5, y-yLineSpace+2, w, y+1) >> "imagemap";
     }
 
   } else {
@@ -168,11 +158,11 @@ func line(x1,x2,y,output, c) {
     l2 = sprintf("%s:%s", $7,$8);
     for (i=0; i<numHosts; i++) {
 
-      if(l1 ~ hosts[i]) {
+      if (l1 ~ hosts[i]) {
         x1 = strtonum(lookup[hosts[i]]);
       }
 
-      if(l2 ~ hosts[i]) {
+      if (l2 ~ hosts[i]) {
         x2 = strtonum(lookup[hosts[i]]);
       }
     }
