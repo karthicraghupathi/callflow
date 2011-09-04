@@ -733,7 +733,7 @@ if which inkscape >/dev/null 2>&1; then
   # (SIP) Messages will be presented in right frame
   sed 's/coords=/target=\"msg\" coords=/' $DESTDIR/index_frameless.html > $DESTDIR/graph.html
 
-  firstFrame=$(awk -F "|" '{ if (NR == 1) print $3 }' $DESTDIR/callflow.short)
+  firstFrame=$(grep -v "^#" $DESTDIR/callflow.short | awk -F "|" '{ if (NR == 1) print $3 }')
 
   ( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\""
     echo "   \"http://www.w3.org/TR/html4/frameset.dtd\">"
