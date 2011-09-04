@@ -117,7 +117,7 @@ func line(x1,x2,y,output, c) {
 
   if ($0 ~ "^#") {
 
-    # The "!" is link identifier
+    # The "!" is the link identifier
     LINK = index($0, "!")
     if (LINK == 0) {
       # There is no link, everything behind the first "#" is the comment
