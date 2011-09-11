@@ -295,6 +295,8 @@ Options:
   --no-loops
                 Prevent flows from and to the same equipment to be represented.
 
+  --no-sdp
+                Do not show detailed SDP information in the SIP information line
   --no-time
                 Do not show the time.
 
@@ -321,6 +323,9 @@ Options:
                 Distance between adjacent nodes in final picture.  The width may
                 vary between 100 and 250.  Default = 200.
 
+  --with-sdp
+                Show detailed SDP in the SIP information line (default)
+
 EOF
 }
 
@@ -329,8 +334,8 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
 LOPT="archive:,browser"
-LOPT="$LOPT,capture-filter:,help,list-nodes,no-loops,no-time,nodenames:,refresh-cache"
-LOPT="$LOPT,remove-duplicate-frames,title:,width-between-nodes:,version"
+LOPT="$LOPT,capture-filter:,help,list-nodes,no-loops,no-sdp,no-time,nodenames:,refresh-cache"
+LOPT="$LOPT,remove-duplicate-frames,title:,with-sdp,width-between-nodes:,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
 # separate word. The quotes around `$@' are essential!
@@ -370,6 +375,9 @@ while true; do
                          noLocalLoop=1;
                          #echo " * Flows from and to the same equipment will not be shown"
                          ;;
+  --no-sdp)
+                         OPT_SHOW_SDP=no
+                         ;;
   --no-time)
                          OPT_SHOW_TIME=no
                          #echo " * Time will not be shown"
@@ -392,6 +400,9 @@ while true; do
   --width-between-nodes)
                          OPT_WIDTH_BETWEEN_NODES=$2; shift
                          #echo " * Width between nodes to use: $OPT_WIDTH_BETWEEN_NODES"
+                         ;;
+  --with-sdp)
+                         OPT_SHOW_SDP=yes
                          ;;
   --version|-v)          echo "$PRGNAME version: $PRGVRSN"; exit;;
   --)                    shift; break;;
@@ -482,6 +493,14 @@ if [[ -n "$OPT_TITLE" ]]; then
   TITLE="$OPT_TITLE"
 else
   TITLE="$inputfile"
+fi
+
+if [[ -z "$OPT_SHOW_SDP" ]]; then
+  [[ -z "$SHOW_SDP" ]] && {
+    SHOW_SDP=yes
+  }
+else
+  SHOW_SDP=$OPT_SHOW_SDP
 fi
 
 # DESTDIR
@@ -654,6 +673,7 @@ fi
   topMargin = 50
   bottomMargin = 50
   showTime = "$SHOW_TIME"
+  showSDP = "$SHOW_SDP"
   if ( showTime == "yes" ) {
     leftMargin = 125
   } else {

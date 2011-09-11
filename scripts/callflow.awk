@@ -181,7 +181,7 @@ func line(x1,x2,y,output, c) {
       }
       printf ("</text>\n")
 
-      if ($9 ~ "SDP") {
+      if ((showSDP == "yes") && ($9 ~ "SDP")) {
         output = sprintf("%s: a=%s:%s %s %s", $10, $12, $13, $14, $15)
       } else {
         output = $10
