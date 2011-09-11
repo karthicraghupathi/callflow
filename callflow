@@ -76,7 +76,8 @@ function make_long_and_short_caches() {
   # in (at least) 2 ways in SIP messages.  The field can indeed be called "Call-ID",
   # but just "i" in abbreviated SIP messages!  Both formats can be used in 1 call.
   tshark -r $inputfile $FARG "$FVAL" -t a -T fields -E separator='|' \
-    -e frame.number -e ip.src -e ip.dst -e sip.CSeq -e sip.Call-ID | awk '
+    -e frame.number -e ip.src -e ip.dst -e sip.CSeq -e sip.Call-ID \
+    -e sdp.connection_info -e sdp.media -e sdp.media_attr | awk '
   BEGIN {
     FS = "|"
     OFS = "|"
@@ -89,7 +90,41 @@ function make_long_and_short_caches() {
       NOC++
     }
       
-    printf "%s||%s|%s|%s|{%s}\n", $1, $2, $3, $4, CALLID[$5]
+    # Process connection info and obtain the ip addr
+    sub("IN IP4 ", "", $6)
+
+    # Process SDP media info and obtain the port and RTP format
+    split($7, S, " ")
+    PORT = S[2]
+    FORMAT = S[4]
+
+    # Process SDP media attributes and get the direction information
+    if ($8 ~ "sendrecv") {
+      DIRECTION = "sendrecv"
+    } else if ($8 ~ "recvonly") {
+      DIRECTION = "recvonly"
+    } else if ($8 ~ "sendonly") {
+      DIRECTION = "sendonly"
+    } else {
+      DIRECTION = ""
+    }
+
+    # The printf line below results in the following fields and order.  For now we assume
+    # that the delivered media contains audio, but that may change one day when
+    # for example audio and video are involved.
+    #
+    # No Description
+    #  1 frame.number
+    #  2 tracefile
+    #  3 ip.src
+    #  4 ip.dst
+    #  5 sip.CSeq
+    #  6 sip.Call-ID
+    #  7 sdp.connection_info (ip addr)
+    #  8 sdp.media (audio port)
+    #  9 sdp.media (audio format)
+    # 10 sdp.media_attr (audio direction (sendrecv, sendonly, recvonly))
+    printf "%s||%s|%s|%s|{%s}|%s|%s|%s|%s\n", $1, $2, $3, $4, CALLID[$5], $6, PORT, FORMAT, DIRECTION
 
   }' > $TMPDIR/${PRGNAME}-tshark-1.$$
 
@@ -126,6 +161,16 @@ function make_long_and_short_caches() {
 
     split($0, A, " ")
 
+    # The line below results in the following fields and order.
+    #
+    # No Description
+    #  1 frame number
+    #  2 time
+    #  3 protocol
+    #  4 srcport
+    #  5 dstport
+    #  6 info
+
     for (i = 1; i <= 5; i++) {
       printf "%s|", $i
     }
@@ -138,8 +183,12 @@ function make_long_and_short_caches() {
     printf "%s\n", $L
 
   }' > $TMPDIR/${PRGNAME}-tshark-2.$$
-    
+
   # Join the 2 datafiles that have been obtained above together
+  # When merged the first field (frame number) in the file ${PRGNAME}-tshark-2.$$
+  # is combined with the first field (frame.number) in the file ${PRGNAME}-tshark-1.$$
+  # So after the merge the total number of fields is 1 less, than the total number
+  # of fields.
   join -t "|" --nocheck-order $TMPDIR/${PRGNAME}-tshark-1.$$ $TMPDIR/${PRGNAME}-tshark-2.$$ > $TMPDIR/${PRGNAME}-tshark-3.$$
 
   # Order the fields
@@ -147,22 +196,28 @@ function make_long_and_short_caches() {
     FS = "|"
 
     # The order in which the fields will be arranged in the output file
-    # 1: time
-    # 2: tracefile
-    # 3: frame.number
-    # 4: ip.src
-    # 5: ip.srcport 
-    # 6: session information
-    # 7: ip.dst
-    # 8: ip.dstport
-    # 9: protocol
-    # 10: info field
-    # 11: SIP CSeq
+    #
+    # No Description
+    #  1 time
+    #  2 tracefile
+    #  3 frame.number
+    #  4 ip.src
+    #  5 ip.srcport 
+    #  6 session information
+    #  7 ip.dst
+    #  8 ip.dstport
+    #  9 protocol
+    # 10 info field
+    # 11 SIP CSeq
+    # 12 Connection info (IP addr)
+    # 13 Media info (Port)
+    # 14 Media info (Protocol)
+    # 15 Media attribute direction
 
     # The array (A) that the 'split' command creates, maps the input fields
-    # to the output file order.  As example: input field 7 is mapped to
+    # to the output file order.  As example: input field 11 is mapped to
     # output field 1 and input field 5 is mapped to output field 11.
-    split("7 2 1 3 9 6 4 10 8 11 5", A, " ")
+    split("11 2 1 3 13 6 4 14 12 15 5 7 8 9 10", A, " ")
   }
   {
     # Look for "200 OK" or "200 Ok" and add the SIP method, from the

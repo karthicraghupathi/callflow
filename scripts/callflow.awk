@@ -181,7 +181,13 @@ func line(x1,x2,y,output, c) {
       }
       printf ("</text>\n")
 
-      line(x1,x2,y,$10,c);
+      if ($9 ~ "SDP") {
+        output = sprintf("%s: a=%s:%s %s %s", $10, $12, $13, $14, $15)
+      } else {
+        output = $10
+      }
+
+      line(x1, x2, y, output, c);
     }
   }
 }
