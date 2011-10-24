@@ -1,0 +1,56 @@
+#!/bin/bash
+#
+# Script to make a release tarbal
+
+PRGNAME=$(basename $0)
+
+CALLFLOW_VERSION=$(grep "readonly VersionSVN=" callflow | cut -d\" -f2 |
+  awk '{split($4, A, "-"); print A[1] A[2] A[3] "-" $3}')
+
+# Only include files that are known, any other file is to be ignored
+FILES="AUTHORS
+callflow
+conf/callflow.conf
+css/callflow.css
+images/frame_bottom.png
+images/frame_dynamic.png
+images/frameless.png
+images/frame_right.png
+images/index.tpl
+js/callflow.js
+js/overlib.js
+LICENSE
+man/callflow.1
+README
+scripts/callflow.awk
+scripts/list-nodes.awk
+scripts/long2html.awk
+scripts/makevars.awk
+scripts/marksession.awk
+scripts/prunenodes.awk
+scripts/removedups.sh"
+
+# Verify location
+FILE=$(echo "$FILES" | head -1)
+[[ ! -f "$FILE" ]] && {
+  ( echo "$PRGNAME: $FILE not found"
+    echo "  might be in the wrong location"
+  ) >&2
+  exit 1
+}
+
+TMPDIR=/tmp/$PRGNAME.$$
+mkdir -p $TMPDIR/callflow-$CALLFLOW_VERSION
+tar cf - $FILES | (cd $TMPDIR/callflow-$CALLFLOW_VERSION; tar xf - )
+
+TARBAL=/var/tmp/callflow-$CALLFLOW_VERSION.tar.bz2
+( cd $TMPDIR; tar cjf $TARBAL callflow-$CALLFLOW_VERSION)
+rm -rf "${TMPDIR:xxxxx}"
+
+if [[ -f $TARBAL ]]; then
+  echo "$PRGNAME: tarbal stored at $TARBAL"
+else
+  echo "$PRGNAME: tarbal $TARBAL not found,"
+  echo "  something went awfully wrong!"
+fi
+
