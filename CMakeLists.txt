@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.6)
 
 project(callflow NONE)
 
+set(VERSION_MAJOR 20110914)
+set(VERSION_MINOR 160)
+set(VERSION_STRING "${VERSION_MAJOR}-${VERSION_MINOR}")
+message(STATUS "*** Will build version ${VERSION_STRING} ***")
+
 # Perhaps redundant, but nice to have the if structure around as an example
 if(UNIX)
   set(BINDIR "${CMAKE_INSTALL_PREFIX}/bin")
@@ -20,11 +25,6 @@ else()
   set(DOCFOLDER "${PREFIX}/share/doc/${PROJECT_NAME}")
 endif()
 add_definitions("-DDOCDIR=\\\"${CMAKE_INSTALL_PREFIX}/${DOCDIR}\\\"")
-
-set(VERSION_MAJOR 20110914)
-set(VERSION_MINOR 160)
-set(VERSION_STRING "${VERSION_MAJOR}-${VERSION_MINOR}")
-message(STATUS "*** Will build version ${VERSION_STRING} ***")
 
 add_subdirectory(js)
 add_subdirectory(css)
@@ -52,6 +52,7 @@ install(FILES
 # If the cmake version includes cpack, use it
 if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   set(CPACK_PACKAGE_EXECUTABLES callflow)
+  set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dummy Value")
   set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Callflow Sequence Diagram Generator")
   
   if(WIN32)
