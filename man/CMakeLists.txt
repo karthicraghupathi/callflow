@@ -1,4 +1,4 @@
 install(FILES
   callflow.1
-  DESTINATION "${MANDIR}"
+  DESTINATION "${MANDIR}/man1"
 )

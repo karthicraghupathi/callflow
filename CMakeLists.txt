@@ -5,9 +5,9 @@ project(callflow NONE)
 set(MAIN_DIR_NAME "callflow")
 
 if(UNIX)
-  set(BINDIR "usr/bin")
-  set(DATADIR "usr/share/callflow")
-  set(DOCDIR "usr/share/doc/callflow")
+  set(BINDIR "${CMAKE_INSTALL_PREFIX}/bin")
+  set(DATADIR "${CMAKE_INSTALL_PREFIX}/share/${MAIN_DIR_NAME}")
+  set(DOCDIR "${CMAKE_INSTALL_PREFIX}/share/doc/${MAIN_DIR_NAME}")
 elseif(APPLE)
   # random placeholders
   set(BINDIR "bin")

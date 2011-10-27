@@ -4,5 +4,5 @@ install(FILES
   frameless.png
   frame_right.png
   index.tpl
-  DESTINATION share/callflow/images
+  DESTINATION "${SHAREDIR}/images"
 )

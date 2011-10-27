@@ -6,5 +6,5 @@ install(FILES
   marksession.awk
   prunenodes.awk
   removedups.sh
-  DESTINATION share/callflow/scripts
+  DESTINATION "${SHAREDIR}/scripts"
 )

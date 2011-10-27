@@ -1,5 +1,5 @@
 install(FILES
   callflow.css
-  DESTINATION share/callflow/css
+  DESTINATION "${SHAREDIR}/css"
 )
 
