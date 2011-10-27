@@ -2,27 +2,23 @@ cmake_minimum_required(VERSION 2.6)
 
 project(callflow NONE)
 
-set(MAIN_DIR_NAME "callflow")
-
+# Perhaps redundant, but nice to have the if structure around as an example
 if(UNIX)
   set(BINDIR "${CMAKE_INSTALL_PREFIX}/bin")
-  set(DATADIR "${CMAKE_INSTALL_PREFIX}/share/${MAIN_DIR_NAME}")
-  set(DOCDIR "${CMAKE_INSTALL_PREFIX}/share/doc/${MAIN_DIR_NAME}")
 elseif(APPLE)
-  # random placeholders
   set(BINDIR "bin")
-  set(DATADIR "share/callflow")
-  set(DOCDIR "share/doc/callflow")
 elseif(WIN32)
   set(BINDIR "bin")
-  set(DATADIR "data")
-  set(DOCDIR "doc")
 endif()
 
 set(MANDIR "share/man/")
-set(SHAREDIR "share/${MAIN_DIR_NAME}/")
+set(SHAREDIR "share/${PROJECT_NAME}/")
 add_definitions("-DSHAREDIR=\\\"${CMAKE_INSTALL_PREFIX}/${SHAREDIR}\\\"")
-set(DOCDIR "share/doc/${MAIN_DIR_NAME}")
+if(DEFINED DOCDIR)
+  set(DOCFOLDER "${DOCDIR}")
+else()
+  set(DOCFOLDER "${PREFIX}/share/doc/${PROJECT_NAME}")
+endif()
 add_definitions("-DDOCDIR=\\\"${CMAKE_INSTALL_PREFIX}/${DOCDIR}\\\"")
 
 set(VERSION_MAJOR 20110914)
@@ -41,16 +37,16 @@ add_subdirectory(scripts)
 # Installation
 #
 
+install(PROGRAMS
+  callflow
+  DESTINATION "${BINDIR}"
+)
+
 install(FILES
   AUTHORS
   LICENSE
   README
-  DESTINATION "${DOCDIR}"
-)
-
-install(PROGRAMS
-  callflow
-  DESTINATION "${BINDIR}"
+  DESTINATION "${DOCFOLDER}"
 )
 
 # If the cmake version includes cpack, use it
