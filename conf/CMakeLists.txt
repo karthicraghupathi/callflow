@@ -1,4 +1,4 @@
 install(FILES
   callflow.conf
-  DESTINATION etc/callflow
+  DESTINATION "${SYSCONF_INSTALL_DIR}/${MAIN_DIR_NAME}"
 )
