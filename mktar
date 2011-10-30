@@ -7,21 +7,29 @@ PRGNAME=$(basename $0)
 CALLFLOW_VERSION=$(grep "readonly VersionSVN=" callflow | cut -d\" -f2 |
   awk '{split($4, A, "-"); print A[1] A[2] A[3] "-" $3}')
 
+
 # Only include files that are known, any other file is to be ignored
 FILES="AUTHORS
+CMakeLists.txt
 callflow
+conf/CMakeLists.txt
 conf/callflow.conf
+css/CMakeLists.txt
 css/callflow.css
+images/CMakeLists.txt
 images/frame_bottom.png
 images/frame_dynamic.png
 images/frameless.png
 images/frame_right.png
 images/index.tpl
+js/CMakeLists.txt
 js/callflow.js
 js/overlib.js
 LICENSE
+man/CMakeLists.txt
 man/callflow.1
 README
+scripts/CMakeLists.txt
 scripts/callflow.awk
 scripts/list-nodes.awk
 scripts/long2html.awk

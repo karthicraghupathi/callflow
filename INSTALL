@@ -1,0 +1,29 @@
+The build instructions are:
+# mkdir build
+# cd build
+# cmake ..
+# make install
+
+This will install the files in their default locations.
+
+The file locations can be influenced using arguments.
+The following once are available:
+- CMAKE_INSTALL_PREFIX
+- SYSCONF_INSTALL_DIR
+- DOCDIR
+
+So the commands:
+# mkdir build
+# cd build
+# cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+# make install
+
+Will install most files under /usr instead of /usr/local
+
+
+Package builders may want to use the commands:
+# mkdir build
+# cd build
+# cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DDOCDIR=/usr/share/doc/package/callflow -DSYSCONF_INSTALL_DIR=/etc
+# make install DESTDIR=<package build directory>
+
