@@ -170,6 +170,7 @@ BEGIN {
       if ($1 ~ "Date:" ) MARK = "sip"
       if ($1 ~ "Expires:" ) MARK = "sip"
       if ($1 ~ "From:" ) MARK = "sip"
+      if ($1 ~ "Max-Forwards:" ) MARK = "sip"
       if ($1 ~ "Min-SE:" ) MARK = "sip"
       if ($1 ~ "P-[A-Z][a-z].*:" ) MARK = "sip"
       if ($1 ~ "Privacy:" ) MARK = "sip"
