@@ -37,9 +37,10 @@
   </table>
 
   <h2>Trace file</h2>
-  <p>The <a href="@TRACE@">trace file</a> that resulted in the callflow diagrams.</p>
-  <br/>
-  @@@<a href="@ARCHIVE_FILE@">Callflow files in archive</a> (to sent the callflow to e.g. interested parties)
+  <p>The <a href="@TRACE@">trace file</a> that resulted in the callflow diagrams.
+   <br/>
+   <a href="@ARCHIVE_FILE@">Callflow files in archive</a> (to sent the callflow to e.g. interested parties) <!-- @@@@ARCHIVE_FILE@@@@ -->
+  </p>
   <p class="info">Those diagrams were created with <a href="http://callflow.sourceforge.net">callflow</a></p>
  </body>
 </html>

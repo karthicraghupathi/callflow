@@ -1025,7 +1025,7 @@ if which inkscape >/dev/null 2>&1; then
     -e "s/@TITLE@/$PRGNAME - $TITLE/" \
     -e "s/@ARCHIVE_FILE@/$ARCHIVE_FILE/" \
     $SETUPDIR/images/index.tpl > $DESTDIR/index.html
-  [[ $ARCHIVE != "yes" ]] && sed -i '/@@@archive@@@/d' $DESTDIR/index.html
+  [[ $ARCHIVE != "yes" ]] && sed -i '/@@@ARCHIVE_FILE@@@/d' $DESTDIR/index.html
 
 else
   ( echo "Error $PRGNAME: inkscape not found."
