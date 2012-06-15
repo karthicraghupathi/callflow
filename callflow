@@ -84,7 +84,7 @@ function make_long_and_short_caches_of_pcap_trace() {
       CALLID[$5] = NOC
       NOC++
     }
-      
+
     # Process connection info and obtain the ip addr
     sub("IN IP4 ", "", $6)
 
@@ -437,7 +437,7 @@ Options:
 
   --archive <archive type>
                 Create an archive with the files for showing the callflow
-                diagram.  Available archive types are: files, bzip2 and zip.
+                diagram.  Available archive types are: files, bzip2 (bz2) and zip.
                 The archive type files just list the files required for the
                 callflow diagram.  It can be used to create an archive with it.
 
@@ -587,6 +587,8 @@ if [ ! -f "$inputfile" ]; then
   exit 1;
 fi
 
+DESTDIR=$(ls $inputfile | sed -r "s/(.+)\.(.+)/\1/");
+
 ##################################
 # Configuration file overwritting by command line options
 ##################################
@@ -638,7 +640,23 @@ if [[ "$ARCHIVE" == "yes" ]]; then
 
   case "$OPT_ARCHIVE_TYPE" in
 
-      bzip2|files|zip) ARCHIVE_TYPE="$OPT_ARCHIVE_TYPE"
+      bz2|bzip2|files|zip) ARCHIVE_TYPE="$OPT_ARCHIVE_TYPE"
+
+      [[ $ARCHIVE_TYPE != "files" ]] && {
+
+        ARCHIVE_NAME=$(basename $DESTDIR)
+        case $ARCHIVE_TYPE in 
+          bz2) 
+            ARCHIVE_FILE=$ARCHIVE_NAME.tar.bz2
+            ;;
+          bzip2) 
+            ARCHIVE_FILE=$ARCHIVE_NAME.tar.bz2
+            ;;
+          *)
+            ARCHIVE_FILE=$ARCHIVE_NAME.$ARCHIVE_TYPE
+            ;;
+        esac 
+      }
       ;;
 
     *)
@@ -669,8 +687,7 @@ else
   SHOW_SDP=$OPT_SHOW_SDP
 fi
 
-# DESTDIR
-DESTDIR=`ls $inputfile | sed -r "s/(.+)\.(.+)/\1/"`;
+# Create the DESTDIR, do it only here, as it isn't needed earlier
 mkdir -p $DESTDIR
 
 # Use cache?
@@ -920,13 +937,17 @@ if which inkscape >/dev/null 2>&1; then
     echo "   <p class=\"footer\">"
     echo "    <a href=\"$TRACEFILE\">Trace source</a>"
     echo "    <br/>"
+    [[ $ARCHIVE == "yes" ]] && {
+      echo "    <a href=\"$ARCHIVE_FILE\">Callflow files in archive</a> (to sent the callflow to e.g. interested parties)"
+      echo "    <br/>"
+    }
     echo "    <a href=\"index.html\" target=\"_parent\">Back to landing page</a>"
     echo "   </p>"
     echo "  </div>"
     echo " </body>"
     echo "</html>"
   ) > $DESTDIR/index_frameless.html
-   
+
   # (SIP) Messages will be presented in popups on the callflow picture
   ( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
     echo "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
@@ -959,6 +980,10 @@ if which inkscape >/dev/null 2>&1; then
     echo "   <p class=\"footer\">"
     echo "    <a href=\"$TRACEFILE\">Trace source</a>"
     echo "    <br/>"
+    [[ $ARCHIVE == "yes" ]] && {
+      echo "    <a href=\"$ARCHIVE_FILE\">Callflow files in archive</a> (to sent the callflow to e.g. interested parties)"
+      echo "    <br/>"
+    }
     echo "    <a href=\"index.html\" target=\"_parent\">Back to landing page</a>"
     echo "   </p>"
     echo "  </div>"
@@ -967,7 +992,7 @@ if which inkscape >/dev/null 2>&1; then
   ) > $DESTDIR/index_dynamic.html
 
   \rm imagemap
-   
+
   #Copy JavaScript files into DESTDIR
   cp -af $SETUPDIR/js $DESTDIR/
 
@@ -995,8 +1020,12 @@ if which inkscape >/dev/null 2>&1; then
 
   mkdir -p $DESTDIR/images
   cp -a $SETUPDIR/images/*png $DESTDIR/images
-  sed "s/@TITLE@/$PRGNAME - $TITLE/;s/@TRACE@/$inputfile/" \
+  sed \
+    -e "s/@TRACE@/$inputfile/" \
+    -e "s/@TITLE@/$PRGNAME - $TITLE/" \
+    -e "s/@ARCHIVE_FILE@/$ARCHIVE_FILE/" \
     $SETUPDIR/images/index.tpl > $DESTDIR/index.html
+  [[ $ARCHIVE != "yes" ]] && sed -i '/@@@archive@@@/d' $DESTDIR/index.html
 
 else
   ( echo "Error $PRGNAME: inkscape not found."
@@ -1004,7 +1033,7 @@ else
     echo "Portable Network Graphic (.png) can be created."
     echo "Install inkscape, to enjoy all that $PRGNAME can give to you!"
   ) >&2
-  
+
   exit 1
 fi
 
@@ -1026,18 +1055,16 @@ if [[ "$ARCHIVE" == "yes" ]]; then
     echo "$ARCHIVE_FILES"
     exit 0
   else
-    
-    ARCHIVE_NAME=$(basename $DESTDIR)
+
     FILES=$(sed "s,^,$ARCHIVE_NAME/," <<< "$ARCHIVE_FILES")
 
     cd $DESTDIR/..
     if [[ "$ARCHIVE_TYPE" == "zip" ]]; then
       zip --quiet $DESTDIR/$ARCHIVE_NAME.zip $FILES
-      echo "$PRGNAME: zip archive available at \"$DESTDIR/$ARCHIVE_NAME.zip\""
     else
       tar cjf $DESTDIR/$ARCHIVE_NAME.tar.bz2 $FILES
-      echo "$PRGNAME: bzip2 archive available at \"$DESTDIR/$ARCHIVE_NAME.tar.bz2\""
     fi
+    echo "$PRGNAME: $ARCHIVE_TYPE archive available at \"$DESTDIR/$ARCHIVE_FILE\""
     cd "$ODIR"
   fi
 fi
