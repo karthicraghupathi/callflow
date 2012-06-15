@@ -1,11 +1,6 @@
 #!/bin/bash
 ###
-###  CallFlow diagram generator
-###
-###  Usage:  callflow.sh capture-file | -t text-input file
-###
-###  Output: $DESTDIR/callflow.svg, $DESTDIR/callflow.png, $DESTDIR/index.html, $DESTDIR/frames/frame*.html
-###
+###  (SIP) Callflow diagram generator
 ###
 
 ##################################
@@ -65,7 +60,7 @@ fi
   COLORS="black"
 }
 
-function make_long_and_short_caches() {
+function make_long_and_short_caches_of_pcap_trace() {
 
   tshark -r $inputfile $FARG "$FVAL" -V > $DESTDIR/callflow.long
 
@@ -245,6 +240,11 @@ function make_long_and_short_caches() {
   }' $TMPDIR/${PRGNAME}-tshark-3.$$ > $DESTDIR/callflow.short
 
   rm $TMPDIR/${PRGNAME}-tshark-[123].$$
+}
+
+function make_long_and_short_caches() {
+
+  make_long_and_short_caches_of_pcap_trace
 
   TRACE_FILE=$(basename $inputfile)
   MD5SUM=$(md5sum $inputfile | awk '{print $1}')
