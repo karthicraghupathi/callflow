@@ -10,7 +10,6 @@ callflow [options] <trace-file>
 .SH DESCRIPTION
 This is a collection of awk and shell scripts that will take a capture file that can be read by tshark and produce a callflow sequence diagram.  The scripts have been primarily tested with SIP call flows, but should work for other network traffic as well.
 
-
 .SS Using callflow
 With callflow in your path, just type:
   callflow capture-file.cap
@@ -139,6 +138,10 @@ Distance between the nodes in final picture.  The distance may vary between 100 
 .PD 0
 .B --with-sdp
 Show detailed SDP information in the callflow (default)
+
+
+.SS Trace-file
+Two trace-file formats are supported; network traces (files that can be read by wireshark, tshark and the like) and Broadsoft Broadworks (SIP) server logs.  In case a Broadworks log is used, the Broadworks server IP address can be specified in callflow's configuration files.
 
 
 .SS Filtering the diagram

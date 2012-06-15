@@ -7,7 +7,7 @@ PRGNAME=$(basename $0)
 CALLFLOW_VERSION=$(grep "readonly VersionSVN=" callflow | cut -d\" -f2 |
   awk '{split($4, A, "-"); print A[1] A[2] A[3] "-" $3}')
 
-CALLFLOW_VERSION=20111030-167
+CALLFLOW_VERSION=20120615-170
 
 # Only include files that are known, any other file is to be ignored
 FILES="AUTHORS
