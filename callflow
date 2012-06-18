@@ -1077,20 +1077,28 @@ if [[ "$ARCHIVE" == "yes" ]]; then
   fi
 fi
 
+if [[ -n "$CALLFLOW_BASE_URL" ]]; then
+  if [[ -z "$CALLFLOW_URL_DIR" ]]; then
+    CALLFLOW_URL=$CALLFLOW_BASE_URL
+  else
+    CALLFLOW_URL=$CALLFLOW_BASE_URL/$CALLFLOW_URL_DIR
+  fi
+fi
+
 if [[ "$START_BROWSER" == "yes" ]]; then
   # Start the browser in the background
-  if [[ -z "$WEBSERVER_URL" ]]; then
+  if [[ -z "$CALLFLOW_URL" ]]; then
     "${BROWSER:=firefox}" "$DESTDIR/index.html" &
   else
-    "${BROWSER:=firefox}" "$WEBSERVER_URL/$DESTDIR/index.html" &
+    "${BROWSER:=firefox}" "$CALLFLOW_URL/$DESTDIR/index.html" &
   fi
 else
   echo
   echo "The output can be viewed with a browser: "
-  if [[ -z "$WEBSERVER_URL" ]]; then
+  if [[ -z "$CALLFLOW_URL" ]]; then
     echo " ${BROWSER:=firefox} $DESTDIR/index.html"
   else
-    echo " ${BROWSER:=firefox} $WEBSERVER_URL/$DESTDIR/index.html"
+    echo " ${BROWSER:=firefox} $CALLFLOW_URL/$DESTDIR/index.html"
   fi
 fi
 
