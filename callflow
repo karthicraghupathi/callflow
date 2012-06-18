@@ -17,10 +17,7 @@ readonly PRGNAME=$(basename $0)
 # Define exit values
 readonly ERR_ARGUMENT=2
 
-##################################
-# Check configuration files :
-#   callflow.conf, order, colors
-##################################
+# Source in callflow's configuration file(s)
 for CONF in $CONFDIR/callflow.conf $HOME/.callflow/callflow.conf callflow.conf; do
   [[ -f $CONF ]] && . $CONF
 done
@@ -577,21 +574,15 @@ while true; do
   shift
 done
 
-inputfile=$1
-
-##################################
-# Check input file
-##################################
-if [ ! -f "$inputfile" ]; then 
+inputfile="$1"
+if [[ ! -f "$inputfile" ]]; then 
   echo "$PRGNAME: error: Input file ($inputfile) does not exists!"
   exit 1;
+else
+  # TODO: what is the sed command doing precisely, is it really needed?
+  DESTDIR=$(ls "$inputfile" | sed -r "s/(.+)\.(.+)/\1/");
 fi
 
-DESTDIR=$(ls $inputfile | sed -r "s/(.+)\.(.+)/\1/");
-
-##################################
-# Configuration file overwritting by command line options
-##################################
 if [[ ! -z "$OPT_FILTER" ]]; then
   if [[ "$OPT_FILTER" == "" ]]; then
     FARG=""
@@ -646,10 +637,7 @@ if [[ "$ARCHIVE" == "yes" ]]; then
 
         ARCHIVE_NAME=$(basename $DESTDIR)
         case $ARCHIVE_TYPE in 
-          bz2) 
-            ARCHIVE_FILE=$ARCHIVE_NAME.tar.bz2
-            ;;
-          bzip2) 
+          bz2|bzip2) 
             ARCHIVE_FILE=$ARCHIVE_NAME.tar.bz2
             ;;
           *)
