@@ -55,7 +55,7 @@ Print version number.
 .TP
 .PD 0
 .B --archive <archive type>
-Create an archive with the files for showing the callflow diagram.  Available archive types are: files, bzip2 (bz2) and zip.  The archive type \fIfiles\fR just list the files required for the callflow diagram.  It can be used to create an archive with it.
+Create an archive with the files for showing the callflow diagram.  Available archive types are: files, bz2 (bzip2) and zip.  The callflow archive can be used to sent to interested parties.  The archive type \fIfiles\fR just list the files required for the callflow diagram.  It can be used to create an archive with it.
 
 .TP
 .PD 0
@@ -80,13 +80,18 @@ List the unique nodes in the trace file (don't forget to redirect output in anot
 
 .TP
 .PD 0
+.B --no-archive
+Disable the creation of and reference to the archive containing the callflow.
+
+.TP
+.PD 0
 .B --no-loops
 Prevent flows from and to the same equipment to be represented.
 
 .TP
 .PD 0
 .B --no-sdp
-Do not show detailed SDP information in the callflow
+Do not show detailed SDP information in the callflow.
 
 .TP
 .PD 0

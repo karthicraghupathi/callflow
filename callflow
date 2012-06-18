@@ -6,10 +6,13 @@
 ##################################
 # Variables
 ##################################
+ARCHIVE=yes
+ARCHIVE_TYPE=bz2
 CONFDIR="/etc/callflow";
 removeDF=0 # do not remove duplicate frames
 ORDER=0 # do not build order file
 localLoop=1 # take into account flows from and to the same element (rounded flows)
+
 readonly VersionSVN="$Id$"; #DO NOT EDIT THIS LINE BY HAND, DATE IS AUTOMATICALLY ADDED BY SUBVERSION
 readonly PRGVRSN=$(awk '{split($4, A, "-"); print A[1] A[2] A[3] "." $3}' <<< "$VersionSVN")
 readonly PRGNAME=$(basename $0)
@@ -434,8 +437,9 @@ Options:
 
   --archive <archive type>
                 Create an archive with the files for showing the callflow
-                diagram.  Available archive types are: files, bzip2 (bz2) and zip.
-                The archive type files just list the files required for the
+                diagram.  Available archive types are: files, bz2 (bzip2) and zip.
+                The callflow archive can be used to sent to interested parties.
+                The archive type "files" just list the files required for the
                 callflow diagram.  It can be used to create an archive with it.
 
   --browser
@@ -454,6 +458,10 @@ Options:
                 List the unique nodes in the trace file
                 (Don't forget to redirect output in another file.
                  Example of use: $PRGNAME --list-nodes capture.cap > order)
+
+  --no-archive
+                Disable the creation of and reference to the archive containing
+                the callflow
 
   --no-loops
                 Prevent flows from and to the same equipment to be represented.
@@ -497,8 +505,9 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
 LOPT="archive:,browser"
-LOPT="$LOPT,capture-filter:,help,list-nodes,no-loops,no-sdp,no-time,nodenames:,refresh-cache"
-LOPT="$LOPT,remove-duplicate-frames,title:,with-sdp,width-between-nodes:,version"
+LOPT="$LOPT,capture-filter:,help,list-nodes,no-archive,no-loops,no-sdp,no-time,nodenames:"
+LOPT="$LOPT,refresh-cache,remove-duplicate-frames,title:,with-sdp,width-between-nodes:"
+LOPT="$LOPT,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
 # separate word. The quotes around `$@' are essential!
@@ -532,6 +541,11 @@ while true; do
                          ;;
   --list-nodes|-o)
                          ORDER=1
+                         ;;
+  --no-archive)
+                         # Disable the creation of and reference to the archive
+                         # containing the callflow
+                         ARCHIVE=no
                          ;;
   --no-loops)
                          # We want to disable auto flows (From and To the same equipment)
@@ -631,20 +645,13 @@ if [[ "$ARCHIVE" == "yes" ]]; then
 
   case "$OPT_ARCHIVE_TYPE" in
 
-      bz2|bzip2|files|zip) ARCHIVE_TYPE="$OPT_ARCHIVE_TYPE"
+    "")
+      # Use default ARCHIVE_TYPE
+      ;;
 
-      [[ $ARCHIVE_TYPE != "files" ]] && {
+    bz2|bzip2|files|zip)
 
-        ARCHIVE_NAME=$(basename $DESTDIR)
-        case $ARCHIVE_TYPE in 
-          bz2|bzip2) 
-            ARCHIVE_FILE=$ARCHIVE_NAME.tar.bz2
-            ;;
-          *)
-            ARCHIVE_FILE=$ARCHIVE_NAME.$ARCHIVE_TYPE
-            ;;
-        esac 
-      }
+      ARCHIVE_TYPE="$OPT_ARCHIVE_TYPE"
       ;;
 
     *)
@@ -652,6 +659,19 @@ if [[ "$ARCHIVE" == "yes" ]]; then
       exit
       ;;
   esac
+
+  [[ $ARCHIVE_TYPE != "files" ]] && {
+
+    ARCHIVE_NAME=$(basename $DESTDIR)
+    case $ARCHIVE_TYPE in 
+      bz2|bzip2) 
+        ARCHIVE_FILE=$ARCHIVE_NAME.tar.bz2
+        ;;
+      *)
+        ARCHIVE_FILE=$ARCHIVE_NAME.$ARCHIVE_TYPE
+        ;;
+    esac 
+  }
 
 fi
 
