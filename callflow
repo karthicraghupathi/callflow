@@ -641,6 +641,12 @@ fi
   fi
 }
 
+[[ -z "$NODENAMES" ]] && {
+  for FILE in $HOME/.callflow/nodenames.conf nodenames.conf; do
+    [[ -f $FILE ]] && NODENAMES=$FILE
+  done
+}
+
 if [[ "$ARCHIVE" == "yes" ]]; then
 
   case "$OPT_ARCHIVE_TYPE" in
@@ -695,8 +701,13 @@ else
   SHOW_SDP=$OPT_SHOW_SDP
 fi
 
-# Create the DESTDIR, do it only here, as it isn't needed earlier
-mkdir -p $DESTDIR
+if [[ -f order ]]; then
+  orderFile=order
+elif [[ -f $DESTDIR/order ]]; then
+  orderFile=$DESTDIR/order
+else
+  orderFile=none
+fi
 
 # Use cache?
 if [[ "$OPT_REFRESH_CACHE" == "yes" ]]; then
@@ -711,9 +722,9 @@ else
 
       if [[ $MD5_FILE == $MD5_CACHE ]]; then
 
-        # Are the cached filter and used filter the same?
         CACHED_FILTER=$(awk -F"|" -v FILE=$FILE '{if ($1 == FILE) {print $3} }' $DESTDIR/metadb)
 
+        # Are the cached filter and used filter the same?
         if [[ "$FVAL" == "$CACHED_FILTER" ]]; then
           USE_CACHE=yes
         else
@@ -733,48 +744,12 @@ else
   fi
 fi
 
-##################################
-# order file
-##################################
-# Build the order file and exit
-[[ -z "$NODENAMES" ]] && {
-  for FILE in $HOME/.callflow/nodenames.conf nodenames.conf; do
-    if [[ -f $FILE ]]; then
-      NODENAMES=$FILE
-    fi
-  done
-}
-
-if [[ $ORDER = 1 ]]; then
-
-  [[ $USE_CACHE == "no" ]] && make_long_and_short_caches
-
-  awk -f $SETUPDIR/scripts/list-nodes.awk -v NODENAMES=$NODENAMES $DESTDIR/callflow.short
-
-  exit 0
-fi
-
-if [[ -f order ]]; then
-  orderFile=order
-elif [[ -f $DESTDIR/order ]]; then
-  orderFile=$DESTDIR/order
-else
-  orderFile=none
-fi
-
-##################################
-# Build short and long files
-##################################
-# Copy the input file into destdir
-TRACEFILE=$(basename $inputfile)
-cp $inputfile $DESTDIR/$TRACEFILE
-
-# if we do want to build new short and long file
-if [[ $USE_CACHE == "no" ]]; then
+[[ $USE_CACHE == "no" ]] && {
+  # Create the DESTDIR, do it only here, as it isn't needed earlier
+  mkdir -p $DESTDIR
 
   make_long_and_short_caches
-
-fi
+}
 
 # We have to check if short and long file exist
 if [ ! -f $DESTDIR/callflow.long ]; then
@@ -794,6 +769,13 @@ else
   # contains unpaired "["
   sed -i '/Malform/d' $DESTDIR/callflow.short
 fi
+
+# Display the node order and exit
+[[ $ORDER == 1 ]] && {
+
+  awk -f $SETUPDIR/scripts/list-nodes.awk -v NODENAMES=$NODENAMES $DESTDIR/callflow.short
+  exit 0
+}
 
 # Create Frames
 mkdir -p $DESTDIR/frames
@@ -911,6 +893,10 @@ if which inkscape >/dev/null 2>&1; then
   else
     inkscape --export-dpi=90 -C --export-background=white --export-png=$DESTDIR/callflow.png $DESTDIR/callflow.svg
   fi
+
+  # Copy the input file into destination directory
+  TRACEFILE=$(basename $inputfile)
+  cp $inputfile $DESTDIR/$TRACEFILE
 
   # Build HTML files
   # Frameless; (SIP) messages will be presented in the same window as the callflow picture
