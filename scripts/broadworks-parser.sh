@@ -135,14 +135,16 @@ function make_long_and_short_caches_of_broadworks_log() {
         # Process the line:
         #    udp 1339 Bytes OUT to 10.48.43.13:5060
 
+        # Separate the IP address and the port
+        split($6, I, ":") 
+
         if ($4 == "OUT") {
           IP_SRC_ADDR = bwIpAddr
           IP_SRC_PRT = "5060"
-          split($6, I, ":") 
           IP_DEST_ADDR = I[1]
           IP_DEST_SRC = I[2]
+
         } else if ($4 == "IN") {
-          split($6, I, ":") 
           IP_SRC_ADDR = I[1]
           IP_SRC_SRC = I[2]
           IP_DEST_ADDR = bwIpAddr
