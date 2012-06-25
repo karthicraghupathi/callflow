@@ -168,6 +168,7 @@ BEGIN {
       if ($1 ~ "Content-Type:" ) MARK = "sip"
       if ($1 ~ "CSeq:" ) MARK = "sip"
       if ($1 ~ "Date:" ) MARK = "sip"
+      if ($1 ~ "Diversion:" ) MARK = "sip"
       if ($1 ~ "Expires:" ) MARK = "sip"
       if ($1 ~ "From:" ) MARK = "sip"
       if ($1 ~ "Max-Forwards:" ) MARK = "sip"
