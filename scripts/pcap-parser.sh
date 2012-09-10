@@ -92,6 +92,7 @@ function make_long_and_short_caches_of_pcap_trace() {
         -e 's/ Status: / /' \
         -e 's/ Request: / /' \
         -e 's/(ITU)//' \
+        -e 's/SCCP (Int. ITU)/SCCP/' \
         -e 's/with session description/SDP/g' | awk '{
 
     split($0, A, " ")
