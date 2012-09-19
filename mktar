@@ -7,7 +7,7 @@ PRGNAME=$(basename $0)
 CALLFLOW_VERSION=$(grep "readonly VersionSVN=" callflow | cut -d\" -f2 |
   awk '{split($4, A, "-"); print A[1] A[2] A[3] "-" $3}')
 
-CALLFLOW_VERSION=20120919-180
+CALLFLOW_VERSION=$(cat callflow.version)
 
 # Only include files that are known, any other file is to be ignored
 FILES="AUTHORS
@@ -54,6 +54,8 @@ FILE=$(echo "$FILES" | head -1)
 TMPDIR=/tmp/$PRGNAME.$$
 mkdir -p $TMPDIR/callflow-$CALLFLOW_VERSION
 tar cf - $FILES | (cd $TMPDIR/callflow-$CALLFLOW_VERSION; tar xf - )
+
+sed -i "s/\(PRGVRSN\)=.*/\1=$CALLFLOW_VERSION/" $TMPDIR/callflow-$CALLFLOW_VERSION/callflow
 
 TARBAL=/var/tmp/callflow-$CALLFLOW_VERSION.tar.bz2
 ( cd $TMPDIR; tar cjf $TARBAL callflow-$CALLFLOW_VERSION)
