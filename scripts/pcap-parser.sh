@@ -185,7 +185,7 @@ function make_long_and_short_caches_of_pcap_trace() {
 
     printf "%s\n", $A[L]
 
-  }' $TMPDIR/${PRGNAME}-tshark-3.$$ | sort > $DESTDIR/callflow.short
+  }' $TMPDIR/${PRGNAME}-tshark-3.$$ > $DESTDIR/callflow.short
 
   rm $TMPDIR/${PRGNAME}-tshark-[123].$$
 }
