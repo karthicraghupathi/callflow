@@ -40,6 +40,8 @@ function make_long_and_short_caches_of_pcap_trace() {
       DIRECTION = "recvonly"
     } else if ($8 ~ "sendonly") {
       DIRECTION = "sendonly"
+    } else if ($8 ~ "inactive") {
+      DIRECTION = "inactive"
     } else {
       DIRECTION = ""
     }
@@ -94,6 +96,11 @@ function make_long_and_short_caches_of_pcap_trace() {
         -e 's/(ITU)//' \
         -e 's/SCCP (Int. ITU)/SCCP/' \
         -e 's/with session description/SDP/g' | awk '{
+
+    # Time value ($2) looks like: 13:35:43.868013000
+    # The last zeros are unwanted.  Desired time string: 13:35:43.868013
+    # This strings has a length of 16.
+    if (length($2) > 16 ) sub ("000$", "", $2)
 
     split($0, A, " ")
 
@@ -178,7 +185,7 @@ function make_long_and_short_caches_of_pcap_trace() {
 
     printf "%s\n", $A[L]
 
-  }' $TMPDIR/${PRGNAME}-tshark-3.$$ > $DESTDIR/callflow.short
+  }' $TMPDIR/${PRGNAME}-tshark-3.$$ | sort > $DESTDIR/callflow.short
 
   rm $TMPDIR/${PRGNAME}-tshark-[123].$$
 }
