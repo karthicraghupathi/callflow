@@ -1,9 +1,31 @@
+include(FindSubversion)
 cmake_minimum_required(VERSION 2.6)
 
 project(callflow NONE)
 
-set(VERSION_MAJOR 20110914)
-set(VERSION_MINOR 160)
+# Get project subversion version
+Subversion_WC_INFO(.. MY)
+
+# Get date
+MACRO (TODAY RESULT)
+    IF (WIN32)
+        EXECUTE_PROCESS(COMMAND "cmd" " /C date /T" OUTPUT_VARIABLE ${RESULT})
+        string(REGEX REPLACE "(..)/(..)/(....).*" "\\3\\2\\1" ${RESULT} ${${RESULT}})
+    ELSEIF(UNIX)
+        EXECUTE_PROCESS(COMMAND "date" "+%d/%m/%Y" OUTPUT_VARIABLE ${RESULT})
+        string(REGEX REPLACE "(..)/(..)/(....).*" "\\3\\2\\1" ${RESULT} ${${RESULT}})
+    ELSE (WIN32)
+        MESSAGE(SEND_ERROR "date not implemented")
+        SET(${RESULT} 000000)
+    ENDIF (WIN32)
+ENDMACRO (TODAY) 
+
+TODAY(DATE)
+
+#set(VERSION_MAJOR 20110914)
+#set(VERSION_MINOR 160)
+set(VERSION_MAJOR ${DATE})
+set(VERSION_MINOR ${MY_WC_REVISION})
 set(VERSION_STRING "${VERSION_MAJOR}-${VERSION_MINOR}")
 message(STATUS "*** Will build version ${VERSION_STRING} ***")
 
