@@ -22,9 +22,14 @@ ENDMACRO (TODAY)
 
 TODAY(DATE)
 
-#set(VERSION_MAJOR 20110914)
-#set(VERSION_MINOR 160)
+
 set(VERSION_MAJOR ${DATE})
+
+# Overwrite version major if callflow.version found
+if(EXISTS "../callflow.version")
+  file (STRINGS "callflow.version" VERSION_MAJOR)
+endif()
+
 set(VERSION_MINOR ${MY_WC_REVISION})
 set(VERSION_STRING "${VERSION_MAJOR}-${VERSION_MINOR}")
 message(STATUS "*** Will build version ${VERSION_STRING} ***")

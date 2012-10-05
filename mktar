@@ -9,7 +9,10 @@ DESTDIR=$(pwd)
 CALLFLOW_VERSION=$(grep "readonly VersionSVN=" callflow | cut -d\" -f2 |
   awk '{split($4, A, "-"); print A[1] A[2] A[3] "-" $3}')
 
-#CALLFLOW_VERSION=$(cat callflow.version)
+# OVerwrite callflow Version if callflow.version file is found
+if [ -e callflow.version ] ; then
+  CALLFLOW_VERSION=$(cat callflow.version)
+fi
 
 # Only include files that are known, any other file is to be ignored
 FILES="AUTHORS
