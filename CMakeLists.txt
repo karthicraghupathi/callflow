@@ -3,9 +3,6 @@ cmake_minimum_required(VERSION 2.6)
 
 project(callflow NONE)
 
-# Get project subversion version
-Subversion_WC_INFO(.. MY)
-
 # Get date
 MACRO (TODAY RESULT)
     IF (WIN32)
@@ -28,10 +25,9 @@ set(VERSION_MAJOR ${DATE})
 # Overwrite version major if callflow.version found
 if(EXISTS "../callflow.version")
   file (STRINGS "callflow.version" VERSION_MAJOR)
+  set(VERSION_STRING "${VERSION_MINOR}")
 endif()
 
-set(VERSION_MINOR ${MY_WC_REVISION})
-set(VERSION_STRING "${VERSION_MAJOR}-${VERSION_MINOR}")
 message(STATUS "*** Will build version ${VERSION_STRING} ***")
 
 # Perhaps redundant, but nice to have the if structure around as an example
