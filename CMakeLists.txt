@@ -20,16 +20,16 @@ ENDMACRO (TODAY)
 TODAY(DATE)
 
 
-set(VERSION_MAJOR ${DATE})
+set(VERSION_STRING ${DATE})
 
 # Overwrite version major if callflow.version found
 if(EXISTS "../callflow.version")
-  file (STRINGS "callflow.version" VERSION_MAJOR)
-  set(VERSION_STRING "${VERSION_MINOR}")
+  file (STRINGS "callflow.version" VERSION_STRING)
 endif()
 
 message(STATUS "*** Will build version ${VERSION_STRING} ***")
 
+# BINDIR
 # Perhaps redundant, but nice to have the if structure around as an example
 if(UNIX)
   set(BINDIR "${CMAKE_INSTALL_PREFIX}/bin")
@@ -39,16 +39,34 @@ elseif(WIN32)
   set(BINDIR "bin")
 endif()
 
-set(MANDIR "share/man/")
-set(SHAREDIR "share/${PROJECT_NAME}/")
-add_definitions("-DSHAREDIR=\\\"${CMAKE_INSTALL_PREFIX}/${SHAREDIR}\\\"")
-if(DEFINED DOCDIR)
-  set(DOCFOLDER "${DOCDIR}")
-else()
-  set(DOCFOLDER "${PREFIX}/share/doc/${PROJECT_NAME}")
-endif()
-add_definitions("-DDOCDIR=\\\"${CMAKE_INSTALL_PREFIX}/${DOCDIR}\\\"")
+message(STATUS " --> Will install BIN file to ${BINDIR}")
 
+# MANDIR
+set(MANDIR "${CMAKE_INSTALL_PREFIX}/share/man/")
+message(STATUS " --> Will install MAN file to ${MANDIR}")
+
+# DOCDIR
+if(NOT DEFINED DOCDIR)
+  set(DOCDIR "${CMAKE_INSTALL_PREFIX}/share/doc/${PROJECT_NAME}")
+endif()
+add_definitions("-DDOCDIR=\\\"${DOCDIR}\\\"")
+message(STATUS " --> Will install DOC files to ${DOCDIR}")
+
+# CONFDIR
+if(NOT DEFINED CONFDIR)
+	set(CONFDIR "${CMAKE_INSTALL_PREFIX}/etc/${PROJECT_NAME}")
+endif()
+add_definitions("-DCONFDIR=\\\"${CONFDIR}\\\"")
+message(STATUS " --> Will install CONF files to ${CONFDIR}")
+
+# SHAREDIR
+set(SHAREDIR "${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/")
+add_definitions("-DSHAREDIR=\\\"${SHAREDIR}\\\"")
+message(STATUS " --> Will install callflow files to ${SHAREDIR}")
+
+#
+# Which folders to install
+#
 add_subdirectory(js)
 add_subdirectory(css)
 add_subdirectory(man)
@@ -69,13 +87,13 @@ install(FILES
   AUTHORS
   LICENSE
   README
-  DESTINATION "${DOCFOLDER}"
+  DESTINATION "${DOCDIR}"
 )
 
 # If the cmake version includes cpack, use it
 if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   set(CPACK_PACKAGE_EXECUTABLES callflow)
-  set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Dummy Value")
+  set(CPACK_DEBIAN_PACKAGE_MAINTAINER "callflow")
   set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Callflow Sequence Diagram Generator")
   
   if(WIN32)
