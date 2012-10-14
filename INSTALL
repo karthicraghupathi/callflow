@@ -1,3 +1,7 @@
+Before installing, you should have the following dependencies
+- gawk (we use the GNU implementation of awk instead of classic awk)
+- inkscape (to build png file from svg)
+
 The build instructions are:
  mkdir build
  cd build
