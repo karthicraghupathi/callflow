@@ -181,7 +181,7 @@ elif [[ $MODE = "REMOVE_ALL_DUPS" ]]; then
   done | awk '{print $1}' | sort -n > $TMPDIR/pckts.$$
 
 else
-  echo "error: unknow mode: \"$MODE\"" >&2
+  echo "error: unknown mode: \"$MODE\"" >&2
   exit 1
 fi
 

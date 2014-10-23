@@ -263,7 +263,7 @@ while true; do
                          ;;
   --version|-v)          echo "$PRGNAME version: $PRGVRSN"; exit;;
   --)                    shift; break;;
-   *)                    echo "unknow argument \"$1\""; exit $ERR_ARGUMENT;;
+   *)                    echo "unknown argument \"$1\""; exit $ERR_ARGUMENT;;
   esac
   shift
 done
