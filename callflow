@@ -47,7 +47,8 @@ if [[ -z "$FILTER" ]]; then
   FARG=""
   FVAL=""
 else
-  FARG="-R"
+  # -2 is required by -R
+  FARG="-2 -R"
   FVAL="$FILTER"
 fi
 
