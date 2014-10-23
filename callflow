@@ -192,7 +192,7 @@ LOPT="$LOPT,version"
 # Note that we use `"$@"' to let each command-line parameter expand to a
 # separate word. The quotes around `$@' are essential!
 # We need TEMP as the `eval set --' would nuke the return value of getopt.
-TEMP=$(getopt --options=dfhorv --long $LOPT -n $PRGNAME -- "$@")
+TEMP=$(getopt --options=dhorv --long $LOPT -n $PRGNAME -- "$@")
 
 if [[ $? -ne 0 ]]; then
   echo "Terminating..." >&2
@@ -214,7 +214,7 @@ while true; do
   --browser)
                          START_BROWSER="yes"
                          ;;
-  --capture-filter|-f)
+  --capture-filter)
                          # Overwrite the default filter previously red from the configuration file
                          OPT_FILTER=$2; shift
                          #echo " * Will use the following filter: $OPT_FILTER"
