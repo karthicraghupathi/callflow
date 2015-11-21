@@ -88,7 +88,7 @@ function make_long_and_short_caches_of_pcap_trace() {
   #   field separator in the output file, remove it.  The actual string
   #   being removed is " |=".
   tshark -r $PCAP_FILE $FARG "$FVAL" -t a \
-    -o 'column.format: "No.", "%m", "Time", %t, "Protocol", "%p", "srcport", %S, "dstport", %D, "Info", "%i"' |
+    -o 'gui.column.format: "No.", "%m", "Time", %t, "Protocol", "%p", "srcport", %S, "dstport", %D, "Info", "%i"' |
       sed -e 's/^[[:blank:]]*//' \
         -e 's/[[:blank:]]*|=/=/' \
         -e 's/ Status: / /' \

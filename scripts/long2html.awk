@@ -16,7 +16,8 @@ BEGIN {
   first = 1
 }
 
-/^Frame [0-9]+: (.*)/ {
+# See bug #7
+/^Frame [0-9]+:? (.*)/ {
   # New frame, closing <pre> and html> from previous frame before compute new filename
   if (first == 0) {
 
