@@ -36,7 +36,7 @@ MODE=$4
 )
 
 if [[ $MODE = "REMOVE_MIRROR_DUPS" ]]; then
-  
+
   ( echo "$MODE is deprecated, may be removed in the future without notice,"
     echo "  please use \"REMOVE_MIRROR_DUPS_2\" instead."
   ) >&2
@@ -50,7 +50,7 @@ if [[ $MODE = "REMOVE_MIRROR_DUPS" ]]; then
     FRAMES[NR] = $0
 
   } END {
-     
+
     # Print first frame number
     split(FRAMES[1], F, " ")
     print F[1]
@@ -60,7 +60,7 @@ if [[ $MODE = "REMOVE_MIRROR_DUPS" ]]; then
     for (i=2; i<=MAX; i++) {
 
       split(FRAMES[i], F, " ")
-      CUR_MD5 = F[2] 
+      CUR_MD5 = F[2]
 
       if (CUR_MD5 != PREV_MD5) {
         # Print the current frame number
@@ -117,7 +117,7 @@ elif [[ $MODE = "REMOVE_MIRROR_DUPS_2" ]]; then
       SEEN = "no"
       CONT = 1
       while (CONT) {
-        
+
         if (DEBUG) printf "DEBUG 1: i = %d, Frame = %d, Time = %s, MD5SUM = %s\n", i, FRAME[i], TIME[i], MD5SUM[i]
         if (DEBUG) printf "DEBUG 2: p = %d, Frame = %d, Time = %s, MD5SUM = %s\n", p, FRAME[p], TIME[p], MD5SUM[p]
 

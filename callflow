@@ -270,7 +270,7 @@ while true; do
 done
 
 inputfile="$1"
-if [[ ! -f "$inputfile" ]]; then 
+if [[ ! -f "$inputfile" ]]; then
   echo "$PRGNAME: error: Input file ($inputfile) does not exists!"
   exit 1;
 else
@@ -350,14 +350,14 @@ if [[ "$ARCHIVE" == "yes" ]]; then
   [[ $ARCHIVE_TYPE != "files" ]] && {
 
     ARCHIVE_NAME=$(basename $DESTDIR)
-    case $ARCHIVE_TYPE in 
-      bz2|bzip2) 
+    case $ARCHIVE_TYPE in
+      bz2|bzip2)
         ARCHIVE_FILE=$ARCHIVE_NAME.tar.bz2
         ;;
       *)
         ARCHIVE_FILE=$ARCHIVE_NAME.$ARCHIVE_TYPE
         ;;
-    esac 
+    esac
   }
 
 fi
