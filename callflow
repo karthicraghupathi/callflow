@@ -8,7 +8,7 @@
 ##################################
 ARCHIVE=yes
 ARCHIVE_TYPE=bz2
-CONFDIR="/etc/callflow";
+CONFDIR=/etc/callflow
 removeDF=0 # do not remove duplicate frames
 ORDER=0 # do not build order file
 localLoop=1 # take into account flows from and to the same element (rounded flows)
@@ -283,7 +283,7 @@ if [[ ! -z "$OPT_FILTER" ]]; then
     FARG=""
     FVAL=""
   else
-    FARS="-R"
+    FARG="-2 -R"
     FVAL="$OPT_FILTER"
   fi
 fi
