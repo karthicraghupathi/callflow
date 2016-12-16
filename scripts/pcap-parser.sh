@@ -1,6 +1,11 @@
 function make_long_and_short_caches_of_pcap_trace() {
 
   PCAP_FILE=$1
+  unset PREV_CALL_ID
+  unset PREV_TIME
+  unset PREV_SRC_IP
+  unset PREV_DST_IP
+  unset PREV_CSEQ
 
   tshark -r $PCAP_FILE $FARG "$FVAL" -V > $DESTDIR/callflow.long
 
@@ -12,7 +17,7 @@ function make_long_and_short_caches_of_pcap_trace() {
   # but just "i" in abbreviated SIP messages!  Both formats can be used in 1 call.
   tshark -r $PCAP_FILE $FARG "$FVAL" -t a -T fields -E separator='|' \
     -e frame.number -e ip.src -e ip.dst -e sip.CSeq -e sip.Call-ID \
-    -e sdp.connection_info -e sdp.media -e sdp.media_attr | awk '
+    -e sdp.connection_info -e sdp.media -e sdp.media_attr -e ipv6.src -e ipv6.dst | awk '
   BEGIN {
     FS = "|"
     OFS = "|"
@@ -52,16 +57,25 @@ function make_long_and_short_caches_of_pcap_trace() {
     #
     # No Description
     #  1 frame.number
-    #  2 tracefile
-    #  3 ip.src
-    #  4 ip.dst
-    #  5 sip.CSeq
-    #  6 sip.Call-ID
-    #  7 sdp.connection_info (ip addr)
-    #  8 sdp.media (audio port)
-    #  9 sdp.media (audio format)
-    # 10 sdp.media_attr (audio direction (sendrecv, sendonly, recvonly))
-    printf "%s||%s|%s|%s|{%s}|%s|%s|%s|%s\n", $1, $2, $3, $4, CALLID[$5], $6, PORT, FORMAT, DIRECTION
+    #  2 ip.src
+    #  3 ip.dst
+    #  4 sip.CSeq
+    #  5 sip.Call-ID
+    #  6 sdp.connection_info (ip addr)
+    #  7 sdp.media (audio port audio format)
+    #  8 sdp.media_attr (audio direction (sendrecv, sendonly, recvonly))
+    #  9 ipv6.src
+    # 10 ipv6.dst
+    # Its an IPv6 address we have to fill source and destination address with the correct IP version
+    if (length($10) > 1) {
+      CURR_SRC_IP=$9
+      CURR_DST_IP=$10
+    } else {
+      CURR_SRC_IP=$2
+      CURR_DST_IP=$3
+    }
+
+    printf "%s||%s|%s|%s|{%s}|%s|%s|%s|%s\n", $1, CURR_SRC_IP, CURR_DST_IP, $4, CALLID[$5], $6, PORT, FORMAT, DIRECTION
 
   }' > $TMPDIR/${PRGNAME}-tshark-1.$$
 
@@ -88,7 +102,7 @@ function make_long_and_short_caches_of_pcap_trace() {
   #   field separator in the output file, remove it.  The actual string
   #   being removed is " |=".
   tshark -r $PCAP_FILE $FARG "$FVAL" -t a \
-    -o 'gui.column.format: "No.", "%m", "Time", %t, "Protocol", "%p", "srcport", %S, "dstport", %D, "Info", "%i"' |
+    -o 'column.format: "No.", "%m", "Time", %t, "Protocol", "%p", "srcport", %S, "dstport", %D, "Info", "%i"' |
       sed -e 's/^[[:blank:]]*//' \
         -e 's/[[:blank:]]*|=/=/' \
         -e 's/ Status: / /' \
@@ -178,15 +192,98 @@ function make_long_and_short_caches_of_pcap_trace() {
     }
 
     # Perform the actual mapping of the input to the output fields
-    L = length(A)
-    for (i = 1; i < L; i++) {
-      printf "%s|", $A[i]
+      L = length(A)
+      for (i = 1; i < L; i++) {
+        printf "%s|", $A[i]
+      }
+
+      printf "%s\n", $A[L]
+
+
+  }' $TMPDIR/${PRGNAME}-tshark-3.$$ > $TMPDIR/${PRGNAME}-tshark-4.$$
+
+  # It sometimes happens that the frames in the trace are not time
+  # ordered (they are ordered at frame number), for this reason
+  # re-order the callflow.short cache on time.
+  # Example of a wrong order:
+  # 13.14.15.625340|1|.....
+  # 13.14.15.625360|2|.....
+  # 13.14.15.625350|3|..... <<< this one is at the wrong spot
+  # The timestamp is the first field in the callflow.short cache, hence
+  # re-ordering on time is rather easy using just sort.
+ sort -o $TMPDIR/${PRGNAME}-tshark-4.$$ $TMPDIR/${PRGNAME}-tshark-4.$$
+
+ awk 'BEGIN {
+    FS = "|"
+    OFS = "|"
+  }
+  {
+    # The order in which the fields will be arranged in the output file
+    #
+    # No Description
+    #  1 time
+    #  2 tracefile
+    #  3 frame.number
+    #  4 ip.src
+    #  5 ip.srcport
+    #  6 session information
+    #  7 ip.dst
+    #  8 ip.dstport
+    #  9 protocol
+    # 10 info field
+    # 11 SIP CSeq
+    # 12 Connection info (IP addr)
+    # 13 Media info (Port)
+    # 14 Media info (Protocol)
+    # 15 Media attribute direction
+
+    # Convert timestamp onto milliseconds to calculate time difference between packets
+    TIME=substr($1,1,8)
+    $1 = substr($1,1,10)
+    m=split(TIME,t,":")
+    n=split(PREV_TIME,w,":")
+    FIRSTTIME= (t[1]*3600) + (t[2]*60) + t[3]
+    SECONDTIME= (w[1]*3600) + (w[2]*60) + w[3]
+    TIME_DIFF=(FIRSTTIME - SECONDTIME)
+
+    # Store current IPs
+    CURR_SRC_IP=$4
+    CURR_DST_IP=$7
+
+    # 1) if protocol is SIP lets start the duplication removal
+    # 2) if previous src&dst IPs are different > OK
+    # 3) if IPs are the same and Call-Id, CSEQ is same, but time diff is bigger than 2sec > OK (retransmission)
+    # 4) if diff is less than 2 sec > drop the packet
+    # 5) keep everything else
+    if ($9 ~ "SIP") {
+        if ((PREV_SRC_IP != CURR_SRC_IP) &&
+            (PREV_DST_IP != CURR_DST_IP)) {
+              print $0
+      } else if ((PREV_CALL_ID == $10) &&
+                 (PREV_CSEQ == $11)   &&
+                 (TIME_DIFF >= 2)) {
+              print $0
+      } else if ((PREV_CALL_ID == $10) &&
+                 (PREV_CSEQ == $11)   &&
+                 (TIME_DIFF < 2)) {
+              # Do Nothing just drop the packet (silently)
+      } else {
+              print $0
+      }
+    } else {
+        # Not an SIP Packet -> do not remove duplicates
+        print $0
     }
 
-    printf "%s\n", $A[L]
+    # Store necessary information to eliminate duplicated packets in the next round.
+    PREV_TIME    = TIME
+    PREV_CALL_ID = $10
+    PREV_CSEQ    = $11
+    PREV_SRC_IP  = CURR_SRC_IP
+    PREV_DST_IP  = CURR_DST_IP
 
-  }' $TMPDIR/${PRGNAME}-tshark-3.$$ > $DESTDIR/callflow.short
+  }' $TMPDIR/${PRGNAME}-tshark-4.$$ > $DESTDIR/callflow.short
 
-  rm $TMPDIR/${PRGNAME}-tshark-[123].$$
+  rm $TMPDIR/${PRGNAME}-tshark-[1234].$$
 }
 

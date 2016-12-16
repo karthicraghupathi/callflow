@@ -79,17 +79,6 @@ function make_long_and_short_caches() {
      make_long_and_short_caches_of_pcap_trace $inputfile
   esac
 
-  # It sometimes happens that the frames in the trace are not time
-  # ordered (they are ordered at frame number), for this reason
-  # re-order the callflow.short cache on time.
-  # Example of a wrong order:
-  # 13.14.15.625340|1|.....
-  # 13.14.15.625360|2|.....
-  # 13.14.15.625350|3|..... <<< this one is at the wrong spot
-  # The timestamp is the first field in the callflow.short cache, hence
-  # re-ordering on time is rather easy using just sort.
-  sort -o $DESTDIR/callflow.short $DESTDIR/callflow.short
-
   # Store the input characteristics.  It will be used in subsequent runs
   # to determine that the cache can be used, or that the input must be
   # processed again.
