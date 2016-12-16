@@ -7,7 +7,10 @@
     lookup[hosts[i]] = i;
     printf "<!-- lookup['%s'] = %d -->\n", hosts[i], i;
   }
-
+  # Define the vertical distance between the node labels
+  Z = 0;
+  # Where the first line should start after node label
+  Q = 0;
   w = (numHosts-1) * xHostSpace + leftMargin + rightMargin;
   h = numLines * yLineSpace + topMargin + bottomMargin;
 
@@ -30,7 +33,8 @@
 
     printf "<text x=\"%d\" y=\"%d\" class=\"label host-text\">%s</text>\n",
       leftMargin+(i*xHostSpace),
-      ystart-(15*(i%2)+2),
+      # Make the node labes inline
+      ystart,
       label[i];
 
     printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"element-line\" />\n", leftMargin+(i*xHostSpace), ystart, leftMargin+(i*xHostSpace), yend;
@@ -114,7 +118,21 @@ func line(x1,x2,y,output, c) {
 { 
   y = NR;
   y = y * yLineSpace + ystart;
-
+  y = y + (Q * 20);
+  Z = Z + 1;
+  # Insert Node labels after every 28th lines
+  if ((Z % 28 == 1) && (Z != 1)){
+    for(i=0;i<numTraces;i++) {
+    if (label[i] == "")
+      label[i] = hosts[i];
+      printf "<text x=\"%d\" y=\"%d\" class=\"label host-text\">%s</text>\n",
+      leftMargin+(i*xHostSpace),
+      y,
+      label[i];
+    }
+    y = y + 20;
+    Q = Q + 1;
+  }
   if ($0 ~ "^#") {
 
     # The "!" is the link identifier
