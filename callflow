@@ -175,9 +175,9 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
 LOPT="archive:,browser"
-LOPT="$LOPT,capture-filter:,help,list-nodes,no-archive,no-loops,no-sdp,no-time,nodenames:"
-LOPT="$LOPT,refresh-cache,remove-duplicate-frames,title:,with-sdp,width-between-nodes:"
-LOPT="$LOPT,version"
+LOPT="$LOPT,capture-filter:,help,lines-between-nodes:,list-nodes,no-archive,no-loops"
+LOPT="$LOPT,no-sdp,no-time,nodenames:,refresh-cache,remove-duplicate-frames,title:,with-sdp"
+LOPT="$LOPT,width-between-nodes:,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
 # separate word. The quotes around `$@' are essential!
@@ -208,6 +208,9 @@ while true; do
                          # Overwrite the default filter previously red from the configuration file
                          OPT_FILTER=$2; shift
                          #echo " * Will use the following filter: $OPT_FILTER"
+                         ;;
+  --lines-between-nodes)
+                         NR_OF_LINES_BETWEEN_NODES=$2; shift
                          ;;
   --list-nodes|-o)
                          ORDER=1
@@ -510,6 +513,7 @@ fi
   # Add graph variables
   yLineSpace = 24
   xHostSpace = $WIDTH_BETWEEN_NODES
+  yHostSpace = ${NR_OF_LINES_BETWEEN_NODES:=28}
   rightMargin = 100
   topMargin = 50
   bottomMargin = 50
@@ -745,9 +749,9 @@ fi
 if [[ "$START_BROWSER" == "yes" ]]; then
   # Start the browser in the background
   if [[ -z "$CALLFLOW_URL" ]]; then
-    "${BROWSER:=firefox}" "$DESTDIR/index.html" &
+    "${BROWSER:=firefox}" "$DESTDIR/index.html" >/dev/null &
   else
-    "${BROWSER:=firefox}" "$CALLFLOW_URL/$DESTDIR/index.html" &
+    "${BROWSER:=firefox}" "$CALLFLOW_URL/$DESTDIR/index.html" >/dev/null &
   fi
 else
   echo

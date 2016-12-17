@@ -64,6 +64,11 @@ Launch a browser with the callflow.
 
 .TP
 .PD 0
+.BI --lines-between-nodes "<value>"
+Lines between nodes determines the number of lines after which the node labels are repeated.  Value is not restricted nor checked, a sensible value is between 5 and 30.  Default value: 28.
+
+.TP
+.PD 0
 .BI --capture-filter " filter"
 A filter can be used to show only those frames that match the given filter criteria.  This filter is for traces that have been captured with programs such as wireshark, snoop, tcpdump, thsark and the like.  Callflow uses tshark's DISPLAY filter functionality to filter the trace.  More information about tshark's DISPLAY filter can be obtained from the tshark man page. A useful filter for SIP traffic is "sip".
 

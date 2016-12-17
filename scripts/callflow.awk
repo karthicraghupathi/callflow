@@ -120,8 +120,8 @@ func line(x1,x2,y,output, c) {
   y = y * yLineSpace + ystart;
   y = y + (Q * 20);
   Z = Z + 1;
-  # Insert Node labels after every 28th lines
-  if ((Z % 28 == 1) && (Z != 1)){
+  # Insert Node labels after every \"yHostSpace\" lines
+  if ((Z % yHostSpace == 1) && (Z != 1)){
     for(i=0;i<numTraces;i++) {
     if (label[i] == "")
       label[i] = hosts[i];
