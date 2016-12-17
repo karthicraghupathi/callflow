@@ -124,6 +124,11 @@ Options:
                 filter can be obtained from the tshark man page.
                 A useful filter for SIP traffic is "sip".
 
+  --lines-between-nodes
+                Lines between nodes determines the number of lines after which the
+                node labels are repeated.  Value is not restricted nor checked,
+                a sensible value is between 5 and 30.  Default value: 28.
+
   --list-nodes, -o
                 List the unique nodes in the trace file
                 (Don't forget to redirect output in another file.
