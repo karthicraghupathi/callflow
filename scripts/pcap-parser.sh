@@ -102,7 +102,7 @@ function make_long_and_short_caches_of_pcap_trace() {
   #   field separator in the output file, remove it.  The actual string
   #   being removed is " |=".
   tshark -r $PCAP_FILE $FARG "$FVAL" -t a \
-    -o 'column.format: "No.", "%m", "Time", %t, "Protocol", "%p", "srcport", %S, "dstport", %D, "Info", "%i"' |
+    -o 'gui.column.format: "No.", "%m", "Time", %t, "Protocol", "%p", "srcport", %S, "dstport", %D, "Info", "%i"' |
       sed -e 's/^[[:blank:]]*//' \
         -e 's/[[:blank:]]*|=/=/' \
         -e 's/ Status: / /' \
@@ -113,7 +113,7 @@ function make_long_and_short_caches_of_pcap_trace() {
 
     # Time value ($2) looks like: 13:35:43.868013000
     # The last zeros are unwanted.  Desired time string: 13:35:43.868013
-    # This strings has a length of 16.
+    # This string has a length of 16.
     if (length($2) > 16 ) sub ("000$", "", $2)
 
     split($0, A, " ")
