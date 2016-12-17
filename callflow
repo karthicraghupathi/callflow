@@ -555,7 +555,7 @@ awk -F "|" -f $TMPDIR/callflow.awk.$PPID $DESTDIR/callflow.short > $DESTDIR/call
 # Build callflow.png if inkscape is available
 if which inkscape >/dev/null 2>&1; then
 
-  # Inkscape does not have a quiet option, it might get one in version 0.49
+  # Inkscape does not have a quiet option, it might get one in a future release
   # Workaround; sent the output to /dev/null in case the files to be archived
   # will be listed on the screen
   if [[ "$ARCHIVE_TYPE" == "files" ]] || [[ "$INKSCAPE_MODE" == "QUIET" ]]; then
