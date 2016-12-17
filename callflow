@@ -336,19 +336,17 @@ if [[ "$ARCHIVE" == "yes" ]]; then
       ;;
   esac
 
-  [[ $ARCHIVE_TYPE != "files" ]] && {
-
-    ARCHIVE_NAME=$(basename $DESTDIR)
-    case $ARCHIVE_TYPE in
-      bz2|bzip2)
-        ARCHIVE_FILE=$ARCHIVE_NAME.tar.bz2
-        ;;
-      *)
-        ARCHIVE_FILE=$ARCHIVE_NAME.$ARCHIVE_TYPE
-        ;;
-    esac
-  }
-
+  ARCHIVE_NAME=$(basename $DESTDIR)
+  case $ARCHIVE_TYPE in
+    bz2|bzip2)
+      ARCHIVE_FILE=$ARCHIVE_NAME.tar.bz2
+      ;;
+    files)
+      ;;
+    *)
+      ARCHIVE_FILE=$ARCHIVE_NAME.$ARCHIVE_TYPE
+      ;;
+  esac
 fi
 
 if [[ -z "$OPT_SHOW_TIME" ]]; then
@@ -716,8 +714,11 @@ if [[ "$ARCHIVE" == "yes" ]]; then
   ARCHIVE_FILES=$(tr " " "\n" <<< "$FILES" | sort)
 
   if [[ "$ARCHIVE_TYPE" == "files" ]]; then
+    echo
+    echo "=== Files in callflow - BEGIN: $ARCHIVE_NAME ==="
     echo "$ARCHIVE_FILES"
-    exit 0
+    echo "=== Files in callflow - END: $ARCHIVE_NAME ==="
+    echo
   else
 
     FILES=$(sed "s,^,$ARCHIVE_NAME/," <<< "$ARCHIVE_FILES")
