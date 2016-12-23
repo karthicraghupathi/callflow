@@ -48,8 +48,7 @@ if [[ -z "$FILTER" ]]; then
   FARG=""
   FVAL=""
 else
-  # -2 is required by -R
-  FARG="-2 -R"
+  FARG="-Y"
   FVAL="$FILTER"
 fi
 
@@ -116,7 +115,7 @@ Options:
   --browser
                 Launch a browser with the callflow.
 
-  --capture-filter <filter>, -f <filter>
+  --display-filter <filter>, -f <filter>
                 A filter can be used to show only those frames that match the
                 given filter criteria.  This filter is for traces that have been
                 captured with programs such as wireshark, snoop, tcpdump, tshark
@@ -184,7 +183,7 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
 LOPT="archive:,browser"
-LOPT="$LOPT,capture-filter:,help,lines-between-nodes:,list-nodes,no-archive,no-loops"
+LOPT="$LOPT,display-filter:,help,lines-between-nodes:,list-nodes,no-archive,no-loops"
 LOPT="$LOPT,no-sdp,no-time,nodenames:,pdf,refresh-cache,remove-duplicate-frames,title:,with-sdp"
 LOPT="$LOPT,width-between-nodes:,version"
 
@@ -213,7 +212,7 @@ while true; do
   --browser)
                          START_BROWSER="yes"
                          ;;
-  --capture-filter)
+  --display-filter)
                          # Overwrite the default filter previously red from the configuration file
                          OPT_FILTER=$2; shift
                          #echo " * Will use the following filter: $OPT_FILTER"
@@ -288,7 +287,7 @@ if [[ ! -z "$OPT_FILTER" ]]; then
     FARG=""
     FVAL=""
   else
-    FARG="-2 -R"
+    FARG="-Y"
     FVAL="$OPT_FILTER"
   fi
 fi
@@ -782,7 +781,7 @@ fi
 
 if [[ "$START_BROWSER" == "yes" ]]; then
   # Start the browser in the background
-  echo "Launching ${BROWSER:=firefox}"
+  echo "Launching ${BROWSER:=firefox}..."
   if [[ -z "$CALLFLOW_URL" ]]; then
     "${BROWSER:=firefox}" "$DESTDIR/index.html" >/dev/null &
   else
