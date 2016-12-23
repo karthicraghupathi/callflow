@@ -39,7 +39,8 @@
   <h2>Trace file</h2>
   <p>The <a href="@TRACE@">trace file</a> that resulted in the callflow diagrams.
    <br/>
-   <a href="@ARCHIVE_FILE@">Callflow files in archive</a> (to sent the callflow to e.g. interested parties) <!-- @@@@ARCHIVE_FILE@@@@ -->
+   <a href="@ARCHIVE_FILE@">Callflow files in archive</a> (to sent the callflow to e.g. interested parties)<br/> <!-- @@@@ARCHIVE_FILE@@@@ -->
+   Callflow in <a href="callflow.pdf">PDF</a> format <!-- @@@@PDF_FILE@@@@ -->
   </p>
   <p class="info">Those diagrams were created with <a href="http://callflow.sourceforge.net">callflow</a></p>
  </body>

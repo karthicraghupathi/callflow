@@ -10,6 +10,7 @@ ARCHIVE=yes
 ARCHIVE_TYPE=bz2
 CONFDIR=/etc/callflow
 removeDF=0 # do not remove duplicate frames
+SVG_TO_PDF=no # default value for PDF conversion
 ORDER=0 # do not build order file
 localLoop=1 # take into account flows from and to the same element (rounded flows)
 
@@ -150,6 +151,9 @@ Options:
                 A file containing the element or node names that belong to the
                 addresses shown in the callflow.
 
+  --pdf
+                Additionally provide the callflow in pdf.
+
   --refresh-cache
                 Refresh the contents of the callflow.short and callflow.long
                 files.  By default these are cached.  The cache is automatically
@@ -181,7 +185,7 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 # alphabetically listed, keep it this way please.
 LOPT="archive:,browser"
 LOPT="$LOPT,capture-filter:,help,lines-between-nodes:,list-nodes,no-archive,no-loops"
-LOPT="$LOPT,no-sdp,no-time,nodenames:,refresh-cache,remove-duplicate-frames,title:,with-sdp"
+LOPT="$LOPT,no-sdp,no-time,nodenames:,pdf,refresh-cache,remove-duplicate-frames,title:,with-sdp"
 LOPT="$LOPT,width-between-nodes:,version"
 
 # Note that we use `"$@"' to let each command-line parameter expand to a
@@ -239,6 +243,10 @@ while true; do
                          ;;
   --nodenames)
                          OPT_NODENAMES=$2; shift
+                         ;;
+  --pdf)
+                         # Additionally provide the callflow in pdf
+                         SVG_TO_PDF=yes
                          ;;
   --refresh-cache)
                          OPT_REFRESH_CACHE=yes
@@ -563,13 +571,19 @@ awk -F "|" -f $TMPDIR/callflow.awk.$PPID $DESTDIR/callflow.short > $DESTDIR/call
 # Build callflow.png if inkscape is available
 if which inkscape >/dev/null 2>&1; then
 
+  INKSCAPE_ARGS="--export-dpi=90 -C --export-background=white --export-png=$DESTDIR/callflow.png $DESTDIR/callflow.svg"
+  
+  [[ "$SVG_TO_PDF" == "yes" ]] && {
+    INKSCAPE_ARGS="--export-pdf=$DESTDIR/callflow.pdf $INKSCAPE_ARGS"
+  }
+
   # Inkscape does not have a quiet option, it might get one in a future release
   # Workaround; sent the output to /dev/null in case the files to be archived
   # will be listed on the screen
   if [[ "$ARCHIVE_TYPE" == "files" ]] || [[ "$INKSCAPE_MODE" == "QUIET" ]]; then
-    inkscape --export-dpi=90 -C --export-background=white --export-png=$DESTDIR/callflow.png $DESTDIR/callflow.svg >/dev/null 2>&1
+    inkscape $INKSCAPE_ARGS >/dev/null 2>&1
   else
-    inkscape --export-dpi=90 -C --export-background=white --export-png=$DESTDIR/callflow.png $DESTDIR/callflow.svg
+    inkscape $INKSCAPE_ARGS
   fi
 
   # Copy the input file into destination directory
@@ -611,6 +625,10 @@ if which inkscape >/dev/null 2>&1; then
     echo "    <br/>"
     [[ $ARCHIVE == "yes" ]] && {
       echo "    <a href=\"$ARCHIVE_FILE\">Callflow files in archive</a> (to sent the callflow to e.g. interested parties)"
+      echo "    <br/>"
+    }
+    [[ "$SVG_TO_PDF" == "yes" ]] && {
+      echo "    Callflow in <a href=\"callflow.pdf\">PDF</a> format"
       echo "    <br/>"
     }
     echo "    <a href=\"index.html\" target=\"_parent\">Back to landing page</a>"
@@ -656,6 +674,10 @@ if which inkscape >/dev/null 2>&1; then
       echo "    <a href=\"$ARCHIVE_FILE\">Callflow files in archive</a> (to sent the callflow to e.g. interested parties)"
       echo "    <br/>"
     }
+    [[ "$SVG_TO_PDF" == "yes" ]] && {
+      echo "    Callflow in <a href=\"callflow.pdf\">PDF</a> format"
+      echo "    <br/>"
+    }
     echo "    <a href=\"index.html\" target=\"_parent\">Back to landing page</a>"
     echo "   </p>"
     echo "  </div>"
@@ -698,6 +720,7 @@ if which inkscape >/dev/null 2>&1; then
     -e "s/@ARCHIVE_FILE@/$ARCHIVE_FILE/" \
     $SETUPDIR/images/index.tpl > $DESTDIR/index.html
   [[ $ARCHIVE != "yes" ]] && sed -i '/@@@ARCHIVE_FILE@@@/d' $DESTDIR/index.html
+  [[ "$SVG_TO_PDF" != "yes" ]] && sed -i '/@@@PDF_FILE@@@/d' $DESTDIR/index.html
 
 else
   ( echo "Error $PRGNAME: inkscape not found."
@@ -721,6 +744,11 @@ if [[ "$ARCHIVE" == "yes" ]]; then
   FILES="$FILES $TRACEFILE callflow.png graph.html"
   FILES="$FILES index_dynamic.html index_frame_bottom.html index_frameless.html"
   FILES="$FILES index_frame_right.html index.html"
+  [[ "$SVG_TO_PDF" == "yes" ]] && {
+    FILES="$FILES callflow.pdf"
+  }
+
+
   ARCHIVE_FILES=$(tr " " "\n" <<< "$FILES" | sort)
 
   if [[ "$ARCHIVE_TYPE" == "files" ]]; then
@@ -754,6 +782,7 @@ fi
 
 if [[ "$START_BROWSER" == "yes" ]]; then
   # Start the browser in the background
+  echo "Launching ${BROWSER:=firefox}"
   if [[ -z "$CALLFLOW_URL" ]]; then
     "${BROWSER:=firefox}" "$DESTDIR/index.html" >/dev/null &
   else
