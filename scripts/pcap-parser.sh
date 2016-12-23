@@ -83,7 +83,7 @@ function make_long_and_short_caches_of_pcap_trace() {
   # the source and destination ports independent whether the datagram is UDP or
   # TCP based.  As SIP can be delivered over UDP or TCP using this tshark command
   # seems to be good choice.  Further more this command delivers the frame information
-  # (summary), that can not be obtained with tshart '-T fields' command above.
+  # (summary), that can not be obtained with tshark '-T fields' command above.
   #
   # For messages containing ISUP payload this step could deliver the IP addresses
   # when using % variables %ns and %nd (network source and destination).  If the

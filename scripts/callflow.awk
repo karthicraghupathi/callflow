@@ -7,11 +7,15 @@
     lookup[hosts[i]] = i;
     printf "<!-- lookup['%s'] = %d -->\n", hosts[i], i;
   }
+
   # Define the vertical distance between the node labels
   Z = 0;
+
   # Where the first line should start after node label
   Q = 0;
+
   w = (numHosts-1) * xHostSpace + leftMargin + rightMargin;
+
   nodes_extra_height = int(numLines / yHostSpace) * yBoxSpace;
   h = numLines * yLineSpace + topMargin + bottomMargin + nodes_extra_height;
   printf "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" viewBox=\"0 0 %d %d\">\n",w,h,w,h;
