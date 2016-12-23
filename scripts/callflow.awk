@@ -12,8 +12,8 @@
   # Where the first line should start after node label
   Q = 0;
   w = (numHosts-1) * xHostSpace + leftMargin + rightMargin;
-  h = numLines * yLineSpace + topMargin + bottomMargin;
-
+  nodes_extra_height = int(numLines / yHostSpace) * yBoxSpace;
+  h = numLines * yLineSpace + topMargin + bottomMargin + nodes_extra_height;
   printf "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" viewBox=\"0 0 %d %d\">\n",w,h,w,h;
 
   insertStyleDefs();
@@ -118,7 +118,7 @@ func line(x1,x2,y,output, c) {
 { 
   y = NR;
   y = y * yLineSpace + ystart;
-  y = y + (Q * 20);
+  y = y + (Q * yBoxSpace);
   Z = Z + 1;
   # Insert Node labels after every \"yHostSpace\" lines
   if ((Z % yHostSpace == 1) && (Z != 1)){
@@ -130,7 +130,7 @@ func line(x1,x2,y,output, c) {
       y,
       label[i];
     }
-    y = y + 20;
+    y = y + yBoxSpace;
     Q = Q + 1;
   }
   if ($0 ~ "^#") {

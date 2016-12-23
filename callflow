@@ -519,11 +519,12 @@ fi
   yLineSpace = 24
   xHostSpace = $WIDTH_BETWEEN_NODES
   yHostSpace = ${NR_OF_LINES_BETWEEN_NODES:=28}
+  yBoxSpace = 20
   rightMargin = 100
   topMargin = 50
   bottomMargin = 50
-  showTime = "$SHOW_TIME"
   showSDP = "$SHOW_SDP"
+  showTime = "$SHOW_TIME"
   if ( showTime == "yes" ) {
     leftMargin = 125
   } else {
