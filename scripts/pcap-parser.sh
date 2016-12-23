@@ -237,9 +237,8 @@ function make_long_and_short_caches_of_pcap_trace() {
     # 14 Media info (Protocol)
     # 15 Media attribute direction
 
-    # Convert timestamp onto milliseconds to calculate time difference between packets
-    TIME=substr($1,1,8)
-    $1 = substr($1,1,10)
+    # Convert timestamp onto seconds to calculate time difference between packets
+    TIME=$1
     m=split(TIME,t,":")
     n=split(PREV_TIME,w,":")
     FIRSTTIME= (t[1]*3600) + (t[2]*60) + t[3]
