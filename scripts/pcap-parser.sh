@@ -251,7 +251,7 @@ function make_long_and_short_caches_of_pcap_trace() {
 
     # 1) if protocol is SIP lets start the duplication removal
     # 2) if previous src&dst IPs are different > OK
-    # 3) if IPs are the same and Call-Id, CSEQ is same, but time diff is bigger than 2sec > OK (retransmission)
+    # 3) if IPs are the same and Call-Id, CSEQ is same, but time diff is bigger than 0.5sec > OK (retransmission)
     # 4) if diff is less than 2 sec > drop the packet
     # 5) keep everything else
     if ($9 ~ "SIP") {
@@ -260,11 +260,11 @@ function make_long_and_short_caches_of_pcap_trace() {
               print $0
       } else if ((PREV_CALL_ID == $10) &&
                  (PREV_CSEQ == $11)   &&
-                 (TIME_DIFF >= 2)) {
+                 (TIME_DIFF >= 0.5)) {
               print $0
       } else if ((PREV_CALL_ID == $10) &&
                  (PREV_CSEQ == $11)   &&
-                 (TIME_DIFF < 2)) {
+                 (TIME_DIFF < 0.5)) {
               # Do Nothing just drop the packet (silently)
       } else {
               print $0
