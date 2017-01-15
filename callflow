@@ -746,19 +746,16 @@ fi
 if [[ "$ARCHIVE" == "yes" ]]; then
 
   # Be specific in the files to be included in the archive
-  ODIR="$PWD"
   cd $DESTDIR
   DIRS="frames images js"
   FILES=$(find $DIRS -type f)
-  cd "$ODIR"
 
-  FILES="$FILES $TRACEFILE callflow.png graph.html"
+  FILES="$FILES $TRACEFILE callflow.svg callflow.png graph.html"
   FILES="$FILES index_dynamic.html index_frame_bottom.html index_frameless.html"
   FILES="$FILES index_frame_right.html index.html"
   [[ "$SVG_TO_PDF" == "yes" ]] && {
     FILES="$FILES callflow.pdf"
   }
-
 
   ARCHIVE_FILES=$(tr " " "\n" <<< "$FILES" | sort)
 
@@ -779,7 +776,6 @@ if [[ "$ARCHIVE" == "yes" ]]; then
       tar cjf $DESTDIR/$ARCHIVE_NAME.tar.bz2 $FILES
     fi
     echo "$PRGNAME: $ARCHIVE_TYPE archive available at \"$DESTDIR/$ARCHIVE_FILE\""
-    cd "$ODIR"
   fi
 fi
 
