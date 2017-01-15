@@ -30,6 +30,40 @@
   yend = h;
   printf "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" viewBox=\"0 0 %d %d\">\n", w, h, w, h
 
+  # Info for debugging
+  debug = 0
+  if (debug) {
+    printf "<!--\n"
+    printf "  DEBUG: == Set Values ==\n"
+    printf "  DEBUG: topMargin = %d\n", topMargin
+    printf "  DEBUG: bottomMargin = %d\n", bottomMargin
+    printf "  DEBUG: rightMargin = %d\n", rightMargin
+    printf "  DEBUG: leftMargin = %d\n", leftMargin
+    printf "  DEBUG: xHostSpace = %d\n", xHostSpace
+    printf "  DEBUG: yLineSpace = %d\n", yLineSpace
+    printf "  DEBUG: yLinesBetweenNodes = %d\n", yLinesBetweenNodes
+    printf "  DEBUG: \n" 
+    printf "  DEBUG: == Calculated Values ==\n"
+    printf "  DEBUG: maxCharsForName = %d\n", maxCharsForName;
+    printf "  DEBUG: numlines = %d\n", numLines
+    printf "  DEBUG: Extra inline node name lines = %d\n", int(numLines / yLinesBetweenNodes)
+    printf "  DEBUG: nodes_extra_height = %d\n", nodes_extra_height
+    printf "  DEBUG: yHostNameSpace = %d\n", yHostNameSpace
+    printf "  DEBUG: Height = %d\n", h
+    printf "  DEBUG: Width = %d\n", w
+    printf "-->\n\n"
+
+    # The actual size of the drawing can be obtained by executed the following
+    # shell script in the data directory.
+    # ( grep -E "<polygon" $DESTDIR/callflow.svg |
+    #     awk -F\" '{print $2}' | awk -F, '{print $NF}' 
+    # 
+    #   grep -E "<line|<text" callflow-dir/callflow.svg |
+    #     awk '{print $3}' | cut -d\" -f2
+    # 
+    # ) | sort -n | tail -1
+  }
+
   insertStyleDefs();
 
   y = 25;
