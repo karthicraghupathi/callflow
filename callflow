@@ -589,9 +589,8 @@ if which inkscape >/dev/null 2>&1; then
   }
 
   # Inkscape does not have a quiet option, it might get one in a future release
-  # Workaround; sent the output to /dev/null in case the files to be archived
-  # will be listed on the screen
-  if [[ "$ARCHIVE_TYPE" == "files" ]] || [[ "$INKSCAPE_MODE" == "QUIET" ]]; then
+  # Workaround; sent the output to /dev/null, when quiet mode is enabled
+  if [[ "$INKSCAPE_MODE" == "QUIET" ]] || [[ "$ARCHIVE_TYPE" == "files" ]]; then
     inkscape $INKSCAPE_ARGS >/dev/null 2>&1
   else
     inkscape $INKSCAPE_ARGS
