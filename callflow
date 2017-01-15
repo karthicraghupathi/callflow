@@ -574,7 +574,7 @@ AWK_BEGIN_SECTION
 awk -F "|" -f $TMPDIR/callflow.awk.$PPID $DESTDIR/callflow.short > $DESTDIR/callflow.svg
 
 # Remove temporary files
-\rm $TMPDIR/callflow.*.$PPID
+rm $TMPDIR/callflow.*.$PPID
 
 # Build callflow.png if inkscape is available
 if which inkscape >/dev/null 2>&1; then
@@ -693,7 +693,7 @@ if which inkscape >/dev/null 2>&1; then
     echo "</html>"
   ) > $DESTDIR/index_dynamic.html
 
-  \rm imagemap
+  rm $IMAGE_MAP
 
   #Copy JavaScript files into DESTDIR
   cp -af $SETUPDIR/js $DESTDIR/
