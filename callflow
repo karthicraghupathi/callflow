@@ -9,6 +9,7 @@
 ARCHIVE=yes
 ARCHIVE_TYPE=bz2
 CONFDIR=/etc/callflow
+CAMEL_CASE=no
 removeDF=0 # do not remove duplicate frames
 SVG_TO_PDF=no # default value for PDF conversion
 ORDER=0 # do not build order file
@@ -115,6 +116,9 @@ Options:
   --browser
                 Launch a browser with the callflow.
 
+  --camel-case
+                Node names are displayed in a high-low alternating pattern.
+
   --display-filter <filter>, -f <filter>
                 A filter can be used to show only those frames that match the
                 given filter criteria.  This filter is for traces that have been
@@ -182,7 +186,7 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
-LOPT="archive:,browser"
+LOPT="archive:,browser,camel-case"
 LOPT="$LOPT,display-filter:,help,lines-between-nodes:,list-nodes,no-archive,no-loops"
 LOPT="$LOPT,no-sdp,no-time,nodenames:,pdf,refresh-cache,remove-duplicate-frames,title:,with-sdp"
 LOPT="$LOPT,width-between-nodes:,version"
@@ -216,6 +220,10 @@ while true; do
                          # Overwrite the default filter previously red from the configuration file
                          OPT_FILTER=$2; shift
                          #echo " * Will use the following filter: $OPT_FILTER"
+                         ;;
+  --camel-case)
+                         # Force high-low name pattern during SVG generation
+                         CAMEL_CASE="always";
                          ;;
   --lines-between-nodes)
                          NR_OF_LINES_BETWEEN_NODES=$2; shift
@@ -525,12 +533,13 @@ fi
   # Add graph variables
   yLineSpace = 24
   xHostSpace = $WIDTH_BETWEEN_NODES
-  yHostSpace = ${NR_OF_LINES_BETWEEN_NODES:=28}
-  yBoxSpace = 20
+  yLinesBetweenNodes = ${NR_OF_LINES_BETWEEN_NODES:=28}
+  yHostNameSpace = 20
   rightMargin = 100
   topMargin = 50
   bottomMargin = 50
   showSDP = "$SHOW_SDP"
+  camelcase = "$CAMEL_CASE"
   showTime = "$SHOW_TIME"
   if ( showTime == "yes" ) {
     leftMargin = 125

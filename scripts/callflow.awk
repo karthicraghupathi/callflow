@@ -3,49 +3,59 @@
   print "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
   print "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.0//EN\" \"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd\">";
 
+  longNames = "no"
+
+  # A character takes on average between 6-7 pixels (dots).  When 7 is used a lot of 
+  # node name space is offered to prevent overlapping node names.  When 6 pixels are used
+  # a little overlap occurs at the boundary of activating the camel pattern.  In this
+  # case it is up to user to play with --width-between-nodes value to prevent overlapping
+  # name labels or use shorter node names.
+  maxCharsForName = int ( xHostSpace / 6 )
+
   for(i=0;i<numHosts;i++) {
     lookup[hosts[i]] = i;
     printf "<!-- lookup['%s'] = %d -->\n", hosts[i], i;
+    if ((camelcase == "always") || (length(label[i]) > maxCharsForName))
+      longNames = "yes";
   }
 
-  # Define the vertical distance between the node labels
-  Z = 0;
-
-  # Where the first line should start after node label
-  Q = 0;
+  nodes_extra_height = ( int(numLines / yLinesBetweenNodes) + 1 ) * yHostNameSpace
+  if (longNames == "yes") {
+    # Take the camel pattern into account when the node names are long
+    nodes_extra_height *= 2 
+  }
 
   w = (numHosts-1) * xHostSpace + leftMargin + rightMargin;
-
-  nodes_extra_height = int(numLines / yHostSpace) * yBoxSpace;
   h = numLines * yLineSpace + topMargin + bottomMargin + nodes_extra_height;
-  printf "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" viewBox=\"0 0 %d %d\">\n",w,h,w,h;
+  yend = h;
+  printf "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" viewBox=\"0 0 %d %d\">\n", w, h, w, h
 
   insertStyleDefs();
 
-  ystart = 60;
-  yend = h;
+  y = 25;
 
+  # With 'leftMargin + ( 1.5 * xHostSpace )' the title is centered above
+  # the second column
   printf "<text x=\"%d\" y=\"%d\" class=\"label title-text\">%s</text>\n",
-    (w/2),
-    ystart-35,
+    leftMargin + ( 1.5 * xHostSpace ),
+    y,
     title;
 
-  for(i=0;i<numTraces;i++) {
+  y += yHostNameSpace
 
-    if (label[i] == "")
-      label[i] = hosts[i];
-
-    printf "<text x=\"%d\" y=\"%d\" class=\"label host-text\">%s</text>\n",
-      leftMargin+(i*xHostSpace),
-      # Make the node labes inline
-      ystart,
-      label[i];
-
-    printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"element-line\" />\n", leftMargin+(i*xHostSpace), ystart, leftMargin+(i*xHostSpace), yend;
+  # Take the camel pattern into account in case the node names are long
+  if (longNames == "yes") {
+    y += yHostNameSpace
   }
+
+  # 1: print the vertical node lines
+  print_nodes(y, 1);
 
   printf "   <map name=\"callflowmap\" id=\"callflowmap\">\n" > "imagemap";
 }
+
+
+################ Fuction Definition  ##################
 
 func insertStyleDefs () {
   printf "<defs>\n<style type=\"text/css\"><![CDATA[\n";
@@ -119,24 +129,45 @@ func line(x1,x2,y,output, c) {
   printf "</a>\n";
 }
 
-{ 
-  y = NR;
-  y = y * yLineSpace + ystart;
-  y = y + (Q * yBoxSpace);
-  Z = Z + 1;
-  # Insert Node labels after every \"yHostSpace\" lines
-  if ((Z % yHostSpace == 1) && (Z != 1)){
-    for(i=0;i<numTraces;i++) {
+func print_nodes(yPos, first_line) {
+  for(i=0;i<numTraces;i++) {
+
     if (label[i] == "")
       label[i] = hosts[i];
-      printf "<text x=\"%d\" y=\"%d\" class=\"label host-text\">%s</text>\n",
-      leftMargin+(i*xHostSpace),
-      y,
-      label[i];
+
+    #  Display the node names in a camel case (low-high) pattern when longNames == yes
+    if (longNames == "yes") {
+       adjustment = yHostNameSpace*(i%2)
     }
-    y = y + yBoxSpace;
-    Q = Q + 1;
+
+    printf "<text x=\"%d\" y=\"%d\" class=\"label host-text\">%s</text>\n",
+      leftMargin+(i*xHostSpace),
+      yPos-adjustment,
+      label[i];
+
+    # Drawing the lines for the actors only needed once
+    if (first_line){
+      printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"element-line\" />\n", leftMargin+(i*xHostSpace), yPos+2, leftMargin+(i*xHostSpace), yend;
+    }
   }
+}
+
+################ Main ##################
+{
+  if ( NR % yLinesBetweenNodes == 0 ) {
+
+    y += yHostNameSpace
+
+    if ( longNames == "yes" ) {
+      y += yHostNameSpace
+    } 
+
+    # 0: only print the node names
+    print_nodes(y, 0)
+  }
+
+  y += yLineSpace
+
   if ($0 ~ "^#") {
 
     # The "!" is the link identifier

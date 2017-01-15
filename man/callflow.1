@@ -64,6 +64,12 @@ Launch a browser with the callflow.
 
 .TP
 .PD 0
+.B --camel-case
+Node names are displayed in a high-low alternating pattern. It prevents overlapping of long node names.  By default the node labels are displayed in a horizontal line.  Depending on the on the horizontal width between the nodes and the longest node name, the high-low alternating pattern will be enabled automatically.  This option enforces the high-low alternating pattern for node names.
+
+
+.TP
+.PD 0
 .BI --lines-between-nodes "<value>"
 Lines between nodes determines the number of lines after which the node labels are repeated.  Value is not restricted nor checked, a sensible value is between 5 and 30.  Default value: 28.
 
