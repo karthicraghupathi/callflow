@@ -544,7 +544,7 @@ IMAGE_MAP=$TMPDIR/$PRGNAME.imagemap.$$
   camelcase = "$CAMEL_CASE"
   showTime = "$SHOW_TIME"
   if ( showTime == "yes" ) {
-    leftMargin = 125
+    leftMargin = 150
   } else {
     leftMargin = 50
   }

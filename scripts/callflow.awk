@@ -95,9 +95,9 @@ func insertStyleDefs () {
   printf "<defs>\n<style type=\"text/css\"><![CDATA[\n";
   printf " .traceline { stroke-width: 1pt; stroke:black; }\n";
   printf " .pkt-text { color: red; font-family: Trebuchet MS,Helvetica, sans-serif;\n";
-  printf "            font-size: 8pt; stroke: none; fill: black;}\n";
+  printf "            font-size: 10pt; stroke: none; fill: black;}\n";
   printf " .comment-text { color: black; font-family: Trebuchet MS,Helvetica, sans-serif;\n";
-  printf "            font-size: 9pt; stroke: none; fill: green;}\n";
+  printf "            font-size: 10pt; stroke: none; fill: green;}\n";
   printf " .host-text { color: black; font-family: Trebuchet MS,Helvetica,sans-serif;\n";
   printf "             font-size: 10pt; stroke:none; fill:blue;}\n";
   printf " .title-text { color: black; font-family: Trebuchet MS,Helvetica,sans-serif;\n";
