@@ -596,6 +596,12 @@ if which inkscape >/dev/null 2>&1; then
     inkscape $INKSCAPE_ARGS
   fi
 
+  # TODO: should there indeed be a target="_blank" in the callflow.svg or not?
+  # Remove the target so the link (frame.html) is opened in the same window where
+  # callflow.svg is displayed.  The user has the ability to sent the link to 
+  # a new tab or new window
+  sed -i 's/ target="_blank"//' $DESTDIR/callflow.svg
+
   # Copy the input file into destination directory
   TRACEFILE=$(basename $inputfile)
   cp $inputfile $DESTDIR/$TRACEFILE
@@ -734,7 +740,7 @@ if [[ "$ARCHIVE" == "yes" ]]; then
     echo
   else
 
-    FILES=$(sed "s,^,$ARCHIVE_NAME/," <<< "$ARCHIVE_FILES")
+    FILES=$( sed "s,^,$ARCHIVE_NAME/," <<< "$ARCHIVE_FILES" )
 
     cd $DESTDIR/..
     if [[ "$ARCHIVE_TYPE" == "zip" ]]; then

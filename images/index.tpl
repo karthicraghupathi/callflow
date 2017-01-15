@@ -16,22 +16,33 @@
   <table>
    <tr>
     <td>
-     <h2>SIP messages presented in right frame</h2>
-     <a href="index_frame_right.html"><img src="images/frame_right.png" /><a>
+     <h2>Messages presented in right frame</h2>
+     <a href="index_frame_right.html"><img src="images/frame_right.png" /></a>
     </td>
     <td>
-     <h2>SIP messages presented in bottom frame</h2>
+     <h2>Messages presented in bottom frame</h2>
      <a href="index_frame_bottom.html"><img src="images/frame_bottom.png" /></a>
     </td>
    </tr>
    <tr>
     <td>
-     <h2>SIP messages presented in a popup window</h2>
+     <h2>Messages presented in a popup window</h2>
      <a href="index_dynamic.html"><img src="images/frame_dynamic.png" /></a>
     </td>
     <td>
-     <h2>SIP messages presented in the same window</h2>
+     <h2>Messages presented in the same window</h2>
      <a href="index_frameless.html"><img src="images/frameless.png" /></a>
+    </td>
+   </tr>
+   <tr>
+    <td>
+     <h2>SVG version: Messages presented in the same window</h2>
+     <p>This is experimental.  Best result in Chromium, in Firefox
+      the links can not be followed.
+     </p>
+     <a href="callflow.svg"><img src="images/frameless.png" /></a>
+    </td>
+    <td>
     </td>
    </tr>
   </table>
