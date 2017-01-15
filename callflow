@@ -119,7 +119,7 @@ Options:
   --camel-case
                 Node names are displayed in a high-low alternating pattern.
 
-  --display-filter <filter>, -f <filter>
+  --filter <filter>
                 A filter can be used to show only those frames that match the
                 given filter criteria.  This filter is for traces that have been
                 captured with programs such as wireshark, snoop, tcpdump, tshark
@@ -187,7 +187,7 @@ readonly SHORTHELP="Usage: $PRGNAME [options] <filename>"
 # Command line argument parsing, the allowed arguments are
 # alphabetically listed, keep it this way please.
 LOPT="archive:,browser,camel-case"
-LOPT="$LOPT,display-filter:,help,lines-between-nodes:,list-nodes,no-archive,no-loops"
+LOPT="$LOPT,filter:,help,lines-between-nodes:,list-nodes,no-archive,no-loops"
 LOPT="$LOPT,no-sdp,no-time,nodenames:,pdf,refresh-cache,remove-duplicate-frames,title:,with-sdp"
 LOPT="$LOPT,width-between-nodes:,version"
 
@@ -216,14 +216,14 @@ while true; do
   --browser)
                          START_BROWSER="yes"
                          ;;
-  --display-filter)
-                         # Overwrite the default filter previously red from the configuration file
-                         OPT_FILTER=$2; shift
-                         #echo " * Will use the following filter: $OPT_FILTER"
-                         ;;
   --camel-case)
                          # Force high-low name pattern during SVG generation
                          CAMEL_CASE="always";
+                         ;;
+  --filter)
+                         # Overwrite the default filter previously red from the configuration file
+                         OPT_FILTER=$2; shift
+                         #echo " * Will use the following filter: $OPT_FILTER"
                          ;;
   --lines-between-nodes)
                          NR_OF_LINES_BETWEEN_NODES=$2; shift

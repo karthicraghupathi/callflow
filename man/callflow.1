@@ -75,7 +75,7 @@ Lines between nodes determines the number of lines after which the node labels a
 
 .TP
 .PD 0
-.BI --display-filter " filter"
+.BI --filter " filter"
 A filter can be used to show only those frames that match the given filter criteria.  This filter is for traces that have been captured with programs such as wireshark, snoop, tcpdump, thsark and the like.  Callflow uses tshark's DISPLAY filter functionality to filter the trace.  More information about tshark's DISPLAY filter can be obtained from the tshark man page. A useful filter for SIP traffic is "sip".
 
 .TP
@@ -167,7 +167,7 @@ A filter can be used to show only those frames that match the given filter crite
 
 
 .SS Ordering the diagram
-If you know what nodes in your network are logically connected, you can have the diagram ordered in a meaningful way.  Just create a file called order in your current directory or in the setup directory with the order of your network nodes, one per line.  You must use the exact name or IP address that appears in your capture file in the form: <host/ip>:<port>, or use a regular expression that resolves to that name. Using a regular expression can be useful to collapse several nodes in to one logical node.
+When you know which nodes in your network are logically connected, you can have the diagram ordered in a meaningful way.  Just create a file called order in your current directory or in the setup directory with the order of your network nodes, one per line.  You must use the exact name or IP address that appears in your capture file in the form: <host/ip>:<port>, or use a regular expression that resolves to that name. Using a regular expression can be useful to collapse several nodes in to one logical node.
 
 You can generate an order file with:
   callflow --list-nodes capture-file.cap > order
@@ -183,7 +183,7 @@ First, you need to create on order file, as above.  Anything that appears after 
 
 
 .SS Forcing a node into the diagram
-If you would like a node that has no traffic to appear in the diagram, put the string "!f!" as part of its label in the order file. 
+When you would like a node that has no traffic to appear in the diagram, put the string "!f!" as part of its label in the order file. 
 The string "!f!" will be edited out of the label.  This can be useful to show the position of a firewall in a trace, or to illustrate a proxy that does not receive traffic.
 Make sure that the forced node does not resolve to a regex pattern that another node will match! (ie. don't use ".")
 
