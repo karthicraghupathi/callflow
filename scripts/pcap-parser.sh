@@ -7,7 +7,7 @@ function make_long_and_short_caches_of_pcap_trace() {
   unset PREV_DST_IP
   unset PREV_CSEQ
 
-  tshark -r $PCAP_FILE $FARG "$FVAL" -V > $DESTDIR/callflow.long
+  tshark -V -r $PCAP_FILE $FARG "$FVAL" > $DESTDIR/callflow.long
 
   # Create a datafile with the data needed to create the callflow.
   # This is done in 2 steps, because of the following reasons:  the tshark command
@@ -15,9 +15,10 @@ function make_long_and_short_caches_of_pcap_trace() {
   # data.  Some additional information about the Call-ID; this field can show up
   # in (at least) 2 ways in SIP messages.  The field can indeed be called "Call-ID",
   # but just "i" in abbreviated SIP messages!  Both formats can be used in 1 call.
-  tshark -r $PCAP_FILE $FARG "$FVAL" -t a -T fields -E separator='|' \
+  tshark -r $PCAP_FILE -t a -T fields -E separator='|' \
     -e frame.number -e ip.src -e ip.dst -e sip.CSeq -e sip.Call-ID \
-    -e sdp.connection_info -e sdp.media -e sdp.media_attr -e ipv6.src -e ipv6.dst | awk '
+    -e sdp.connection_info -e sdp.media -e sdp.media_attr -e ipv6.src -e ipv6.dst \
+    $FARG "$FVAL" | awk '
   BEGIN {
     FS = "|"
     OFS = "|"
@@ -101,8 +102,9 @@ function make_long_and_short_caches_of_pcap_trace() {
   # - Megaco has a "|" in its info string, this character is however the
   #   field separator in the output file, remove it.  The actual string
   #   being removed is " |=".
-  tshark -r $PCAP_FILE $FARG "$FVAL" -t a \
-    -o 'gui.column.format: "No.", "%m", "Time", %t, "Protocol", "%p", "srcport", %S, "dstport", %D, "Info", "%i"' |
+  tshark -r $PCAP_FILE -t a \
+    -o 'gui.column.format: "No.", "%m", "Time", %t, "Protocol", "%p", "srcport", %S, "dstport", %D, "Info", "%i"' \
+    $FARG "$FVAL" |
       sed -e 's/^[[:blank:]]*//' \
         -e 's/[[:blank:]]*|=/=/' \
         -e 's/ Status: / /' \
