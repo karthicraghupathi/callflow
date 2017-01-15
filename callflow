@@ -602,99 +602,67 @@ if which inkscape >/dev/null 2>&1; then
   cp $inputfile $DESTDIR/$TRACEFILE
 
   # Build HTML files
-  # Frameless; (SIP) messages will be presented in the same window as the callflow picture
-  ( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
-    echo "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
-    echo "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">"
-    echo " <head>"
-    echo "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>"
-    echo "  <title>$PRGNAME - $TITLE</title>"
+  for INDEX_FILE in dynamic frameless; do
 
-    # Do not use an external style sheet, as it is visible that the stylesheet is loaded
-    echo "  <style type=\"text/css\">"
-    echo ".callflow-image img {"
-    echo " display: block;"
-    echo " border: 0px;"
-    echo " margin-left: auto;"
-    echo " margin-right: auto;"
-    echo "}"
-    echo "p.footer {"
-    echo " border-top: 1px solid #aaa;"
-    echo " font-size: small;"
-    echo " padding: 0.1em 1em 0 1em;"
-    echo "}"
-    echo "  </style>"
-    echo " </head>"
-    echo " <body>"
-    echo "  <div class=\"callflow-image\">"
-    cat $IMAGE_MAP
-    echo "   <p>"
-    echo "    <img src=\"callflow.png\" usemap=\"#callflowmap\" alt=\"Call flow sequence diagram for $inputfile\"/>"
-    echo "   </p>"
-    echo "   <p class=\"footer\">"
-    echo "    <a href=\"$TRACEFILE\">Trace source</a>"
-    echo "    <br/>"
-    [[ $ARCHIVE == "yes" ]] && {
-      echo "    <a href=\"$ARCHIVE_FILE\">Callflow files in archive</a> (to sent the callflow to e.g. interested parties)"
-      echo "    <br/>"
-    }
-    [[ "$SVG_TO_PDF" == "yes" ]] && {
-      echo "    Callflow in <a href=\"callflow.pdf\">PDF</a> format"
-      echo "    <br/>"
-    }
-    echo "    <a href=\"index.html\" target=\"_parent\">Back to landing page</a>"
-    echo "   </p>"
-    echo "  </div>"
-    echo " </body>"
-    echo "</html>"
-  ) > $DESTDIR/index_frameless.html
+    # Dynamic;   (SIP) Messages will be presented in popups on the callflow picture
+    # Frameless; (SIP) messages will be presented in the same window as the callflow picture
+    ( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
+      echo "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
+      echo "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">"
+      echo " <head>"
+      echo "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>"
+      echo "  <title>$PRGNAME - $TITLE</title>"
+      echo "  <!-- Do not use an external style sheet, as it is visible that the stylesheet is loaded -->"
+      echo "  <style type=\"text/css\">"
+      echo ".callflow-image img {"
+      echo " display: block;"
+      echo " border: 0px;"
+      echo " margin-left: auto;"
+      echo " margin-right: auto;"
+      echo "}"
+      echo 
+      echo "p.footer {"
+      echo " border-top: 1px solid #aaa;"
+      echo " font-size: small;"
+      echo " padding: 0.1em 1em 0 1em;"
+      echo "}"
+      echo "  </style>"
 
-  # (SIP) Messages will be presented in popups on the callflow picture
-  ( echo "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
-    echo "  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
-    echo "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\" xml:lang=\"en\">"
-    echo " <head>"
-    echo "  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>"
-    echo "  <title>$PRGNAME - $TITLE</title>"
-    echo "  <style type=\"text/css\">"
-    echo ".callflow-image img {"
-    echo " display: block;"
-    echo " border: 0px;"
-    echo " margin-left: auto;"
-    echo " margin-right: auto;"
-    echo "}"
-    echo "p.footer {"
-    echo " border-top: 1px solid #aaa;"
-    echo " font-size: small;"
-    echo " padding: 0.1em 1em 0 1em;"
-    echo "}"
-    echo "  </style>"
-    echo "  <script type=\"text/javascript\" src=\"js/overlib.js\"></script>"
-    echo "  <script type=\"text/javascript\" src=\"js/callflow.js\"></script>"
-    echo " </head>"
-    echo " <body>"
-    echo "  <div class=\"callflow-image\">"
-    cat $IMAGE_MAP
-    echo "   <p>"
-    echo "    <img src=\"callflow.png\" usemap=\"#callflowmap\" alt=\"Call flow sequence diagram for $inputfile\"/>"
-    echo "   </p>"
-    echo "   <p class=\"footer\">"
-    echo "    <a href=\"$TRACEFILE\">Trace source</a>"
-    echo "    <br/>"
-    [[ $ARCHIVE == "yes" ]] && {
-      echo "    <a href=\"$ARCHIVE_FILE\">Callflow files in archive</a> (to sent the callflow to e.g. interested parties)"
+      [[ $INDEX_FILE == "dynamic" ]] && {
+        echo "  <script type=\"text/javascript\" src=\"js/overlib.js\"></script>"
+        echo "  <script type=\"text/javascript\" src=\"js/callflow.js\"></script>"
+      }
+
+      echo " </head>"
+      echo " <body>"
+      echo "  <div class=\"callflow-image\">"
+      cat $IMAGE_MAP
+      echo "   <p>"
+      echo "    <img src=\"callflow.png\" usemap=\"#callflowmap\" alt=\"Call flow sequence diagram for $inputfile\"/>"
+      echo "   </p>"
+      echo "   <p class=\"footer\">"
+      echo "    <a href=\"$TRACEFILE\">Trace source</a>"
       echo "    <br/>"
-    }
-    [[ "$SVG_TO_PDF" == "yes" ]] && {
-      echo "    Callflow in <a href=\"callflow.pdf\">PDF</a> format"
-      echo "    <br/>"
-    }
-    echo "    <a href=\"index.html\" target=\"_parent\">Back to landing page</a>"
-    echo "   </p>"
-    echo "  </div>"
-    echo " </body>"
-    echo "</html>"
-  ) > $DESTDIR/index_dynamic.html
+
+      [[ $ARCHIVE == "yes" ]] && {
+        echo "    <a href=\"$ARCHIVE_FILE\">Callflow files in archive</a> (to sent the callflow to e.g. interested parties)"
+        echo "    <br/>"
+      }
+
+      [[ "$SVG_TO_PDF" == "yes" ]] && {
+        echo "    Callflow in <a href=\"callflow.pdf\">PDF</a> format"
+        echo "    <br/>"
+      }
+
+      echo "    <a href=\"index.html\" target=\"_parent\">Back to landing page</a>"
+      echo "   </p>"
+      echo "  </div>"
+      echo " </body>"
+      echo "</html>"
+
+    ) > $DESTDIR/index_$INDEX_FILE.html
+
+  done
 
   rm $IMAGE_MAP
 
