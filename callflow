@@ -381,7 +381,7 @@ fi
 if [[ -n "$OPT_TITLE" ]]; then
   TITLE="$OPT_TITLE"
 else
-  TITLE="$inputfile"
+  TITLE=$( basename "$inputfile" )
 fi
 
 if [[ -z "$OPT_SHOW_SDP" ]]; then
@@ -524,6 +524,8 @@ else
     finalOrderFile=$TMPDIR/callflow.auto-uniq.$PPID
 fi
 
+IMAGE_MAP=$TMPDIR/$PRGNAME.imagemap.$$
+
 ( awk -f $SETUPDIR/scripts/makevars.awk $finalOrderFile
 
   cat << AWK_BEGIN_SECTION
@@ -547,6 +549,7 @@ fi
     leftMargin = 50
   }
   numTraces = numHosts
+  imageMap = "$IMAGE_MAP"
 
   # Add localLoop to vars in order to delete self messaging
   localLoop = "$localLoop"
@@ -624,7 +627,7 @@ if which inkscape >/dev/null 2>&1; then
     echo " </head>"
     echo " <body>"
     echo "  <div class=\"callflow-image\">"
-    cat imagemap
+    cat $IMAGE_MAP
     echo "   <p>"
     echo "    <img src=\"callflow.png\" usemap=\"#callflowmap\" alt=\"Call flow sequence diagram for $inputfile\"/>"
     echo "   </p>"
@@ -671,7 +674,7 @@ if which inkscape >/dev/null 2>&1; then
     echo " </head>"
     echo " <body>"
     echo "  <div class=\"callflow-image\">"
-    cat imagemap
+    cat $IMAGE_MAP
     echo "   <p>"
     echo "    <img src=\"callflow.png\" usemap=\"#callflowmap\" alt=\"Call flow sequence diagram for $inputfile\"/>"
     echo "   </p>"
@@ -723,9 +726,9 @@ if which inkscape >/dev/null 2>&1; then
   mkdir -p $DESTDIR/images
   cp -a $SETUPDIR/images/*png $DESTDIR/images
   sed \
-    -e "s/@TRACE@/$inputfile/" \
-    -e "s/@TITLE@/$PRGNAME - $TITLE/" \
-    -e "s/@ARCHIVE_FILE@/$ARCHIVE_FILE/" \
+    -e "s|@TRACE@|$inputfile|" \
+    -e "s|@TITLE@|$PRGNAME - $TITLE|" \
+    -e "s|@ARCHIVE_FILE@|$ARCHIVE_FILE|" \
     $SETUPDIR/images/index.tpl > $DESTDIR/index.html
   [[ $ARCHIVE != "yes" ]] && sed -i '/@@@ARCHIVE_FILE@@@/d' $DESTDIR/index.html
   [[ "$SVG_TO_PDF" != "yes" ]] && sed -i '/@@@PDF_FILE@@@/d' $DESTDIR/index.html

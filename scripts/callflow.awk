@@ -85,7 +85,7 @@
   # 1: print the vertical node lines
   print_nodes(y, 1);
 
-  printf "   <map name=\"callflowmap\" id=\"callflowmap\">\n" > "imagemap";
+  printf "   <map name=\"callflowmap\" id=\"callflowmap\">\n" > imageMap;
 }
 
 
@@ -139,7 +139,7 @@ func line(x1,x2,y,output, c) {
 
     xtext = x1 + 18;
     
-    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $3, x1, y-yLineSpace+2, x1+15, y+7+1, $3, $3 >> "imagemap"
+    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $3, x1, y-yLineSpace+2, x1+15, y+7+1, $3, $3 >> imageMap
 
   } else if (x1<x2) {
     printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" style=\"stroke: %s;\"/>\n", x1, y, x2, y, color[c];
@@ -147,7 +147,7 @@ func line(x1,x2,y,output, c) {
   
     xtext = x1 + 10;
     
-    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $3, x1, y-yLineSpace+2, x2, y+1, $3, $3 >> "imagemap"
+    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $3, x1, y-yLineSpace+2, x2, y+1, $3, $3 >> imageMap
 
   } else {
     printf "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" class=\"traceline\" style=\"stroke: %s;\"/>\n", x1, y, x2, y, color[c];
@@ -155,7 +155,7 @@ func line(x1,x2,y,output, c) {
     
     xtext = x2 + 10;
     
-    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $3, x2, y-yLineSpace+2, x1, y+1, $3, $3 >> "imagemap"
+    printf "    <area href=\"frames/Frame%d.html\" coords=\"%d,%d,%d,%d\" alt=\"frame %d\"  onmouseover=\"return getFrame('frames/Frame%d.html');\" onmouseout=\"return nd();\"/>\n", $3, x2, y-yLineSpace+2, x1, y+1, $3, $3 >> imageMap
   }
   
   printf "<a href=\"frames/Frame%d.html\" target=\"_blank\">\n", $3;
@@ -219,7 +219,7 @@ func print_nodes(yPos, first_line) {
       link = substr($0, LINK + 1)
 
       printf("<text x=\"%d\" y=\"%d\" class=\"link\" xml:space=\"preserve\">%s</text>\n", leftMargin + 5, y, output);
-      printf("    <area href=\"%s\" coords=\"%d,%d,%d,%d\"/>\n", link, leftMargin + 5, y-yLineSpace+2, w, y+1) >> "imagemap";
+      printf("    <area href=\"%s\" coords=\"%d,%d,%d,%d\"/>\n", link, leftMargin + 5, y-yLineSpace+2, w, y+1) >> imageMap;
     }
 
   } else {
@@ -280,7 +280,7 @@ func print_nodes(yPos, first_line) {
 }
 
 END {
-  printf "   </map>\n" >> "imagemap";
+  printf "   </map>\n" >> imageMap;
   printf "</svg>\n";
 }
 
