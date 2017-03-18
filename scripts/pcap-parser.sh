@@ -93,7 +93,9 @@ function make_long_and_short_caches_of_pcap_trace() {
   # wireshark bug 5969.
   #
   # The available % variables can be found at:
-  #   http://anonsvn.wireshark.org/viewvc/trunk/epan/column.c?view=markup
+  #   https://code.wireshark.org/review/gitweb?p=wireshark.git;a=blob;f=epan/column.c;hb=HEAD
+  #
+  # Or use: tshark -G column-formats
   #
   # Information about the stream editor (sed) manipulations:
   # - The string (ITU) shows up in the protocol description "ISUP(ITU)".
@@ -103,7 +105,7 @@ function make_long_and_short_caches_of_pcap_trace() {
   #   field separator in the output file, remove it.  The actual string
   #   being removed is " |=".
   tshark -r $PCAP_FILE -t a \
-    -o 'gui.column.format: "No.", "%m", "Time", %t, "Protocol", "%p", "srcport", %S, "dstport", %D, "Info", "%i"' \
+    -o "${TSHARK_GUI_FORMAT:=gui.column.format}: "No.", "%m", "Time", %t, "Protocol", "%p", "srcport", %S, "dstport", %D, "Info", "%i"" \
     $FARG "$FVAL" |
       sed -e 's/^[[:blank:]]*//' \
         -e 's/[[:blank:]]*|=/=/' \
