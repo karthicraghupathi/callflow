@@ -1,4 +1,3 @@
-include(FindSubversion)
 cmake_minimum_required(VERSION 2.6)
 
 project(callflow NONE)
@@ -84,9 +83,8 @@ install(PROGRAMS
 )
 
 install(FILES
-  AUTHORS
   LICENSE
-  README
+  README.md
   DESTINATION "${DOCDIR}"
 )
 

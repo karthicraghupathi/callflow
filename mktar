@@ -9,14 +9,12 @@ DESTDIR=$(pwd)
 [[ -e callflow.version ]] && CALLFLOW_VERSION=$(cat callflow.version)
 
 # Only include files that are known, any other file is to be ignored
-FILES="AUTHORS
-CMakeLists.txt
+FILES="CMakeLists.txt
 callflow
 conf/CMakeLists.txt
 conf/callflow.conf
 css/CMakeLists.txt
 css/callflow.css
-INSTALL
 images/CMakeLists.txt
 images/frame_bottom.png
 images/frame_dynamic.png
@@ -29,7 +27,7 @@ js/overlib.js
 LICENSE
 man/CMakeLists.txt
 man/callflow.1
-README
+README.md
 scripts/CMakeLists.txt
 scripts/broadworks-parser.sh
 scripts/callflow.awk
