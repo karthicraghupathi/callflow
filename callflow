@@ -8,7 +8,7 @@
 ##################################
 ARCHIVE=yes
 ARCHIVE_TYPE=bz2
-CONFDIR=/etc/callflow
+CONFDIR=/usr/local/etc/callflow
 CAMEL_CASE=no
 removeDF=0 # do not remove duplicate frames
 SVG_TO_PDF=no # default value for PDF conversion
