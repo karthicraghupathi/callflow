@@ -174,7 +174,7 @@ Options:
 
   --width-between-nodes <width>
                 Distance between adjacent nodes in final picture.  The width may
-                vary between 100 and 250.  Default = 200.
+                vary between 100 and 500.  Default = 400.
 
   --with-sdp
                 Show detailed SDP in the SIP information line (default)
@@ -307,7 +307,7 @@ fi
 
 if [[ -z "$OPT_WIDTH_BETWEEN_NODES" ]]; then
   if [[ -z "$WIDTH_BETWEEN_NODES" ]]; then
-    WIDTH_BETWEEN_NODES=200
+    WIDTH_BETWEEN_NODES=400
   else
     # In case the WIDTH_BETWEEN_NODES has been defined in the configuration
     # file callflow.conf, prepare it to be verified.
@@ -317,7 +317,7 @@ fi
 
 if [[ -n "$OPT_WIDTH_BETWEEN_NODES" ]]; then
 
-  if [[ $OPT_WIDTH_BETWEEN_NODES -gt 250 ]]; then
+  if [[ $OPT_WIDTH_BETWEEN_NODES -gt 500 ]]; then
     echo "$PRGNAME: error: width ($OPT_WIDTH_BETWEEN_NODES) between nodes too big" >&2
     exit 1
   fi
