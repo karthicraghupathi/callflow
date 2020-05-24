@@ -587,7 +587,7 @@ rm $TMPDIR/callflow.*.$PPID
 # Build callflow.png if inkscape is available
 if which inkscape >/dev/null 2>&1; then
 
-  INKSCAPE_ARGS="--export-dpi=90 -C --export-background=white --export-png=$DESTDIR/callflow.png $DESTDIR/callflow.svg"
+  INKSCAPE_ARGS="--export-dpi=150 -C --export-background=white --export-filename=$DESTDIR/callflow.png $DESTDIR/callflow.svg"
   
   [[ "$SVG_TO_PDF" == "yes" ]] && {
     INKSCAPE_ARGS="--export-pdf=$DESTDIR/callflow.pdf $INKSCAPE_ARGS"
