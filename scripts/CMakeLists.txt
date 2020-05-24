@@ -1,4 +1,4 @@
-install(FILES
+install(PROGRAMS
   broadworks-parser.sh
   callflow.awk
   list-nodes.awk
