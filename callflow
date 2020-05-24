@@ -281,11 +281,6 @@ while true; do
   shift
 done
 
-[[ $(id -u) == 0 ]] && {
-  echo "$PRGNAME: error: do not run as user 'root'"
-  exit 1
-}
-
 inputfile="$1"
 if [[ ! -f "$inputfile" ]]; then
   echo "$PRGNAME: error: Input file ($inputfile) does not exists!"
