@@ -150,7 +150,7 @@ function make_long_and_short_caches_of_pcap_trace() {
   # is combined with the first field (frame.number) in the file ${PRGNAME}-tshark-1.$$
   # So after the merge the total number of fields is 1 less, than the total number
   # of fields.
-  join -t "|" --nocheck-order $TMPDIR/${PRGNAME}-tshark-1.$$ $TMPDIR/${PRGNAME}-tshark-2.$$ > $TMPDIR/${PRGNAME}-tshark-3.$$
+  join -t "|" $TMPDIR/${PRGNAME}-tshark-1.$$ $TMPDIR/${PRGNAME}-tshark-2.$$ > $TMPDIR/${PRGNAME}-tshark-3.$$
 
   # Order the fields
   awk 'BEGIN {
