@@ -747,13 +747,13 @@ if [[ "$ARCHIVE" == "yes" ]]; then
 
     FILES=$( sed "s,^,$ARCHIVE_NAME/," <<< "$ARCHIVE_FILES" )
 
-    cd $DESTDIR/..
+    cd ..
     if [[ "$ARCHIVE_TYPE" == "zip" ]]; then
-      zip --quiet $DESTDIR/$ARCHIVE_NAME.zip $FILES
+      zip --quiet $ARCHIVE_NAME.zip $FILES
     else
-      tar cjf $DESTDIR/$ARCHIVE_NAME.tar.bz2 $FILES
+      tar cjf $ARCHIVE_NAME.tar.bz2 $FILES
     fi
-    echo "$PRGNAME: $ARCHIVE_TYPE archive available at \"$DESTDIR/$ARCHIVE_FILE\""
+    echo "$PRGNAME: $ARCHIVE_TYPE archive available at \"$ARCHIVE_FILE\""
   fi
 fi
 
